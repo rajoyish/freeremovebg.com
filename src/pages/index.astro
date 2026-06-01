@@ -1,11 +1,321 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
 ---
 
 <Layout>
-	<Welcome />
+  <div style="min-height:100vh; display:flex; flex-direction:column;">
+    <Header />
+
+    <main style="flex:1;">
+
+      <!-- ── Hero ─────────────────────────────────────────────── -->
+      <section style="padding: 64px 24px 32px; text-align:center;">
+        <div style="max-width:800px; margin:0 auto;">
+          <h1 style="font-size:clamp(2rem,5vw,3.5rem); font-weight:600; letter-spacing:-2px; line-height:1.1; margin:0 0 20px; color:#171717;">
+            Remove Image Backgrounds with AI.
+          </h1>
+          <p style="font-size:1.125rem; color:#4d4d4d; line-height:1.7; margin:0 0 32px; max-width:600px; margin-left:auto; margin-right:auto;">
+            High-quality background removal powered by AI. 100% client-side — your images never leave your device. No sign-up, unlimited HD downloads.
+          </p>
+          <!-- Privacy badge -->
+          <div style="display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:#f5f5f5; border:1px solid #ebebeb; border-radius:100px; font-size:13px; color:#4d4d4d; font-weight:500;">
+            <svg width="14" height="14" fill="none" stroke="#0070f3" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            100% Private — Processed Locally in Your Browser
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Upload Zone ───────────────────────────────────────── -->
+      <section style="padding: 0 24px 64px;">
+        <div style="max-width:960px; margin:0 auto;">
+
+          <!-- Drop zone -->
+          <div id="upload-zone"
+            style="border:2px dashed #a1a1a1; border-radius:12px; padding:64px 24px; text-align:center; background:#fff; cursor:pointer; transition:border-color .2s, background .2s;"
+            onmouseenter="this.style.borderColor='#171717'; this.style.background='#fafafa';"
+            onmouseleave="this.style.borderColor='#a1a1a1'; this.style.background='#fff';">
+            <svg width="48" height="48" fill="none" stroke="#888" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 16px; display:block;">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            <p style="font-size:1.125rem; font-weight:600; color:#171717; margin:0 0 8px;">Drop images here or click to upload</p>
+            <p style="font-size:14px; color:#888; margin:0 0 24px;">Supports JPG, PNG, WebP · Multiple files supported</p>
+            <button id="browse-btn"
+              style="padding:10px 24px; background:#171717; color:#fff; border:none; border-radius:100px; font-size:14px; font-weight:500; cursor:pointer; transition:opacity .2s;"
+              onmouseenter="this.style.opacity='.85';"
+              onmouseleave="this.style.opacity='1';">
+              Browse Files
+            </button>
+            <input type="file" id="file-input" accept="image/*" multiple style="display:none;" />
+          </div>
+
+          <!-- Model loading state -->
+          <div id="loading-state" style="display:none; margin-top:24px; text-align:center;">
+            <div style="display:inline-flex; align-items:center; gap:12px; padding:14px 24px; background:#fff; border:1px solid #ebebeb; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
+              <div id="spinner" style="width:18px; height:18px; border:2px solid #ebebeb; border-top-color:#171717; border-radius:50%;"></div>
+              <span id="loading-text" style="font-size:14px; font-weight:500; color:#171717;">Loading AI model…</span>
+            </div>
+          </div>
+
+          <!-- Per-image processing state -->
+          <div id="progress-state" style="display:none; margin-top:24px;">
+            <div style="background:#fff; border:1px solid #ebebeb; border-radius:10px; padding:20px 24px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-size:14px; font-weight:500; color:#171717;">Processing images…</span>
+                <span id="progress-text" style="font-size:13px; color:#888;">0 / 0</span>
+              </div>
+              <div style="background:#f5f5f5; border-radius:100px; height:6px; overflow:hidden;">
+                <div id="progress-bar" style="background:#171717; height:100%; width:0%; border-radius:100px; transition:width .3s;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results grid -->
+          <div id="image-grid" style="display:none; margin-top:40px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+              <h2 style="font-size:1.5rem; font-weight:600; color:#171717; margin:0;">Processed Images</h2>
+              <button id="download-all-btn"
+                style="display:flex; align-items:center; gap:8px; padding:10px 20px; background:#171717; color:#fff; border:none; border-radius:100px; font-size:14px; font-weight:500; cursor:pointer; transition:opacity .2s;"
+                onmouseenter="this.style.opacity='.85';"
+                onmouseleave="this.style.opacity='1';">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Download All (ZIP)
+              </button>
+            </div>
+            <div id="images-container" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px;"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ── Features ──────────────────────────────────────────── -->
+      <section style="padding:64px 24px; background:#f5f5f5; border-top:1px solid #ebebeb;">
+        <div style="max-width:960px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:40px;">
+          <div style="text-align:center;">
+            <div style="width:44px; height:44px; background:#171717; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+              <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3 style="font-size:1rem; font-weight:600; color:#171717; margin:0 0 8px;">100% Private</h3>
+            <p style="font-size:14px; color:#4d4d4d; line-height:1.6; margin:0;">All processing happens in your browser. Your images never leave your device.</p>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:44px; height:44px; background:#171717; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+              <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <h3 style="font-size:1rem; font-weight:600; color:#171717; margin:0 0 8px;">No Sign-Up</h3>
+            <p style="font-size:14px; color:#4d4d4d; line-height:1.6; margin:0;">Start removing backgrounds instantly. No account, no API key, no limits.</p>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:44px; height:44px; background:#171717; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+              <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <h3 style="font-size:1rem; font-weight:600; color:#171717; margin:0 0 8px;">HD Downloads</h3>
+            <p style="font-size:14px; color:#4d4d4d; line-height:1.6; margin:0;">Download transparent PNGs in their original full resolution, every time.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <Footer />
+  </div>
 </Layout>
+
+<!-- ── Spinner animation ─────────────────────────────────────── -->
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #spinner { animation: spin 0.8s linear infinite; }
+</style>
+
+<!-- ── Client-side AI logic ──────────────────────────────────── -->
+<script>
+  import { pipeline, env } from '@huggingface/transformers';
+  import JSZip from 'jszip';
+
+  // No API key needed — model weights are downloaded from HF CDN as ONNX files
+  env.allowLocalModels  = false;
+  env.allowRemoteModels = true;
+
+  // ── State ──────────────────────────────────────────────────────
+  let segmenter: any = null;
+  const processedImages: Array<{ name: string; blob: Blob; url: string }> = [];
+
+  // ── DOM refs ───────────────────────────────────────────────────
+  const uploadZone     = document.getElementById('upload-zone')!;
+  const fileInput      = document.getElementById('file-input') as HTMLInputElement;
+  const browseBtn      = document.getElementById('browse-btn')!;
+  const loadingState   = document.getElementById('loading-state')!;
+  const loadingText    = document.getElementById('loading-text')!;
+  const progressState  = document.getElementById('progress-state')!;
+  const progressBar    = document.getElementById('progress-bar') as HTMLElement;
+  const progressText   = document.getElementById('progress-text')!;
+  const imageGrid      = document.getElementById('image-grid')!;
+  const imagesContainer = document.getElementById('images-container')!;
+  const downloadAllBtn = document.getElementById('download-all-btn')!;
+
+  // ── Load model ─────────────────────────────────────────────────
+  // Uses the 'background-removal' pipeline — output is a RawImage (RGBA PNG),
+  // NOT a segmentation mask. No API key required.
+  async function initModel() {
+    if (segmenter) return;
+
+    loadingState.style.display = 'block';
+    loadingText.textContent = 'Downloading AI model (~30 MB, first load only)…';
+
+    try {
+      segmenter = await pipeline(
+        'background-removal',
+        'Xenova/modnet',
+        { dtype: 'fp32' }
+      );
+      loadingText.textContent = 'Model ready!';
+      setTimeout(() => { loadingState.style.display = 'none'; }, 1200);
+    } catch (err) {
+      console.error('Model load failed:', err);
+      loadingText.textContent = 'Failed to load model. Check your connection and refresh.';
+      throw err;
+    }
+  }
+
+  // ── Process one image ──────────────────────────────────────────
+  async function processImage(file: File): Promise<void> {
+    // Keep a persistent object URL for the original preview (revoked on page unload)
+    const originalUrl = URL.createObjectURL(file);
+
+    try {
+      // Single string input → pipeline returns RawImage directly (not an array)
+      const output = await segmenter(originalUrl) as any;
+
+      // output IS the RawImage — call toBlob() directly
+      const blob: Blob = await output.toBlob('image/png');
+      const resultUrl = URL.createObjectURL(blob);
+      const name = file.name.replace(/\.[^/.]+$/, '') + '_nobg.png';
+
+      processedImages.push({ name, blob, url: resultUrl });
+      addCard(name, originalUrl, resultUrl);
+      // Note: originalUrl intentionally NOT revoked here — the <img> tag still needs it
+    } catch (err) {
+      URL.revokeObjectURL(originalUrl);
+      throw err;
+    }
+  }
+
+  // ── Render a result card ───────────────────────────────────────
+  function addCard(name: string, originalUrl: string, processedUrl: string) {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:#fff; border:1px solid #ebebeb; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.06);';
+
+    card.innerHTML = `
+      <div style="position:relative; aspect-ratio:4/3; display:grid; grid-template-columns:1fr 1fr;">
+        <!-- Original -->
+        <div style="position:relative; overflow:hidden; border-right:1px solid #ebebeb;">
+          <img src="${originalUrl}" alt="Original"
+            style="width:100%; height:100%; object-fit:cover; display:block;" />
+          <span style="position:absolute; top:8px; left:8px; padding:3px 8px; background:#171717; color:#fff; font-size:11px; font-weight:500; border-radius:4px;">Original</span>
+        </div>
+        <!-- Processed (checkered bg shows transparency) -->
+        <div style="position:relative; overflow:hidden; background:repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 0 0 / 16px 16px;">
+          <img src="${processedUrl}" alt="Background removed"
+            style="width:100%; height:100%; object-fit:cover; display:block;" />
+          <span style="position:absolute; top:8px; right:8px; padding:3px 8px; background:#0070f3; color:#fff; font-size:11px; font-weight:500; border-radius:4px;">Removed</span>
+        </div>
+      </div>
+      <div style="padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+        <p style="font-size:13px; font-weight:500; color:#171717; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">${name}</p>
+        <button class="dl-btn"
+          style="flex-shrink:0; padding:7px 16px; background:#171717; color:#fff; border:none; border-radius:100px; font-size:13px; font-weight:500; cursor:pointer; transition:opacity .2s;"
+          onmouseenter="this.style.opacity='.8';" onmouseleave="this.style.opacity='1';">
+          Download PNG
+        </button>
+      </div>
+    `;
+
+    imagesContainer.appendChild(card);
+    imageGrid.style.display = 'block';
+
+    (card.querySelector('.dl-btn') as HTMLButtonElement).addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = processedUrl;
+      a.download = name;
+      a.click();
+    });
+  }
+
+  // ── Handle dropped / selected files ───────────────────────────
+  async function handleFiles(files: FileList) {
+    const imgs = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (!imgs.length) { alert('Please select image files (JPG, PNG, WebP).'); return; }
+
+    // Revoke old object URLs to free memory
+    processedImages.forEach(({ url }) => URL.revokeObjectURL(url));
+    processedImages.length = 0;
+    imagesContainer.innerHTML = '';
+    imageGrid.style.display = 'none';
+
+    // Load model if not yet loaded
+    await initModel();
+
+    // Show progress
+    progressState.style.display = 'block';
+    progressBar.style.width = '0%';
+
+    for (let i = 0; i < imgs.length; i++) {
+      progressText.textContent = `${i} / ${imgs.length}`;
+      try {
+        await processImage(imgs[i]);
+      } catch (err) {
+        console.error(`Error on ${imgs[i].name}:`, err);
+      }
+      progressBar.style.width = `${((i + 1) / imgs.length) * 100}%`;
+      progressText.textContent = `${i + 1} / ${imgs.length}`;
+    }
+
+    setTimeout(() => { progressState.style.display = 'none'; }, 1500);
+  }
+
+  // ── Download all as ZIP ────────────────────────────────────────
+  async function downloadZip() {
+    if (!processedImages.length) return;
+    const zip = new JSZip();
+    processedImages.forEach(({ name, blob }) => zip.file(name, blob));
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zipBlob);
+    a.download = 'removed-backgrounds.zip';
+    a.click();
+  }
+
+  // ── Event wiring ───────────────────────────────────────────────
+  uploadZone.addEventListener('click', () => fileInput.click());
+
+  browseBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput.click();
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files?.length) handleFiles(fileInput.files);
+    fileInput.value = ''; // reset so same file can be re-selected
+  });
+
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    (e.currentTarget as HTMLElement).style.borderColor = '#171717';
+    (e.currentTarget as HTMLElement).style.background  = '#fafafa';
+  });
+
+  uploadZone.addEventListener('dragleave', (e) => {
+    (e.currentTarget as HTMLElement).style.borderColor = '#a1a1a1';
+    (e.currentTarget as HTMLElement).style.background  = '#fff';
+  });
+
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    (e.currentTarget as HTMLElement).style.borderColor = '#a1a1a1';
+    (e.currentTarget as HTMLElement).style.background  = '#fff';
+    if (e.dataTransfer?.files.length) handleFiles(e.dataTransfer.files);
+  });
+
+  downloadAllBtn.addEventListener('click', downloadZip);
+</script>
