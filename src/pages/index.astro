@@ -32,23 +32,23 @@ import Footer from '../components/Footer.astro';
 
           <!-- Model selector -->
           <div style="margin-bottom:20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <span style="font-size:13px; font-weight:500; color:#4d4d4d;">AI Model:</span>
+            <span style="font-size:13px; font-weight:500; color:#4d4d4d;">Quality:</span>
             <div id="model-selector" style="display:inline-flex; background:#f5f5f5; border:1px solid #ebebeb; border-radius:8px; padding:3px; gap:2px;">
               <button data-model="auto"
                 style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:#171717; color:#fff;">
-                ✦ Auto
+                ✦ Smart
               </button>
               <button data-model="portrait"
                 style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:transparent; color:#4d4d4d;">
-                Portrait
+                People & Portraits
               </button>
               <button data-model="general"
                 style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:transparent; color:#4d4d4d;">
-                General
+                Objects & Graphics
               </button>
             </div>
             <span id="model-hint" style="font-size:12px; color:#888; font-style:italic;">
-              Detects people automatically — uses portrait model for humans, general model for everything else
+              Analyses your image and automatically selects the best engine for the result
             </span>
           </div>
 
@@ -195,9 +195,9 @@ import Footer from '../components/Footer.astro';
 
   // ── Model selector UI ─────────────────────────────────────────────────────
   const HINTS: Record<ModelMode, string> = {
-    auto:     'Detects people automatically — uses portrait model for humans, general model for everything else',
-    portrait: 'Xenova/modnet — optimised for people, portraits and hair detail',
-    general:  '@imgly ISNet/U2Net — best for logos, products, animals and flat graphics',
+    auto:     'Analyses your image and automatically selects the best engine for the result',
+    portrait: 'Optimised for sharp edges on hair, skin and fine detail in people',
+    general:  'Optimised for logos, products, objects, animals and flat graphics',
   };
 
   document.getElementById('model-selector')!.addEventListener('click', (e) => {
@@ -219,16 +219,15 @@ import Footer from '../components/Footer.astro';
   // ── Lazy-load the person detector (only needed in auto mode) ──────────────
   async function ensureDetector() {
     if (detector) return;
-    setStatus('Loading person detector…');
+    setStatus('Preparing smart detection…');
     detector = await pipeline('object-detection', 'Xenova/detr-resnet-50', {
       dtype: 'fp32',
     });
   }
 
-  // ── Lazy-load the portrait matting pipeline ───────────────────────────────
   async function ensurePortraitPipe() {
     if (portraitPipe) return;
-    setStatus('Loading portrait model (Xenova/modnet)…');
+    setStatus('Loading portrait engine…');
     portraitPipe = await pipeline('background-removal', 'Xenova/modnet', {
       dtype: 'fp32',
     });
@@ -246,39 +245,38 @@ import Footer from '../components/Footer.astro';
   async function removeBg(file: File, objectUrl: string): Promise<{ blob: Blob; usedModel: string }> {
     if (currentMode === 'portrait') {
       await ensurePortraitPipe();
-      setStatus(`Portrait model — processing ${file.name}…`);
+      setStatus(`Removing background…`);
       const output = await portraitPipe(objectUrl);
-      // Single input → RawImage returned directly (not an array)
       const blob: Blob = await output.toBlob('image/png');
-      return { blob, usedModel: 'Portrait (modnet)' };
+      return { blob, usedModel: 'People & Portraits' };
     }
 
     if (currentMode === 'general') {
-      setStatus(`General model — processing ${file.name}…`);
+      setStatus(`Removing background…`);
       const blob = await removeBackground(file, {
         model: 'medium',
         output: { format: 'image/png', quality: 1 },
       });
-      return { blob, usedModel: 'General (ISNet)' };
+      return { blob, usedModel: 'Objects & Graphics' };
     }
 
     // ── Auto mode ────────────────────────────────────────────────────────────
-    setStatus(`Auto — detecting content in ${file.name}…`);
+    setStatus(`Analysing image…`);
     const hasPerson = await containsPerson(objectUrl);
 
     if (hasPerson) {
       await ensurePortraitPipe();
-      setStatus(`Auto → Portrait model detected — processing ${file.name}…`);
+      setStatus(`Removing background…`);
       const output = await portraitPipe(objectUrl);
       const blob: Blob = await output.toBlob('image/png');
-      return { blob, usedModel: 'Auto → Portrait (modnet)' };
+      return { blob, usedModel: 'Smart · People & Portraits' };
     } else {
-      setStatus(`Auto → General model selected — processing ${file.name}…`);
+      setStatus(`Removing background…`);
       const blob = await removeBackground(file, {
         model: 'medium',
         output: { format: 'image/png', quality: 1 },
       });
-      return { blob, usedModel: 'Auto → General (ISNet)' };
+      return { blob, usedModel: 'Smart · Objects & Graphics' };
     }
   }
 
