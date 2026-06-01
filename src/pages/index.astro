@@ -54,40 +54,56 @@ import Footer from '../components/Footer.astro';
 
           <!-- Drop zone -->
           <div id="upload-zone"
-            style="border:2px dashed #a1a1a1; border-radius:12px; padding:64px 24px; text-align:center; background:#fff; cursor:pointer; transition:border-color .2s, background .2s;"
-            onmouseenter="this.style.borderColor='#171717'; this.style.background='#fafafa';"
-            onmouseleave="this.style.borderColor='#a1a1a1'; this.style.background='#fff';">
-            <svg width="48" height="48" fill="none" stroke="#888" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 16px; display:block;">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-            </svg>
-            <p style="font-size:1.125rem; font-weight:600; color:#171717; margin:0 0 8px;">Drop images here or click to upload</p>
-            <p style="font-size:14px; color:#888; margin:0 0 24px;">Supports JPG, PNG, WebP · Multiple files supported</p>
-            <button id="browse-btn"
-              style="padding:10px 24px; background:#171717; color:#fff; border:none; border-radius:100px; font-size:14px; font-weight:500; cursor:pointer; transition:opacity .2s;"
-              onmouseenter="this.style.opacity='.85';"
-              onmouseleave="this.style.opacity='1';">
-              Browse Files
-            </button>
+            style="border:2px dashed #a1a1a1; border-radius:12px; background:#fff; cursor:pointer; transition:border-color .2s, background .2s; overflow:hidden;"
+            onmouseenter="if(!this.classList.contains('has-files')){this.style.borderColor='#171717';this.style.background='#fafafa';}"
+            onmouseleave="if(!this.classList.contains('has-files')){this.style.borderColor='#a1a1a1';this.style.background='#fff';}">
+
+            <!-- Empty state -->
+            <div id="zone-empty" style="padding:64px 24px; text-align:center;">
+              <svg width="48" height="48" fill="none" stroke="#888" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 16px; display:block;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+              </svg>
+              <p style="font-size:1.125rem; font-weight:600; color:#171717; margin:0 0 8px;">Drop images here or click to upload</p>
+              <p style="font-size:14px; color:#888; margin:0 0 24px;">Supports JPG, PNG, WebP · Multiple files supported</p>
+              <button id="browse-btn"
+                style="padding:10px 24px; background:#171717; color:#fff; border:none; border-radius:100px; font-size:14px; font-weight:500; cursor:pointer; transition:opacity .2s;"
+                onmouseenter="this.style.opacity='.85';" onmouseleave="this.style.opacity='1';">
+                Browse Files
+              </button>
+            </div>
+
+            <!-- Filled state: thumbnail grid -->
+            <div id="zone-filled" style="display:none; padding:16px;">
+              <div id="thumb-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:10px; margin-bottom:12px;"></div>
+              <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                <span id="zone-count" style="font-size:13px; color:#888;"></span>
+                <button id="add-more-btn"
+                  style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:transparent; color:#171717; border:1px solid #ebebeb; border-radius:100px; font-size:13px; font-weight:500; cursor:pointer; transition:border-color .15s;"
+                  onmouseenter="this.style.borderColor='#171717';" onmouseleave="this.style.borderColor='#ebebeb';">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  Add more
+                </button>
+              </div>
+            </div>
+
             <input type="file" id="file-input" accept="image/*" multiple style="display:none;" />
           </div>
 
-          <!-- Status / loading -->
-          <div id="loading-state" style="display:none; margin-top:24px; text-align:center;">
-            <div style="display:inline-flex; align-items:center; gap:12px; padding:14px 24px; background:#fff; border:1px solid #ebebeb; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
-              <div id="spinner" style="width:18px; height:18px; border:2px solid #ebebeb; border-top-color:#171717; border-radius:50%;"></div>
-              <span id="loading-text" style="font-size:14px; font-weight:500; color:#171717;">Processing…</span>
-            </div>
-          </div>
-
-          <!-- Batch progress -->
-          <div id="progress-state" style="display:none; margin-top:24px;">
-            <div style="background:#fff; border:1px solid #ebebeb; border-radius:10px; padding:20px 24px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <span style="font-size:14px; font-weight:500; color:#171717;">Processing images…</span>
-                <span id="progress-text" style="font-size:13px; color:#888;">0 / 0</span>
+          <!-- Unified progress bar (hidden until processing starts) -->
+          <div id="progress-state" style="display:none; margin-top:20px;">
+            <div style="background:#fff; border:1px solid #ebebeb; border-radius:10px; padding:16px 20px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px;">
+                <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                  <div id="spinner" style="flex-shrink:0; width:16px; height:16px; border:2px solid #ebebeb; border-top-color:#171717; border-radius:50%;"></div>
+                  <span id="loading-text" style="font-size:13px; font-weight:500; color:#171717; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Processing…</span>
+                </div>
+                <span id="progress-text" style="flex-shrink:0; font-size:13px; color:#888; font-variant-numeric:tabular-nums;">0 / 0</span>
               </div>
-              <div style="background:#f5f5f5; border-radius:100px; height:6px; overflow:hidden;">
-                <div id="progress-bar" style="background:#171717; height:100%; width:0%; border-radius:100px; transition:width .3s;"></div>
+              <!-- Semantic progress bar: role + aria attributes for accessibility -->
+              <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+                id="progress-track"
+                style="background:#f5f5f5; border-radius:100px; height:6px; overflow:hidden;">
+                <div id="progress-bar" style="background:#171717; height:100%; width:0%; border-radius:100px; transition:width .4s cubic-bezier(.4,0,.2,1);"></div>
               </div>
             </div>
           </div>
@@ -153,47 +169,40 @@ import Footer from '../components/Footer.astro';
   import { removeBackground } from '@imgly/background-removal';
   import JSZip from 'jszip';
 
-  // ---------------------------------------------------------------------------
-  // Model strategy
-  //
-  //  "auto"     — run a fast person-detection check first (Xenova/detr-resnet-50),
-  //               then route to the best model:
-  //               • person detected  → Xenova/modnet  (portrait matting, sharp hair/skin edges)
-  //               • no person        → @imgly/background-removal (ISNet/U2Net, logos/products/animals)
-  //
-  //  "portrait" — always use Xenova/modnet
-  //  "general"  — always use @imgly/background-removal
-  //
-  // No API key needed for either library. Both download ONNX weights from CDN
-  // on first use and cache them in the browser.
-  // ---------------------------------------------------------------------------
-
   env.allowLocalModels  = false;
   env.allowRemoteModels = true;
 
   type ModelMode = 'auto' | 'portrait' | 'general';
+  type ThumbStatus = 'queued' | 'analysing' | 'processing' | 'done' | 'error';
 
   let currentMode: ModelMode = 'auto';
-  let detector: any   = null;   // Xenova/detr-resnet-50  (person detection)
-  let portraitPipe: any = null; // Xenova/modnet          (portrait matting)
+  let detector: any     = null;
+  let portraitPipe: any = null;
 
+  // Accumulated queue across multiple "Add more" drops
+  let allFiles: File[] = [];
   const processedImages: Array<{ name: string; blob: Blob; url: string }> = [];
 
   // ── DOM refs ──────────────────────────────────────────────────────────────
-  const uploadZone      = document.getElementById('upload-zone')!;
-  const fileInput       = document.getElementById('file-input') as HTMLInputElement;
-  const browseBtn       = document.getElementById('browse-btn')!;
-  const loadingState    = document.getElementById('loading-state')!;
-  const loadingText     = document.getElementById('loading-text')!;
-  const progressState   = document.getElementById('progress-state')!;
-  const progressBar     = document.getElementById('progress-bar') as HTMLElement;
-  const progressText    = document.getElementById('progress-text')!;
-  const imageGrid       = document.getElementById('image-grid')!;
+  const uploadZone    = document.getElementById('upload-zone')!;
+  const fileInput     = document.getElementById('file-input') as HTMLInputElement;
+  const browseBtn     = document.getElementById('browse-btn')!;
+  const addMoreBtn    = document.getElementById('add-more-btn')!;
+  const zoneEmpty     = document.getElementById('zone-empty')!;
+  const zoneFilled    = document.getElementById('zone-filled')!;
+  const thumbGrid     = document.getElementById('thumb-grid')!;
+  const zoneCount     = document.getElementById('zone-count')!;
+  const progressState = document.getElementById('progress-state')!;
+  const progressTrack = document.getElementById('progress-track')!;
+  const progressBar   = document.getElementById('progress-bar') as HTMLElement;
+  const progressText  = document.getElementById('progress-text')!;
+  const loadingText   = document.getElementById('loading-text')!;
+  const imageGrid     = document.getElementById('image-grid')!;
   const imagesContainer = document.getElementById('images-container')!;
   const downloadAllBtn  = document.getElementById('download-all-btn')!;
   const modelHint       = document.getElementById('model-hint')!;
 
-  // ── Model selector UI ─────────────────────────────────────────────────────
+  // ── Model selector ────────────────────────────────────────────────────────
   const HINTS: Record<ModelMode, string> = {
     auto:     'Analyses your image and automatically selects the best engine for the result',
     portrait: 'Optimised for sharp edges on hair, skin and fine detail in people',
@@ -205,106 +214,149 @@ import Footer from '../components/Footer.astro';
     if (!btn) return;
     const mode = btn.dataset.model as ModelMode;
     currentMode = mode;
-
-    // Update button styles
     document.querySelectorAll<HTMLButtonElement>('#model-selector button').forEach(b => {
       const active = b.dataset.model === mode;
       b.style.background = active ? '#171717' : 'transparent';
       b.style.color      = active ? '#fff'    : '#4d4d4d';
     });
-
     modelHint.textContent = HINTS[mode];
   });
 
-  // ── Lazy-load the person detector (only needed in auto mode) ──────────────
+  // ── Thumbnail helpers ─────────────────────────────────────────────────────
+  const STATUS_STYLES: Record<ThumbStatus, { bg: string; label: string }> = {
+    queued:     { bg: 'rgba(0,0,0,.45)',    label: 'Queued'      },
+    analysing:  { bg: 'rgba(245,166,35,.9)', label: 'Analysing…' },
+    processing: { bg: 'rgba(0,112,243,.9)', label: 'Processing…' },
+    done:       { bg: 'rgba(0,112,243,.9)', label: '✓ Done'      },
+    error:      { bg: 'rgba(238,0,0,.85)',  label: '✗ Error'     },
+  };
+
+  function addThumb(file: File, index: number) {
+    const wrap = document.createElement('div');
+    wrap.id = `thumb-${index}`;
+    wrap.style.cssText = 'position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; background:#f5f5f5;';
+
+    const img = document.createElement('img');
+    const objUrl = URL.createObjectURL(file);
+    img.src = objUrl;
+    img.alt = file.name;
+    img.style.cssText = 'width:100%; height:100%; object-fit:cover; display:block;';
+    img.onload = () => URL.revokeObjectURL(objUrl);
+
+    const overlay = document.createElement('div');
+    overlay.id = `thumb-overlay-${index}`;
+    overlay.style.cssText = 'position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.45); transition:background .2s, opacity .4s;';
+
+    const badge = document.createElement('span');
+    badge.id = `thumb-badge-${index}`;
+    badge.style.cssText = 'font-size:10px; font-weight:600; color:#fff; letter-spacing:.3px; text-transform:uppercase;';
+    badge.textContent = 'Queued';
+
+    overlay.appendChild(badge);
+    wrap.appendChild(img);
+    wrap.appendChild(overlay);
+    thumbGrid.appendChild(wrap);
+  }
+
+  function setThumbStatus(index: number, status: ThumbStatus) {
+    const overlay = document.getElementById(`thumb-overlay-${index}`);
+    const badge   = document.getElementById(`thumb-badge-${index}`);
+    if (!overlay || !badge) return;
+    const s = STATUS_STYLES[status];
+    overlay.style.background = s.bg;
+    badge.textContent = s.label;
+    if (status === 'done') setTimeout(() => { overlay.style.opacity = '0'; }, 800);
+  }
+
+  // ── Show uploaded files in the zone ──────────────────────────────────────
+  function showFilesInZone(files: File[], startIndex: number) {
+    zoneEmpty.style.display  = 'none';
+    zoneFilled.style.display = 'block';
+    uploadZone.classList.add('has-files');
+    uploadZone.style.cursor = 'default';
+    files.forEach((f, i) => addThumb(f, startIndex + i));
+    zoneCount.textContent = `${allFiles.length} image${allFiles.length !== 1 ? 's' : ''} selected`;
+  }
+
+  // ── Progress helpers ──────────────────────────────────────────────────────
+  function setProgress(done: number, total: number, msg: string) {
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    progressBar.style.width = `${pct}%`;
+    progressTrack.setAttribute('aria-valuenow', String(pct));
+    progressText.textContent = `${done} / ${total}`;
+    loadingText.textContent  = msg;
+  }
+
+  // ── Lazy model loaders ────────────────────────────────────────────────────
   async function ensureDetector() {
     if (detector) return;
-    setStatus('Preparing smart detection…');
-    detector = await pipeline('object-detection', 'Xenova/detr-resnet-50', {
-      dtype: 'fp32',
-    });
+    loadingText.textContent = 'Preparing smart detection…';
+    detector = await pipeline('object-detection', 'Xenova/detr-resnet-50', { dtype: 'fp32' });
   }
 
   async function ensurePortraitPipe() {
     if (portraitPipe) return;
-    setStatus('Loading portrait engine…');
-    portraitPipe = await pipeline('background-removal', 'Xenova/modnet', {
-      dtype: 'fp32',
-    });
+    loadingText.textContent = 'Loading portrait engine…';
+    portraitPipe = await pipeline('background-removal', 'Xenova/modnet', { dtype: 'fp32' });
   }
 
-  // ── Detect whether the image contains a person ───────────────────────────
-  // Returns true if any detection has label "person" with score >= threshold.
-  async function containsPerson(objectUrl: string, threshold = 0.5): Promise<boolean> {
+  async function containsPerson(objectUrl: string): Promise<boolean> {
     await ensureDetector();
-    const detections = await detector(objectUrl, { threshold }) as Array<{ label: string; score: number }>;
-    return detections.some(d => d.label.toLowerCase() === 'person');
+    const dets = await detector(objectUrl, { threshold: 0.5 }) as Array<{ label: string }>;
+    return dets.some(d => d.label.toLowerCase() === 'person');
   }
 
-  // ── Route to the right model and return a transparent-PNG Blob ───────────
-  async function removeBg(file: File, objectUrl: string): Promise<{ blob: Blob; usedModel: string }> {
+  // ── Core removal ──────────────────────────────────────────────────────────
+  async function removeBg(file: File, objectUrl: string, idx: number): Promise<{ blob: Blob; usedModel: string }> {
     if (currentMode === 'portrait') {
       await ensurePortraitPipe();
-      setStatus(`Removing background…`);
+      setThumbStatus(idx, 'processing');
+      loadingText.textContent = 'Removing background…';
       const output = await portraitPipe(objectUrl);
-      const blob: Blob = await output.toBlob('image/png');
-      return { blob, usedModel: 'People & Portraits' };
+      return { blob: await output.toBlob('image/png'), usedModel: 'People & Portraits' };
     }
-
     if (currentMode === 'general') {
-      setStatus(`Removing background…`);
-      const blob = await removeBackground(file, {
-        model: 'medium',
-        output: { format: 'image/png', quality: 1 },
-      });
+      setThumbStatus(idx, 'processing');
+      loadingText.textContent = 'Removing background…';
+      const blob = await removeBackground(file, { model: 'medium', output: { format: 'image/png', quality: 1 } });
       return { blob, usedModel: 'Objects & Graphics' };
     }
-
-    // ── Auto mode ────────────────────────────────────────────────────────────
-    setStatus(`Analysing image…`);
+    // Auto
+    setThumbStatus(idx, 'analysing');
+    loadingText.textContent = 'Analysing image…';
     const hasPerson = await containsPerson(objectUrl);
-
+    setThumbStatus(idx, 'processing');
+    loadingText.textContent = 'Removing background…';
     if (hasPerson) {
       await ensurePortraitPipe();
-      setStatus(`Removing background…`);
       const output = await portraitPipe(objectUrl);
-      const blob: Blob = await output.toBlob('image/png');
-      return { blob, usedModel: 'Smart · People & Portraits' };
-    } else {
-      setStatus(`Removing background…`);
-      const blob = await removeBackground(file, {
-        model: 'medium',
-        output: { format: 'image/png', quality: 1 },
-      });
-      return { blob, usedModel: 'Smart · Objects & Graphics' };
+      return { blob: await output.toBlob('image/png'), usedModel: 'Smart · People & Portraits' };
     }
+    const blob = await removeBackground(file, { model: 'medium', output: { format: 'image/png', quality: 1 } });
+    return { blob, usedModel: 'Smart · Objects & Graphics' };
   }
 
   // ── Process one image ─────────────────────────────────────────────────────
-  async function processImage(file: File): Promise<void> {
+  async function processImage(file: File, thumbIdx: number): Promise<void> {
     const originalUrl = URL.createObjectURL(file);
-    loadingState.style.display = 'block';
-
     try {
-      const { blob, usedModel } = await removeBg(file, originalUrl);
+      const { blob, usedModel } = await removeBg(file, originalUrl, thumbIdx);
       const resultUrl = URL.createObjectURL(blob);
       const name = file.name.replace(/\.[^/.]+$/, '') + '_nobg.png';
-
       processedImages.push({ name, blob, url: resultUrl });
       addCard(name, originalUrl, resultUrl, usedModel);
+      setThumbStatus(thumbIdx, 'done');
     } catch (err) {
       URL.revokeObjectURL(originalUrl);
+      setThumbStatus(thumbIdx, 'error');
       throw err;
-    } finally {
-      loadingState.style.display = 'none';
     }
   }
 
-  // ── Render a result card ──────────────────────────────────────────────────
+  // ── Result card ───────────────────────────────────────────────────────────
   function addCard(name: string, originalUrl: string, processedUrl: string, modelLabel: string) {
     const card = document.createElement('div');
     card.style.cssText = 'background:#fff; border:1px solid #ebebeb; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.06);';
-
     card.innerHTML = `
       <div style="position:relative; aspect-ratio:4/3; display:grid; grid-template-columns:1fr 1fr;">
         <div style="position:relative; overflow:hidden; border-right:1px solid #ebebeb;">
@@ -317,7 +369,7 @@ import Footer from '../components/Footer.astro';
         </div>
       </div>
       <div style="padding:12px 16px 14px; border-top:1px solid #f5f5f5;">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;">
           <p style="font-size:13px; font-weight:500; color:#171717; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">${name}</p>
           <button class="dl-btn"
             style="flex-shrink:0; padding:7px 16px; background:#171717; color:#fff; border:none; border-radius:100px; font-size:13px; font-weight:500; cursor:pointer; transition:opacity .2s;"
@@ -331,10 +383,8 @@ import Footer from '../components/Footer.astro';
         </p>
       </div>
     `;
-
     imagesContainer.appendChild(card);
     imageGrid.style.display = 'block';
-
     (card.querySelector('.dl-btn') as HTMLButtonElement).addEventListener('click', () => {
       const a = document.createElement('a');
       a.href = processedUrl;
@@ -343,34 +393,35 @@ import Footer from '../components/Footer.astro';
     });
   }
 
-  // ── Handle dropped / selected files ──────────────────────────────────────
-  async function handleFiles(files: FileList) {
-    const imgs = Array.from(files).filter(f => f.type.startsWith('image/'));
+  // ── Main handler ──────────────────────────────────────────────────────────
+  async function handleFiles(newFiles: File[]) {
+    const imgs = newFiles.filter(f => f.type.startsWith('image/'));
     if (!imgs.length) { alert('Please select image files (JPG, PNG, WebP).'); return; }
 
-    processedImages.forEach(({ url }) => URL.revokeObjectURL(url));
-    processedImages.length = 0;
-    imagesContainer.innerHTML = '';
-    imageGrid.style.display = 'none';
+    const startIndex = allFiles.length;
+    allFiles.push(...imgs);
+    showFilesInZone(imgs, startIndex);
 
     progressState.style.display = 'block';
-    progressBar.style.width = '0%';
+    let doneCount = processedImages.length;
+    const total   = allFiles.length;
+    setProgress(doneCount, total, 'Starting…');
 
     for (let i = 0; i < imgs.length; i++) {
-      progressText.textContent = `${i} / ${imgs.length}`;
+      setProgress(doneCount, total, `Processing ${imgs[i].name}…`);
       try {
-        await processImage(imgs[i]);
+        await processImage(imgs[i], startIndex + i);
       } catch (err) {
         console.error(`Skipping ${imgs[i].name}:`, err);
       }
-      progressBar.style.width = `${((i + 1) / imgs.length) * 100}%`;
-      progressText.textContent = `${i + 1} / ${imgs.length}`;
+      doneCount++;
+      setProgress(doneCount, total, doneCount === total ? 'All done!' : 'Processing…');
     }
 
-    setTimeout(() => { progressState.style.display = 'none'; }, 1500);
+    if (doneCount === total) setTimeout(() => { progressState.style.display = 'none'; }, 2000);
   }
 
-  // ── Download all as ZIP ───────────────────────────────────────────────────
+  // ── ZIP download ──────────────────────────────────────────────────────────
   async function downloadZip() {
     if (!processedImages.length) return;
     const zip = new JSZip();
@@ -382,32 +433,30 @@ import Footer from '../components/Footer.astro';
     a.click();
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  function setStatus(msg: string) {
-    loadingText.textContent = msg;
-  }
-
   // ── Event wiring ──────────────────────────────────────────────────────────
-  uploadZone.addEventListener('click', () => fileInput.click());
-  browseBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+  uploadZone.addEventListener('click', () => {
+    if (!uploadZone.classList.contains('has-files')) fileInput.click();
+  });
+  browseBtn.addEventListener('click',  (e) => { e.stopPropagation(); fileInput.click(); });
+  addMoreBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
   fileInput.addEventListener('change', () => {
-    if (fileInput.files?.length) handleFiles(fileInput.files);
+    if (fileInput.files?.length) handleFiles(Array.from(fileInput.files));
     fileInput.value = '';
   });
   uploadZone.addEventListener('dragover', (e) => {
     e.preventDefault();
-    (e.currentTarget as HTMLElement).style.borderColor = '#171717';
-    (e.currentTarget as HTMLElement).style.background  = '#fafafa';
+    uploadZone.style.borderColor = '#171717';
+    uploadZone.style.background  = '#fafafa';
   });
-  uploadZone.addEventListener('dragleave', (e) => {
-    (e.currentTarget as HTMLElement).style.borderColor = '#a1a1a1';
-    (e.currentTarget as HTMLElement).style.background  = '#fff';
+  uploadZone.addEventListener('dragleave', () => {
+    uploadZone.style.borderColor = '#a1a1a1';
+    uploadZone.style.background  = '#fff';
   });
   uploadZone.addEventListener('drop', (e) => {
     e.preventDefault();
-    (e.currentTarget as HTMLElement).style.borderColor = '#a1a1a1';
-    (e.currentTarget as HTMLElement).style.background  = '#fff';
-    if (e.dataTransfer?.files.length) handleFiles(e.dataTransfer.files);
+    uploadZone.style.borderColor = '#a1a1a1';
+    uploadZone.style.background  = '#fff';
+    if (e.dataTransfer?.files.length) handleFiles(Array.from(e.dataTransfer.files));
   });
   downloadAllBtn.addEventListener('click', downloadZip);
 </script>
