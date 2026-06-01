@@ -10,7 +10,7 @@ import Footer from '../components/Footer.astro';
 
     <main style="flex:1;">
 
-      <!-- ── Hero ─────────────────────────────────────────────── -->
+      <!-- Hero -->
       <section style="padding: 64px 24px 32px; text-align:center;">
         <div style="max-width:800px; margin:0 auto;">
           <h1 style="font-size:clamp(2rem,5vw,3.5rem); font-weight:600; letter-spacing:-2px; line-height:1.1; margin:0 0 20px; color:#171717;">
@@ -19,7 +19,6 @@ import Footer from '../components/Footer.astro';
           <p style="font-size:1.125rem; color:#4d4d4d; line-height:1.7; margin:0 0 32px; max-width:600px; margin-left:auto; margin-right:auto;">
             High-quality background removal powered by AI. 100% client-side — your images never leave your device. No sign-up, unlimited HD downloads.
           </p>
-          <!-- Privacy badge -->
           <div style="display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:#f5f5f5; border:1px solid #ebebeb; border-radius:100px; font-size:13px; color:#4d4d4d; font-weight:500;">
             <svg width="14" height="14" fill="none" stroke="#0070f3" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             100% Private — Processed Locally in Your Browser
@@ -27,9 +26,31 @@ import Footer from '../components/Footer.astro';
         </div>
       </section>
 
-      <!-- ── Upload Zone ───────────────────────────────────────── -->
+      <!-- Upload Zone -->
       <section style="padding: 0 24px 64px;">
         <div style="max-width:960px; margin:0 auto;">
+
+          <!-- Model selector -->
+          <div style="margin-bottom:20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+            <span style="font-size:13px; font-weight:500; color:#4d4d4d;">AI Model:</span>
+            <div id="model-selector" style="display:inline-flex; background:#f5f5f5; border:1px solid #ebebeb; border-radius:8px; padding:3px; gap:2px;">
+              <button data-model="auto"
+                style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:#171717; color:#fff;">
+                ✦ Auto
+              </button>
+              <button data-model="portrait"
+                style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:transparent; color:#4d4d4d;">
+                Portrait
+              </button>
+              <button data-model="general"
+                style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:transparent; color:#4d4d4d;">
+                General
+              </button>
+            </div>
+            <span id="model-hint" style="font-size:12px; color:#888; font-style:italic;">
+              Detects people automatically — uses portrait model for humans, general model for everything else
+            </span>
+          </div>
 
           <!-- Drop zone -->
           <div id="upload-zone"
@@ -50,15 +71,15 @@ import Footer from '../components/Footer.astro';
             <input type="file" id="file-input" accept="image/*" multiple style="display:none;" />
           </div>
 
-          <!-- Model loading state -->
+          <!-- Status / loading -->
           <div id="loading-state" style="display:none; margin-top:24px; text-align:center;">
             <div style="display:inline-flex; align-items:center; gap:12px; padding:14px 24px; background:#fff; border:1px solid #ebebeb; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,.06);">
               <div id="spinner" style="width:18px; height:18px; border:2px solid #ebebeb; border-top-color:#171717; border-radius:50%;"></div>
-              <span id="loading-text" style="font-size:14px; font-weight:500; color:#171717;">Loading AI model…</span>
+              <span id="loading-text" style="font-size:14px; font-weight:500; color:#171717;">Processing…</span>
             </div>
           </div>
 
-          <!-- Per-image processing state -->
+          <!-- Batch progress -->
           <div id="progress-state" style="display:none; margin-top:24px;">
             <div style="background:#fff; border:1px solid #ebebeb; border-radius:10px; padding:20px 24px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -89,7 +110,7 @@ import Footer from '../components/Footer.astro';
         </div>
       </section>
 
-      <!-- ── Features ──────────────────────────────────────────── -->
+      <!-- Features -->
       <section style="padding:64px 24px; background:#f5f5f5; border-top:1px solid #ebebeb;">
         <div style="max-width:960px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:40px;">
           <div style="text-align:center;">
@@ -103,8 +124,8 @@ import Footer from '../components/Footer.astro';
             <div style="width:44px; height:44px; background:#171717; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
               <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
-            <h3 style="font-size:1rem; font-weight:600; color:#171717; margin:0 0 8px;">No Sign-Up</h3>
-            <p style="font-size:14px; color:#4d4d4d; line-height:1.6; margin:0;">Start removing backgrounds instantly. No account, no API key, no limits.</p>
+            <h3 style="font-size:1rem; font-weight:600; color:#171717; margin:0 0 8px;">Smart Model Selection</h3>
+            <p style="font-size:14px; color:#4d4d4d; line-height:1.6; margin:0;">Auto mode detects people and picks the best AI model for each image automatically.</p>
           </div>
           <div style="text-align:center;">
             <div style="width:44px; height:44px; background:#171717; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
@@ -122,112 +143,194 @@ import Footer from '../components/Footer.astro';
   </div>
 </Layout>
 
-<!-- ── Spinner animation ─────────────────────────────────────── -->
 <style>
   @keyframes spin { to { transform: rotate(360deg); } }
   #spinner { animation: spin 0.8s linear infinite; }
 </style>
 
-<!-- ── Client-side AI logic ──────────────────────────────────── -->
 <script>
   import { pipeline, env } from '@huggingface/transformers';
+  import { removeBackground } from '@imgly/background-removal';
   import JSZip from 'jszip';
 
-  // No API key needed — model weights are downloaded from HF CDN as ONNX files
+  // ---------------------------------------------------------------------------
+  // Model strategy
+  //
+  //  "auto"     — run a fast person-detection check first (Xenova/detr-resnet-50),
+  //               then route to the best model:
+  //               • person detected  → Xenova/modnet  (portrait matting, sharp hair/skin edges)
+  //               • no person        → @imgly/background-removal (ISNet/U2Net, logos/products/animals)
+  //
+  //  "portrait" — always use Xenova/modnet
+  //  "general"  — always use @imgly/background-removal
+  //
+  // No API key needed for either library. Both download ONNX weights from CDN
+  // on first use and cache them in the browser.
+  // ---------------------------------------------------------------------------
+
   env.allowLocalModels  = false;
   env.allowRemoteModels = true;
 
-  // ── State ──────────────────────────────────────────────────────
-  let segmenter: any = null;
+  type ModelMode = 'auto' | 'portrait' | 'general';
+
+  let currentMode: ModelMode = 'auto';
+  let detector: any   = null;   // Xenova/detr-resnet-50  (person detection)
+  let portraitPipe: any = null; // Xenova/modnet          (portrait matting)
+
   const processedImages: Array<{ name: string; blob: Blob; url: string }> = [];
 
-  // ── DOM refs ───────────────────────────────────────────────────
-  const uploadZone     = document.getElementById('upload-zone')!;
-  const fileInput      = document.getElementById('file-input') as HTMLInputElement;
-  const browseBtn      = document.getElementById('browse-btn')!;
-  const loadingState   = document.getElementById('loading-state')!;
-  const loadingText    = document.getElementById('loading-text')!;
-  const progressState  = document.getElementById('progress-state')!;
-  const progressBar    = document.getElementById('progress-bar') as HTMLElement;
-  const progressText   = document.getElementById('progress-text')!;
-  const imageGrid      = document.getElementById('image-grid')!;
+  // ── DOM refs ──────────────────────────────────────────────────────────────
+  const uploadZone      = document.getElementById('upload-zone')!;
+  const fileInput       = document.getElementById('file-input') as HTMLInputElement;
+  const browseBtn       = document.getElementById('browse-btn')!;
+  const loadingState    = document.getElementById('loading-state')!;
+  const loadingText     = document.getElementById('loading-text')!;
+  const progressState   = document.getElementById('progress-state')!;
+  const progressBar     = document.getElementById('progress-bar') as HTMLElement;
+  const progressText    = document.getElementById('progress-text')!;
+  const imageGrid       = document.getElementById('image-grid')!;
   const imagesContainer = document.getElementById('images-container')!;
-  const downloadAllBtn = document.getElementById('download-all-btn')!;
+  const downloadAllBtn  = document.getElementById('download-all-btn')!;
+  const modelHint       = document.getElementById('model-hint')!;
 
-  // ── Load model ─────────────────────────────────────────────────
-  // Uses the 'background-removal' pipeline — output is a RawImage (RGBA PNG),
-  // NOT a segmentation mask. No API key required.
-  async function initModel() {
-    if (segmenter) return;
+  // ── Model selector UI ─────────────────────────────────────────────────────
+  const HINTS: Record<ModelMode, string> = {
+    auto:     'Detects people automatically — uses portrait model for humans, general model for everything else',
+    portrait: 'Xenova/modnet — optimised for people, portraits and hair detail',
+    general:  '@imgly ISNet/U2Net — best for logos, products, animals and flat graphics',
+  };
 
-    loadingState.style.display = 'block';
-    loadingText.textContent = 'Downloading AI model (~30 MB, first load only)…';
+  document.getElementById('model-selector')!.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('button[data-model]') as HTMLButtonElement | null;
+    if (!btn) return;
+    const mode = btn.dataset.model as ModelMode;
+    currentMode = mode;
 
-    try {
-      segmenter = await pipeline(
-        'background-removal',
-        'Xenova/modnet',
-        { dtype: 'fp32' }
-      );
-      loadingText.textContent = 'Model ready!';
-      setTimeout(() => { loadingState.style.display = 'none'; }, 1200);
-    } catch (err) {
-      console.error('Model load failed:', err);
-      loadingText.textContent = 'Failed to load model. Check your connection and refresh.';
-      throw err;
+    // Update button styles
+    document.querySelectorAll<HTMLButtonElement>('#model-selector button').forEach(b => {
+      const active = b.dataset.model === mode;
+      b.style.background = active ? '#171717' : 'transparent';
+      b.style.color      = active ? '#fff'    : '#4d4d4d';
+    });
+
+    modelHint.textContent = HINTS[mode];
+  });
+
+  // ── Lazy-load the person detector (only needed in auto mode) ──────────────
+  async function ensureDetector() {
+    if (detector) return;
+    setStatus('Loading person detector…');
+    detector = await pipeline('object-detection', 'Xenova/detr-resnet-50', {
+      dtype: 'fp32',
+    });
+  }
+
+  // ── Lazy-load the portrait matting pipeline ───────────────────────────────
+  async function ensurePortraitPipe() {
+    if (portraitPipe) return;
+    setStatus('Loading portrait model (Xenova/modnet)…');
+    portraitPipe = await pipeline('background-removal', 'Xenova/modnet', {
+      dtype: 'fp32',
+    });
+  }
+
+  // ── Detect whether the image contains a person ───────────────────────────
+  // Returns true if any detection has label "person" with score >= threshold.
+  async function containsPerson(objectUrl: string, threshold = 0.5): Promise<boolean> {
+    await ensureDetector();
+    const detections = await detector(objectUrl, { threshold }) as Array<{ label: string; score: number }>;
+    return detections.some(d => d.label.toLowerCase() === 'person');
+  }
+
+  // ── Route to the right model and return a transparent-PNG Blob ───────────
+  async function removeBg(file: File, objectUrl: string): Promise<{ blob: Blob; usedModel: string }> {
+    if (currentMode === 'portrait') {
+      await ensurePortraitPipe();
+      setStatus(`Portrait model — processing ${file.name}…`);
+      const output = await portraitPipe(objectUrl);
+      // Single input → RawImage returned directly (not an array)
+      const blob: Blob = await output.toBlob('image/png');
+      return { blob, usedModel: 'Portrait (modnet)' };
+    }
+
+    if (currentMode === 'general') {
+      setStatus(`General model — processing ${file.name}…`);
+      const blob = await removeBackground(file, {
+        model: 'medium',
+        output: { format: 'image/png', quality: 1 },
+      });
+      return { blob, usedModel: 'General (ISNet)' };
+    }
+
+    // ── Auto mode ────────────────────────────────────────────────────────────
+    setStatus(`Auto — detecting content in ${file.name}…`);
+    const hasPerson = await containsPerson(objectUrl);
+
+    if (hasPerson) {
+      await ensurePortraitPipe();
+      setStatus(`Auto → Portrait model detected — processing ${file.name}…`);
+      const output = await portraitPipe(objectUrl);
+      const blob: Blob = await output.toBlob('image/png');
+      return { blob, usedModel: 'Auto → Portrait (modnet)' };
+    } else {
+      setStatus(`Auto → General model selected — processing ${file.name}…`);
+      const blob = await removeBackground(file, {
+        model: 'medium',
+        output: { format: 'image/png', quality: 1 },
+      });
+      return { blob, usedModel: 'Auto → General (ISNet)' };
     }
   }
 
-  // ── Process one image ──────────────────────────────────────────
+  // ── Process one image ─────────────────────────────────────────────────────
   async function processImage(file: File): Promise<void> {
-    // Keep a persistent object URL for the original preview (revoked on page unload)
     const originalUrl = URL.createObjectURL(file);
+    loadingState.style.display = 'block';
 
     try {
-      // Single string input → pipeline returns RawImage directly (not an array)
-      const output = await segmenter(originalUrl) as any;
-
-      // output IS the RawImage — call toBlob() directly
-      const blob: Blob = await output.toBlob('image/png');
+      const { blob, usedModel } = await removeBg(file, originalUrl);
       const resultUrl = URL.createObjectURL(blob);
       const name = file.name.replace(/\.[^/.]+$/, '') + '_nobg.png';
 
       processedImages.push({ name, blob, url: resultUrl });
-      addCard(name, originalUrl, resultUrl);
-      // Note: originalUrl intentionally NOT revoked here — the <img> tag still needs it
+      addCard(name, originalUrl, resultUrl, usedModel);
     } catch (err) {
       URL.revokeObjectURL(originalUrl);
       throw err;
+    } finally {
+      loadingState.style.display = 'none';
     }
   }
 
-  // ── Render a result card ───────────────────────────────────────
-  function addCard(name: string, originalUrl: string, processedUrl: string) {
+  // ── Render a result card ──────────────────────────────────────────────────
+  function addCard(name: string, originalUrl: string, processedUrl: string, modelLabel: string) {
     const card = document.createElement('div');
     card.style.cssText = 'background:#fff; border:1px solid #ebebeb; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.06);';
 
     card.innerHTML = `
       <div style="position:relative; aspect-ratio:4/3; display:grid; grid-template-columns:1fr 1fr;">
-        <!-- Original -->
         <div style="position:relative; overflow:hidden; border-right:1px solid #ebebeb;">
-          <img src="${originalUrl}" alt="Original"
-            style="width:100%; height:100%; object-fit:cover; display:block;" />
+          <img src="${originalUrl}" alt="Original" style="width:100%; height:100%; object-fit:cover; display:block;" />
           <span style="position:absolute; top:8px; left:8px; padding:3px 8px; background:#171717; color:#fff; font-size:11px; font-weight:500; border-radius:4px;">Original</span>
         </div>
-        <!-- Processed (checkered bg shows transparency) -->
         <div style="position:relative; overflow:hidden; background:repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 0 0 / 16px 16px;">
-          <img src="${processedUrl}" alt="Background removed"
-            style="width:100%; height:100%; object-fit:cover; display:block;" />
+          <img src="${processedUrl}" alt="Background removed" style="width:100%; height:100%; object-fit:cover; display:block;" />
           <span style="position:absolute; top:8px; right:8px; padding:3px 8px; background:#0070f3; color:#fff; font-size:11px; font-weight:500; border-radius:4px;">Removed</span>
         </div>
       </div>
-      <div style="padding:14px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-        <p style="font-size:13px; font-weight:500; color:#171717; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">${name}</p>
-        <button class="dl-btn"
-          style="flex-shrink:0; padding:7px 16px; background:#171717; color:#fff; border:none; border-radius:100px; font-size:13px; font-weight:500; cursor:pointer; transition:opacity .2s;"
-          onmouseenter="this.style.opacity='.8';" onmouseleave="this.style.opacity='1';">
-          Download PNG
-        </button>
+      <div style="padding:12px 16px 14px; border-top:1px solid #f5f5f5;">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px;">
+          <p style="font-size:13px; font-weight:500; color:#171717; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">${name}</p>
+          <button class="dl-btn"
+            style="flex-shrink:0; padding:7px 16px; background:#171717; color:#fff; border:none; border-radius:100px; font-size:13px; font-weight:500; cursor:pointer; transition:opacity .2s;"
+            onmouseenter="this.style.opacity='.8';" onmouseleave="this.style.opacity='1';">
+            Download PNG
+          </button>
+        </div>
+        <p style="margin:0; font-size:11px; color:#888; font-family:ui-monospace,monospace;">
+          <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#0070f3; margin-right:5px; vertical-align:middle;"></span>
+          ${modelLabel}
+        </p>
       </div>
     `;
 
@@ -242,21 +345,16 @@ import Footer from '../components/Footer.astro';
     });
   }
 
-  // ── Handle dropped / selected files ───────────────────────────
+  // ── Handle dropped / selected files ──────────────────────────────────────
   async function handleFiles(files: FileList) {
     const imgs = Array.from(files).filter(f => f.type.startsWith('image/'));
     if (!imgs.length) { alert('Please select image files (JPG, PNG, WebP).'); return; }
 
-    // Revoke old object URLs to free memory
     processedImages.forEach(({ url }) => URL.revokeObjectURL(url));
     processedImages.length = 0;
     imagesContainer.innerHTML = '';
     imageGrid.style.display = 'none';
 
-    // Load model if not yet loaded
-    await initModel();
-
-    // Show progress
     progressState.style.display = 'block';
     progressBar.style.width = '0%';
 
@@ -265,7 +363,7 @@ import Footer from '../components/Footer.astro';
       try {
         await processImage(imgs[i]);
       } catch (err) {
-        console.error(`Error on ${imgs[i].name}:`, err);
+        console.error(`Skipping ${imgs[i].name}:`, err);
       }
       progressBar.style.width = `${((i + 1) / imgs.length) * 100}%`;
       progressText.textContent = `${i + 1} / ${imgs.length}`;
@@ -274,7 +372,7 @@ import Footer from '../components/Footer.astro';
     setTimeout(() => { progressState.style.display = 'none'; }, 1500);
   }
 
-  // ── Download all as ZIP ────────────────────────────────────────
+  // ── Download all as ZIP ───────────────────────────────────────────────────
   async function downloadZip() {
     if (!processedImages.length) return;
     const zip = new JSZip();
@@ -286,36 +384,32 @@ import Footer from '../components/Footer.astro';
     a.click();
   }
 
-  // ── Event wiring ───────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function setStatus(msg: string) {
+    loadingText.textContent = msg;
+  }
+
+  // ── Event wiring ──────────────────────────────────────────────────────────
   uploadZone.addEventListener('click', () => fileInput.click());
-
-  browseBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    fileInput.click();
-  });
-
+  browseBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
   fileInput.addEventListener('change', () => {
     if (fileInput.files?.length) handleFiles(fileInput.files);
-    fileInput.value = ''; // reset so same file can be re-selected
+    fileInput.value = '';
   });
-
   uploadZone.addEventListener('dragover', (e) => {
     e.preventDefault();
     (e.currentTarget as HTMLElement).style.borderColor = '#171717';
     (e.currentTarget as HTMLElement).style.background  = '#fafafa';
   });
-
   uploadZone.addEventListener('dragleave', (e) => {
     (e.currentTarget as HTMLElement).style.borderColor = '#a1a1a1';
     (e.currentTarget as HTMLElement).style.background  = '#fff';
   });
-
   uploadZone.addEventListener('drop', (e) => {
     e.preventDefault();
     (e.currentTarget as HTMLElement).style.borderColor = '#a1a1a1';
     (e.currentTarget as HTMLElement).style.background  = '#fff';
     if (e.dataTransfer?.files.length) handleFiles(e.dataTransfer.files);
   });
-
   downloadAllBtn.addEventListener('click', downloadZip);
 </script>
