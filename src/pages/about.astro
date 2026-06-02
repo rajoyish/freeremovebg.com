@@ -1,0 +1,93 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+
+const title = 'About Free Remove BG: The Private AI Background Remover';
+const description = 'Learn about Free Remove BG, the free AI background remover that runs entirely in your browser. Private, unlimited, watermark-free, and built for real work.';
+const canonical = 'https://freeremovebg.com/about';
+---
+
+<Layout title={title} description={description} canonical={canonical}>
+  <div class="min-h-screen flex flex-col">
+    <Header />
+    <Breadcrumb current="About" />
+
+    <main class="flex-1">
+
+      <!-- Hero -->
+      <section class="px-6 pt-16 pb-8 text-center">
+        <div class="max-w-[760px] mx-auto">
+          <h1 class="text-[clamp(2rem,5vw,3.25rem)] font-semibold tracking-[-2px] leading-[1.1] mt-0 mb-5 text-ink">
+            About Free Remove BG
+          </h1>
+          <p class="text-lg text-body leading-[1.7] mt-0 mb-0 max-w-[600px] mx-auto">
+            A free AI background remover built on a simple idea: removing the background from an image should be fast, private, and cost nothing.
+          </p>
+        </div>
+      </section>
+
+      <!-- Article -->
+      <section class="px-6 py-16">
+        <article class="max-w-[760px] mx-auto">
+          <div class="reveal" data-reveal>
+            <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-5">Our Mission</h2>
+            <p class="text-base text-body leading-[1.8] m-0">Most background removers ask you to sign up, watch a watermark land on your download, or pay for the resolution you actually need. Free Remove BG was created to remove that friction. It is a free AI bg remove tool that turns any photo into a clean transparent cutout in seconds, with no account, no watermark, and no hidden limits. Whether you are preparing a single profile picture or a folder full of product shots, the tool is ready the moment you open the page.</p>
+          </div>
+
+          <div class="reveal mt-12" data-reveal>
+            <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-5">Privacy by Design</h2>
+            <p class="text-base text-body leading-[1.8] m-0">The biggest difference is where the work happens. Instead of uploading your photos to a cloud server, Free Remove BG runs the entire cutout locally inside your browser. Your images are never sent anywhere, never stored, and never seen by anyone. That makes it a safe choice for sensitive product shots, client work, and personal photos. After the page loads once, you can even disconnect from the internet and keep removing backgrounds offline.</p>
+          </div>
+
+          <div class="reveal mt-12" data-reveal>
+            <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-5">Smart AI for Every Image</h2>
+            <p class="text-base text-body leading-[1.8] m-0">Different pictures need different handling. A portrait with fine, flyaway hair needs careful matting, while a hard-edged logo or product needs crisp, clean lines. Smart mode analyses each image and automatically routes it to the best engine, using a portrait-optimised model for people and a general-purpose model for objects, graphics, and animals. You can also choose the engine yourself at any time. The result is a high-quality cutout exported as a full-resolution transparent PNG.</p>
+          </div>
+
+          <div class="reveal mt-12" data-reveal>
+            <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-5">Built for Real Work</h2>
+            <p class="text-base text-body leading-[1.8] m-0">Free Remove BG handles JPG, PNG, WebP, AVIF, and even GIF images, and it can process many files at once. Drop in a batch, watch each one cut out with a live before-and-after preview, and download every result together as a single ZIP. The transparent PNGs slot straight into the tools you already use, from Canva, PowerPoint, and Google Slides to Photoshop, GIMP, and Photopea, making it a practical part of any everyday design workflow.</p>
+          </div>
+
+          <div class="reveal mt-12" data-reveal>
+            <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-5">Always Free</h2>
+            <p class="text-base text-body leading-[1.8] m-0">There is no paywall hiding better output and no stamp across your downloads. Every cutout comes out at the original resolution you uploaded, free to use for personal and commercial projects alike. Install nothing, sign up for nothing, and open the page whenever you need a fast, private, free background remover that simply works.</p>
+          </div>
+
+          <div class="reveal mt-14 text-center" data-reveal>
+            <a href="/"
+              class="inline-flex items-center gap-2 px-6 py-3 bg-ink text-on-primary rounded-pill text-sm font-medium no-underline transition-opacity hover:opacity-[0.85]">
+              Try Free Remove BG
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+        </article>
+      </section>
+
+    </main>
+
+    <Footer />
+  </div>
+</Layout>
+
+<script>
+  // Scroll-reveal for the article blocks (same behaviour as the home page).
+  const revealEls = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+    revealEls.forEach(el => el.classList.add('is-visible'));
+  } else {
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+    revealEls.forEach(el => observer.observe(el));
+  }
+</script>

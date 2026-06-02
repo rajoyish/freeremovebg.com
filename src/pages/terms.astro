@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
 
 const title = 'Terms & Conditions: Free Remove BG';
 const description = 'The terms and conditions for using Free Remove BG, the free in-browser AI background remover. Free for personal and commercial use.';
@@ -12,6 +13,7 @@ const updated = 'June 2, 2026';
 <Layout title={title} description={description} canonical={canonical}>
   <div class="min-h-screen flex flex-col">
     <Header />
+    <Breadcrumb current="Terms & Conditions" />
 
     <main class="flex-1">
       <section class="px-6 pt-16 pb-20">

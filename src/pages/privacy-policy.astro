@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
 
 const title = 'Privacy Policy: Free Remove BG';
 const description = 'How Free Remove BG handles your data. All image processing happens locally in your browser. Your images are never uploaded, stored, or shared.';
@@ -12,6 +13,7 @@ const updated = 'June 2, 2026';
 <Layout title={title} description={description} canonical={canonical}>
   <div class="min-h-screen flex flex-col">
     <Header />
+    <Breadcrumb current="Privacy Policy" />
 
     <main class="flex-1">
       <section class="px-6 pt-16 pb-20">
