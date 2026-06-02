@@ -1,22 +1,22 @@
 ---
-// Footer component following Vercel design system
+// Footer component — always dark regardless of theme
 ---
 
-<footer class="bg-canvas border-t border-hairline mt-auto">
+<footer class="bg-[#0a0a0a] border-t border-[#2a2a2a] mt-auto">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <!-- About -->
       <div>
-        <h3 class="text-sm font-semibold mb-3 text-ink">About</h3>
-        <p class="text-sm text-body leading-relaxed">
+        <h3 class="text-sm font-semibold mb-3 text-[#ededed]">About</h3>
+        <p class="text-sm text-[#a3a3a3] leading-relaxed">
           A free, privacy-first background remover that runs entirely in your browser. Your images never leave your device, so there are no uploads, no accounts, and no waiting.
         </p>
       </div>
 
       <!-- Features -->
       <div>
-        <h3 class="text-sm font-semibold mb-3 text-ink">Features</h3>
-        <ul class="space-y-2 text-sm text-body">
+        <h3 class="text-sm font-semibold mb-3 text-[#ededed]">Features</h3>
+        <ul class="space-y-2 text-sm text-[#a3a3a3]">
           <li>✓ 100% Private, On-Device Processing</li>
           <li>✓ No Sign-Up or Watermarks</li>
           <li>✓ Unlimited Full-Resolution Downloads</li>
@@ -28,8 +28,8 @@
 
       <!-- Use Cases -->
       <div>
-        <h3 class="text-sm font-semibold mb-3 text-ink">Great For</h3>
-        <ul class="space-y-2 text-sm text-body">
+        <h3 class="text-sm font-semibold mb-3 text-[#ededed]">Great For</h3>
+        <ul class="space-y-2 text-sm text-[#a3a3a3]">
           <li>Product photos &amp; online listings</li>
           <li>Profile pictures &amp; avatars</li>
           <li>Logos, graphics &amp; design assets</li>
@@ -38,13 +38,13 @@
       </div>
     </div>
 
-    <div class="mt-8 pt-8 border-t border-hairline flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-mute">
+    <div class="mt-8 pt-8 border-t border-[#2a2a2a] flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[#737373]">
       <nav class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2" aria-label="Footer">
-        <a href="/" class="text-mute no-underline hover:text-ink transition-colors">Home</a>
-        <a href="/about" class="text-mute no-underline hover:text-ink transition-colors">About</a>
-        <a href="/privacy-policy" class="text-mute no-underline hover:text-ink transition-colors">Privacy Policy</a>
-        <a href="/terms" class="text-mute no-underline hover:text-ink transition-colors">Terms &amp; Conditions</a>
-        <a href="/contact" class="text-mute no-underline hover:text-ink transition-colors">Contact</a>
+        <a href="/" class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">Home</a>
+        <a href="/about" class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">About</a>
+        <a href="/privacy-policy" class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">Privacy Policy</a>
+        <a href="/terms" class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">Terms &amp; Conditions</a>
+        <a href="/contact" class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">Contact</a>
       </nav>
       <p class="m-0 whitespace-nowrap">&copy; {new Date().getFullYear()} FreeRemoveBG. All rights reserved.</p>
     </div>
