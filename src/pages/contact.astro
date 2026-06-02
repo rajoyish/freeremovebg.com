@@ -1,0 +1,69 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const title = 'Contact Us: Free Remove BG';
+const description = 'Get in touch with the Free Remove BG team. Questions, feedback, or bug reports about our free AI background remover are always welcome.';
+const canonical = 'https://freeremovebg.com/contact';
+---
+
+<Layout title={title} description={description} canonical={canonical}>
+  <div class="min-h-screen flex flex-col">
+    <Header />
+
+    <main class="flex-1">
+      <section class="px-6 pt-16 pb-20">
+        <div class="max-w-[640px] mx-auto">
+          <h1 class="text-[clamp(2rem,5vw,3rem)] font-semibold tracking-[-1.5px] leading-[1.1] mt-0 mb-4 text-ink">Contact Us</h1>
+          <p class="text-base text-body leading-[1.8] mt-0 mb-10">
+            Have a question, some feedback, or found a bug? We'd love to hear from you. Fill in the form below or email us directly, and we'll get back to you as soon as we can.
+          </p>
+
+          <form
+            class="flex flex-col gap-5"
+            action="https://formsubmit.co/hello@freeremovebg.com"
+            method="POST">
+            <div class="flex flex-col gap-2">
+              <label for="name" class="text-sm font-medium text-ink">Name</label>
+              <input
+                id="name" name="name" type="text" required autocomplete="name"
+                class="w-full px-4 py-2.5 bg-canvas border border-hairline rounded-md text-sm text-ink placeholder:text-mute transition-colors focus:border-ink focus:outline-none"
+                placeholder="Your name" />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="email" class="text-sm font-medium text-ink">Email</label>
+              <input
+                id="email" name="email" type="email" required autocomplete="email"
+                class="w-full px-4 py-2.5 bg-canvas border border-hairline rounded-md text-sm text-ink placeholder:text-mute transition-colors focus:border-ink focus:outline-none"
+                placeholder="you@example.com" />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="message" class="text-sm font-medium text-ink">Message</label>
+              <textarea
+                id="message" name="message" rows="6" required
+                class="w-full px-4 py-2.5 bg-canvas border border-hairline rounded-md text-sm text-ink placeholder:text-mute transition-colors focus:border-ink focus:outline-none resize-y"
+                placeholder="How can we help?"></textarea>
+            </div>
+
+            <button
+              type="submit"
+              class="self-start px-6 py-2.5 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85]">
+              Send Message
+            </button>
+          </form>
+
+          <p class="text-sm text-mute leading-relaxed mt-10 m-0">
+            Prefer email? Reach us at
+            <a href="mailto:hello@freeremovebg.com" class="text-link no-underline hover:underline">hello@freeremovebg.com</a>.
+            For privacy details, see our <a href="/privacy-policy" class="text-link no-underline hover:underline">Privacy Policy</a>.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>

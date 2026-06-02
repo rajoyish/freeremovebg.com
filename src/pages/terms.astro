@@ -1,0 +1,56 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const title = 'Terms & Conditions: Free Remove BG';
+const description = 'The terms and conditions for using Free Remove BG, the free in-browser AI background remover. Free for personal and commercial use.';
+const canonical = 'https://freeremovebg.com/terms';
+const updated = 'June 2, 2026';
+---
+
+<Layout title={title} description={description} canonical={canonical}>
+  <div class="min-h-screen flex flex-col">
+    <Header />
+
+    <main class="flex-1">
+      <section class="px-6 pt-16 pb-20">
+        <article class="max-w-[760px] mx-auto">
+          <h1 class="text-[clamp(2rem,5vw,3rem)] font-semibold tracking-[-1.5px] leading-[1.1] mt-0 mb-3 text-ink">Terms &amp; Conditions</h1>
+          <p class="text-sm text-mute m-0 mb-10">Last updated: {updated}</p>
+
+          <div class="[&_h2]:text-[1.3rem] [&_h2]:font-semibold [&_h2]:text-ink [&_h2]:mt-10 [&_h2]:mb-4 [&_p]:text-base [&_p]:text-body [&_p]:leading-[1.8] [&_p]:m-0 [&_p]:mb-4 [&_ul]:text-base [&_ul]:text-body [&_ul]:leading-[1.8] [&_ul]:my-4 [&_ul]:pl-6 [&_li]:mb-2 [&_ul]:list-disc [&_a]:text-link [&_a]:no-underline hover:[&_a]:underline">
+            <p>By using Free Remove BG, you agree to these terms. Please read them carefully. If you do not agree, please do not use the tool.</p>
+
+            <h2>Use of the Service</h2>
+            <p>Free Remove BG is a free tool that removes backgrounds from images directly in your browser. You may use it for both personal and commercial projects at no cost, with no sign-up and no watermarks. You are responsible for ensuring you have the right to edit any image you process.</p>
+
+            <h2>Your Content</h2>
+            <p>You retain all rights to the images you upload and the cutouts you create. Because processing happens entirely on your device, we never receive, store, or claim any ownership over your content.</p>
+
+            <h2>Acceptable Use</h2>
+            <ul>
+              <li>Do not use the tool to process images you do not have permission to use.</li>
+              <li>Do not use the tool to create unlawful, infringing, or harmful content.</li>
+              <li>Do not attempt to disrupt, reverse-engineer, or misuse the service.</li>
+            </ul>
+
+            <h2>No Warranty</h2>
+            <p>The tool is provided "as is" without warranties of any kind. While we aim for high-quality, accurate cutouts, results can vary depending on the image, and we do not guarantee that the service will be uninterrupted or error-free.</p>
+
+            <h2>Limitation of Liability</h2>
+            <p>To the fullest extent permitted by law, Free Remove BG and its operators are not liable for any damages arising from your use of, or inability to use, the tool, including any loss of data or output.</p>
+
+            <h2>Changes to These Terms</h2>
+            <p>We may revise these terms from time to time. Continued use of the tool after changes are posted constitutes acceptance of the updated terms.</p>
+
+            <h2>Contact</h2>
+            <p>Questions about these terms? Visit our <a href="/contact">contact page</a>.</p>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>

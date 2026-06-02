@@ -1,0 +1,52 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const title = 'Privacy Policy: Free Remove BG';
+const description = 'How Free Remove BG handles your data. All image processing happens locally in your browser. Your images are never uploaded, stored, or shared.';
+const canonical = 'https://freeremovebg.com/privacy-policy';
+const updated = 'June 2, 2026';
+---
+
+<Layout title={title} description={description} canonical={canonical}>
+  <div class="min-h-screen flex flex-col">
+    <Header />
+
+    <main class="flex-1">
+      <section class="px-6 pt-16 pb-20">
+        <article class="max-w-[760px] mx-auto">
+          <h1 class="text-[clamp(2rem,5vw,3rem)] font-semibold tracking-[-1.5px] leading-[1.1] mt-0 mb-3 text-ink">Privacy Policy</h1>
+          <p class="text-sm text-mute m-0 mb-10">Last updated: {updated}</p>
+
+          <div class="[&_h2]:text-[1.3rem] [&_h2]:font-semibold [&_h2]:text-ink [&_h2]:mt-10 [&_h2]:mb-4 [&_p]:text-base [&_p]:text-body [&_p]:leading-[1.8] [&_p]:m-0 [&_p]:mb-4 [&_ul]:text-base [&_ul]:text-body [&_ul]:leading-[1.8] [&_ul]:my-4 [&_ul]:pl-6 [&_li]:mb-2 [&_ul]:list-disc [&_a]:text-link [&_a]:no-underline hover:[&_a]:underline">
+            <p>Free Remove BG is built around a single privacy principle: your images belong to you. This policy explains what data we do and do not collect when you use the tool.</p>
+
+            <h2>Your Images Stay on Your Device</h2>
+            <p>All background removal happens locally in your browser using on-device AI. Your images are never uploaded to a server, never stored, and never seen by us or anyone else. When you close the tab, any images you worked with are gone from memory. After the page has loaded once, you can even use the tool offline.</p>
+
+            <h2>Information We Collect</h2>
+            <p>We do not require an account, and we do not ask for your name, email, or any personal details to use the background remover. We do not collect, transmit, or retain the images you process.</p>
+
+            <h2>Analytics and Cookies</h2>
+            <p>The core tool works without tracking you. If basic, privacy-respecting analytics are used, they are limited to aggregate, anonymous usage statistics (such as page views) and are never linked to the images you process. We do not sell or share personal data.</p>
+
+            <h2>Third-Party Resources</h2>
+            <p>To run, the page may load assets such as web fonts and the AI model files from content delivery networks. These requests are limited to delivering the application itself and do not include your images.</p>
+
+            <h2>Children's Privacy</h2>
+            <p>Free Remove BG is a general-purpose tool and is not directed at children under 13. Because we do not collect personal information, no such data is knowingly gathered.</p>
+
+            <h2>Changes to This Policy</h2>
+            <p>We may update this policy from time to time. Any changes will be posted on this page with a revised "last updated" date.</p>
+
+            <h2>Contact</h2>
+            <p>If you have any questions about this Privacy Policy, please reach out through our <a href="/contact">contact page</a>.</p>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>

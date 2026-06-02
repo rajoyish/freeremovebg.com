@@ -38,8 +38,15 @@
       </div>
     </div>
 
-    <div class="mt-8 pt-8 border-t border-hairline text-center text-sm text-mute">
-      <p>&copy; {new Date().getFullYear()} FreeRemoveBG. All rights reserved.</p>
+    <div class="mt-8 pt-8 border-t border-hairline flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-mute">
+      <nav class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2" aria-label="Footer">
+        <a href="/" class="text-mute no-underline hover:text-ink transition-colors">Home</a>
+        <a href="/about" class="text-mute no-underline hover:text-ink transition-colors">About</a>
+        <a href="/privacy-policy" class="text-mute no-underline hover:text-ink transition-colors">Privacy Policy</a>
+        <a href="/terms" class="text-mute no-underline hover:text-ink transition-colors">Terms &amp; Conditions</a>
+        <a href="/contact" class="text-mute no-underline hover:text-ink transition-colors">Contact</a>
+      </nav>
+      <p class="m-0 whitespace-nowrap">&copy; {new Date().getFullYear()} FreeRemoveBG. All rights reserved.</p>
     </div>
   </div>
 </footer>
