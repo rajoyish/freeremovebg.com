@@ -6,7 +6,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Vercel Design System Colors — light (default) */
+  /* Vercel Design System Colors (light, default) */
   --color-ink: #171717;
   --color-on-primary: #ffffff;
   --color-body: #4d4d4d;
