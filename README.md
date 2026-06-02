@@ -1,40 +1,36 @@
-# FreeRemoveBG - AI-Powered Background Remover
+# Free Remove BG
 
-A high-performance, client-side image background remover built with Astro.js and Tailwind CSS v4. All processing happens locally in your browser - your images never leave your device.
+A free AI background remover that runs entirely in your browser. Your images never leave your device.
 
-## ✨ Features
+## Features
 
-- **100% Client-Side Processing** - All AI processing happens in your browser using WebAssembly
-- **Privacy-First** - Your images never leave your device
-- **No Sign-Up Required** - Start using immediately
-- **Unlimited HD Downloads** - Download processed images in original resolution
-- **Batch Processing** - Process multiple images at once
-- **Before/After Preview** - See the results side-by-side
-- **Download as ZIP** - Download all processed images in a single ZIP file
+- **100% Private** - All processing happens locally on your device, nothing is uploaded
+- **Free, Unlimited, No Watermark** - No account, no credits, no hidden limits
+- **HD Downloads** - Export transparent PNGs at the original resolution
+- **Batch Processing** - Drop in many images and download them all as a ZIP
+- **Smart AI Selection** - Auto mode picks the best engine for each image (portraits vs objects)
+- **Broad Format Support** - JPG, PNG, WebP, AVIF, GIF, BMP and more
+- **Works Offline** - After the first load, background removal works without a connection
+- **Dark Mode** - Toggle between light and dark themes
+- **Crisp Edge Detail** - A dedicated portrait engine preserves fine hair, fur and soft edges
+- **Instant Side-by-Side** - Compare the original and cutout on a transparency checkerboard
 
-## 🛠️ Technology Stack
+## Pages
 
-- **Astro.js** - Modern static site generator
-- **Tailwind CSS v4** - Latest version with native CSS support
-- **Hugging Face Transformers** - AI model inference in the browser
-- **Xenova/modnet** - State-of-the-art image matting model
-- **JSZip** - Client-side ZIP file generation
+| Route | Description |
+|-------|-------------|
+| `/` | Home page with the background removal tool, features grid, SEO article and FAQ |
+| `/about` | About Free Remove BG |
+| `/privacy-policy` | Privacy policy |
+| `/terms` | Terms and conditions |
+| `/contact` | Contact form |
 
-## 🎨 Design System
-
-Built following Vercel's design language:
-
-- Minimalist monochrome palette (black, white, sleek grays)
-- Inter font family
-- Subtle borders and soft shadows
-- Clean micro-interactions
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
 - Node.js >= 22.12.0
-- pnpm (recommended) or npm
+- pnpm
 
 ### Installation
 
@@ -52,91 +48,48 @@ pnpm build
 pnpm preview
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-freeremovebg.com/
-├── src/
-│   ├── components/
-│   │   ├── Header.astro       # Navigation header with privacy badge
-│   │   └── Footer.astro       # Footer with features and info
-│   ├── layouts/
-│   │   └── Layout.astro       # Base layout with meta tags
-│   ├── pages/
-│   │   └── index.astro        # Main page with background remover
-│   └── styles/
-│       └── global.css         # Tailwind CSS v4 with design tokens
-├── public/
-│   ├── favicon.svg
-│   └── favicon.ico
-├── astro.config.mjs           # Astro + Tailwind configuration
-└── package.json
+src/
+├── components/
+│   ├── Breadcrumb.astro    # Breadcrumb navigation for subpages
+│   ├── Header.astro        # Sticky header with logo and dark mode toggle
+│   └── Footer.astro        # Footer with nav links and copyright
+├── layouts/
+│   └── Layout.astro        # Base layout (SEO meta, OG tags, JSON-LD, fonts)
+├── pages/
+│   ├── index.astro         # Home page with the background remover tool
+│   ├── about.astro         # About page
+│   ├── privacy-policy.astro
+│   ├── terms.astro
+│   └── contact.astro
+├── styles/
+│   └── global.css          # Design tokens, dark mode, scroll-reveal, toast
+public/
+├── favicon.svg
+├── favicon-96x96.png
+├── apple-touch-icon.png
+└── site.webmanifest
 ```
 
-## 🎯 How It Works
+## How It Works
 
-1. **Model Loading**: On first use, the Xenova/modnet model is loaded from Hugging Face
-2. **Image Upload**: Users can drag & drop or browse for images
-3. **AI Processing**: Each image is processed using the modnet model for image matting
-4. **Background Removal**: The AI-generated mask is applied to remove the background
-5. **Download**: Users can download individual PNGs or all images as a ZIP
+1. Upload one or more images (drag and drop or browse)
+2. The AI analyses each image and removes the background
+3. Download individual transparent PNGs or the entire batch as a ZIP
 
-## 🔧 Configuration
+Smart mode automatically detects whether an image contains a person and routes it to the best engine. You can also select the engine manually (People & Portraits or Objects & Graphics).
 
-### Vite Configuration
+## SEO
 
-The project is configured to:
+- Per-page title, meta description, keywords, and canonical URL
+- Open Graph and Twitter Card meta tags
+- JSON-LD structured data (WebApplication + FAQPage)
+- Semantic HTML with proper heading hierarchy
+- Scroll-reveal article with keyword-rich content
+- FAQ section with visible accordion and matching FAQPage schema
 
-- Use Tailwind CSS v4 via the Vite plugin
-- Exclude `@huggingface/transformers` from optimization for proper WebAssembly loading
-- Use ES format for web workers
+## License
 
-### Tailwind CSS v4
-
-Custom design tokens are defined in `src/styles/global.css` following the Vercel design system:
-
-- Color palette (ink, canvas, hairline, etc.)
-- Spacing scale (4px base unit)
-- Typography (Inter font family)
-- Border radius tokens
-
-## 🌐 Browser Support
-
-- Chrome/Edge 113+ (WebGPU support recommended)
-- Firefox 115+
-- Safari 16.4+
-
-Note: WebGPU provides the best performance but the app will fall back to WebAssembly if unavailable.
-
-## 📝 License
-
-MIT License - feel free to use this project for personal or commercial purposes.
-
-## 🙏 Acknowledgments
-
-- [Hugging Face](https://huggingface.co/) for the Transformers.js library
-- [Xenova](https://huggingface.co/Xenova) for the modnet model
-- [Vercel](https://vercel.com/) for design inspiration
-- [Astro](https://astro.build/) for the amazing framework
-
-## 🐛 Known Issues
-
-- First load may take a few seconds to download the AI model (~30MB)
-- Very large images (>4000px) may take longer to process
-- WebGPU support is still experimental in some browsers
-
-## 🚀 Deployment
-
-This is a static site that can be deployed to:
-
-- Vercel
-- Netlify
-- Cloudflare Pages
-- GitHub Pages
-- Any static hosting service
-
-Simply run `pnpm build` and deploy the `dist/` folder.
-
-## 📧 Support
-
-For issues or questions, please open an issue on GitHub.
+MIT
