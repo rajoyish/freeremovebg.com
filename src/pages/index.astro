@@ -234,6 +234,9 @@ import Footer from '../components/Footer.astro';
     </main>
 
     <Footer />
+
+    <!-- Toast notification container (fixed bottom-center) -->
+    <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none"></div>
   </div>
 </Layout>
 
@@ -599,6 +602,87 @@ import Footer from '../components/Footer.astro';
     return candidate;
   }
 
+  // ── Toast notifications ────────────────────────────────────────────────────
+  const toastContainer = document.getElementById('toast-container')!;
+
+  function showToast(message: string, durationMs = 10000) {
+    const toast = document.createElement('div');
+    toast.className = 'toast flex items-center gap-3 px-5 py-3 bg-ink text-on-primary text-sm font-medium rounded-lg shadow-lg';
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="shrink-0 stroke-amber-400"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      <span>${message}</span>
+    `;
+    toastContainer.appendChild(toast);
+    // Trigger reflow so the transition plays.
+    void toast.offsetWidth;
+    toast.classList.add('toast-visible');
+
+    setTimeout(() => {
+      toast.classList.remove('toast-visible');
+      toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+      setTimeout(() => toast.remove(), 400); // fallback
+    }, durationMs);
+  }
+
+  // ── Glitch detection ──────────────────────────────────────────────────────
+  // Scans the result PNG for the torn-band corruption signature: large
+  // contiguous blocks of fully-transparent rows sandwiched between opaque
+  // content. Returns true if the image looks glitched.
+  async function isGlitched(blob: Blob, threshold = 0.04): Promise<boolean> {
+    const url = URL.createObjectURL(blob);
+    try {
+      const img = new Image();
+      img.src = url;
+      await img.decode();
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      if (!w || !h) return false;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return false;
+      ctx.drawImage(img, 0, 0);
+      const { data } = ctx.getImageData(0, 0, w, h);
+
+      // Build per-row opacity: a row is "empty" if >95% of its pixels are fully
+      // transparent (alpha === 0).
+      const emptyThreshold = Math.floor(w * 0.95);
+      const rowEmpty: boolean[] = [];
+      for (let y = 0; y < h; y++) {
+        let transparentCount = 0;
+        const rowStart = y * w * 4;
+        for (let x = 0; x < w; x++) {
+          if (data[rowStart + x * 4 + 3] === 0) transparentCount++;
+        }
+        rowEmpty.push(transparentCount >= emptyThreshold);
+      }
+
+      // Find contiguous bands of empty rows that are at least `bandMin` rows
+      // tall. If total glitched rows exceed `threshold` of image height, flag.
+      const bandMin = Math.max(4, Math.floor(h * 0.02));
+      let glitchedRows = 0;
+      let run = 0;
+      let hadContent = false;
+      for (let y = 0; y < h; y++) {
+        if (rowEmpty[y]) {
+          run++;
+        } else {
+          if (hadContent && run >= bandMin) glitchedRows += run;
+          run = 0;
+          hadContent = true;
+        }
+      }
+      // Don't count a trailing transparent band (normal for subjects that don't
+      // fill the frame vertically).
+      return glitchedRows / h >= threshold;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
   // ── Process one image ─────────────────────────────────────────────────────
   async function processImage(item: QueueItem): Promise<void> {
     const originalUrl = URL.createObjectURL(item.file);
@@ -609,6 +693,13 @@ import Footer from '../components/Footer.astro';
       const pngBlob = await normalizeToPng(item.file);
       workingUrl = URL.createObjectURL(pngBlob);
       const { blob, usedModel } = await removeBg(pngBlob, workingUrl, item.id);
+
+      // Check for the torn-band glitch and warn the user if detected.
+      const glitched = await isGlitched(blob);
+      if (glitched) {
+        showToast('A result looks glitched. Try uploading the same image again to redo it.');
+      }
+
       const resultUrl = URL.createObjectURL(blob);
       const name = buildOutName(item.file.name);
       item.resultUrl = resultUrl;
