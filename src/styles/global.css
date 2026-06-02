@@ -51,6 +51,31 @@
   background: repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 0 0 / 16px 16px;
 }
 
+/* ── Scroll-reveal for the SEO article ───────────────────────────────────────
+   Each [data-reveal] block starts shifted down and transparent, then animates
+   into place when it enters the viewport (the `.is-visible` class is added by
+   an IntersectionObserver in index.astro). */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* ── Dark mode ──────────────────────────────────────────────────────────────
    Overriding the design-system variables here means every `var(--color-*)`
    consumer (Header, Footer, and the inline styles on the home page) adapts
