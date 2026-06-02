@@ -62,7 +62,7 @@ import Footer from '../components/Footer.astro';
                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
               </svg>
               <p class="text-lg font-semibold text-ink mt-0 mb-2">Drop images here or click to upload</p>
-              <p class="text-sm text-mute mt-0 mb-6">Supports JPG, PNG, WebP · Multiple files supported</p>
+              <p class="text-sm text-mute mt-0 mb-6">Supports JPG, PNG, WebP, GIF, BMP, AVIF and more · Multiple files supported</p>
               <button id="browse-btn"
                 class="px-6 py-2.5 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85]">
                 Browse Files
@@ -82,7 +82,7 @@ import Footer from '../components/Footer.astro';
               </div>
             </div>
 
-            <input type="file" id="file-input" accept="image/*" multiple class="hidden" />
+            <input type="file" id="file-input" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,.svg,.ico,.tif,.tiff" multiple class="hidden" />
           </div>
 
           <!-- Unified progress bar (hidden until processing starts) -->
@@ -386,7 +386,7 @@ import Footer from '../components/Footer.astro';
   }
 
   // ── Core removal ──────────────────────────────────────────────────────────
-  async function removeBg(file: File, objectUrl: string, idx: number): Promise<{ blob: Blob; usedModel: string }> {
+  async function removeBg(file: Blob, objectUrl: string, idx: number): Promise<{ blob: Blob; usedModel: string }> {
     if (currentMode === 'portrait') {
       await ensurePortraitPipe();
       setThumbStatus(idx, 'processing');
@@ -397,7 +397,7 @@ import Footer from '../components/Footer.astro';
     if (currentMode === 'general') {
       setThumbStatus(idx, 'processing');
       loadingText.textContent = 'Removing background…';
-      const blob = await removeBackground(file, { model: 'medium', output: { format: 'image/png', quality: 1 } });
+      const blob = await removeBackground(file, { model: 'isnet_fp16', output: { format: 'image/png', quality: 1 } });
       return { blob, usedModel: 'Objects & Graphics' };
     }
     // Auto
@@ -411,15 +411,54 @@ import Footer from '../components/Footer.astro';
       const output = await portraitPipe(objectUrl);
       return { blob: await output.toBlob('image/png'), usedModel: 'Smart · People & Portraits' };
     }
-    const blob = await removeBackground(file, { model: 'medium', output: { format: 'image/png', quality: 1 } });
+    const blob = await removeBackground(file, { model: 'isnet_fp16', output: { format: 'image/png', quality: 1 } });
     return { blob, usedModel: 'Smart · Objects & Graphics' };
+  }
+
+  // ── Image normalisation ─────────────────────────────────────────────────────
+  // Some formats (notably certain WebP files) fail to decode consistently inside
+  // the AI engines, which both rely on createImageBitmap. To make every upload
+  // work, we first decode the file with the browser's most tolerant decoder (an
+  // <img> element) and re-encode it to a lossless PNG that the engines accept.
+  async function normalizeToPng(file: File): Promise<Blob> {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = url;
+      try {
+        await img.decode();
+      } catch {
+        throw new Error(`Could not decode "${file.name}". The file may be corrupt or an unsupported format.`);
+      }
+      const width  = img.naturalWidth;
+      const height = img.naturalHeight;
+      if (!width || !height) throw new Error(`"${file.name}" has no readable image data.`);
+
+      const canvas = document.createElement('canvas');
+      canvas.width  = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas 2D context is unavailable in this browser.');
+      ctx.drawImage(img, 0, 0);
+
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('Failed to convert the image to PNG.');
+      return blob;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
   }
 
   // ── Process one image ─────────────────────────────────────────────────────
   async function processImage(file: File, thumbIdx: number): Promise<void> {
     const originalUrl = URL.createObjectURL(file);
+    let workingUrl: string | null = null;
     try {
-      const { blob, usedModel } = await removeBg(file, originalUrl, thumbIdx);
+      // Normalise to PNG so every engine receives a format it can reliably decode.
+      const pngBlob = await normalizeToPng(file);
+      workingUrl = URL.createObjectURL(pngBlob);
+      const { blob, usedModel } = await removeBg(pngBlob, workingUrl, thumbIdx);
       const resultUrl = URL.createObjectURL(blob);
       const name = file.name.replace(/\.[^/.]+$/, '') + '_nobg.png';
       processedImages.push({ name, blob, url: resultUrl });
@@ -429,6 +468,8 @@ import Footer from '../components/Footer.astro';
       URL.revokeObjectURL(originalUrl);
       setThumbStatus(thumbIdx, 'error');
       throw err;
+    } finally {
+      if (workingUrl) URL.revokeObjectURL(workingUrl);
     }
   }
 
@@ -471,9 +512,17 @@ import Footer from '../components/Footer.astro';
   }
 
   // ── Main handler ──────────────────────────────────────────────────────────
+  // Accept anything the browser can decode as an image. We check the MIME type
+  // first, then fall back to the file extension for files that arrive with an
+  // empty or generic type (common with some WebP/AVIF downloads).
+  const IMAGE_EXT = /\.(jpe?g|png|webp|gif|bmp|avif|svg|ico|tiff?)$/i;
+  function isImageFile(f: File): boolean {
+    return f.type.startsWith('image/') || IMAGE_EXT.test(f.name);
+  }
+
   async function handleFiles(newFiles: File[]) {
-    const imgs = newFiles.filter(f => f.type.startsWith('image/'));
-    if (!imgs.length) { alert('Please select image files (JPG, PNG, WebP).'); return; }
+    const imgs = newFiles.filter(isImageFile);
+    if (!imgs.length) { alert('Please select image files (JPG, PNG, WebP, GIF, BMP, AVIF, and more).'); return; }
 
     const startIndex = allFiles.length;
     allFiles.push(...imgs);
