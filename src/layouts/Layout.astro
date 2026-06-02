@@ -4,12 +4,45 @@ import '../styles/global.css';
 interface Props {
 	title?: string;
 	description?: string;
+	keywords?: string;
+	canonical?: string;
+	ogImage?: string;
 }
 
-const { 
-	title = 'Free Background Remover - 100% Private & Local',
-	description = 'Remove image backgrounds instantly with AI. 100% client-side processing - your images never leave your device. No sign-up, unlimited HD downloads.'
+const SITE = 'https://freeremovebg.com';
+
+const {
+	title = 'Free Remove BG: Free AI Background Remover Online',
+	description = 'Free Remove BG is a free AI background remover. Remove bg from image, GIF and batches online in HD. 100% private, no sign-up, unlimited downloads.',
+	keywords = 'free remove bg, remove bg, free ai bg remove, remove bg app image, remove bg free, remove bg from image, remove bg from gif, remove bg ai, remove bg online, remove bg background, remove bg gif, remove bg hd, remove bg high quality, background remove bg, multiple image bg remove, batch bg remove, bg remove ai, remove bg ms word, remove bg ppt, remove bg canva, remove bg web, remove bg offline',
+	canonical = `${SITE}/`,
+	ogImage = `${SITE}/web-app-manifest-512x512.png`,
 } = Astro.props;
+
+// Structured data: helps search engines understand the tool.
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@type': 'WebApplication',
+	name: 'Free Remove BG',
+	url: SITE,
+	description,
+	applicationCategory: 'MultimediaApplication',
+	operatingSystem: 'Any (web browser)',
+	browserRequirements: 'Requires a modern web browser with JavaScript.',
+	offers: {
+		'@type': 'Offer',
+		price: '0',
+		priceCurrency: 'USD',
+	},
+	featureList: [
+		'AI background removal',
+		'Remove bg from image, GIF, JPG, PNG and WebP',
+		'Batch / multiple image background removal',
+		'HD transparent PNG downloads',
+		'100% private, on-device processing',
+		'Works offline after first load',
+	],
+};
 ---
 
 <!doctype html>
@@ -26,8 +59,18 @@ const {
 				}
 			})();
 		</script>
-		<meta name="description" content={description} />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Primary SEO -->
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta name="keywords" content={keywords} />
+		<meta name="robots" content="index, follow, max-image-preview:large" />
+		<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+		<link rel="canonical" href={canonical} />
+
+		<!-- Icons / PWA -->
 		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="shortcut icon" href="/favicon.ico" />
@@ -35,18 +78,30 @@ const {
 		<meta name="apple-mobile-web-app-title" content="RemoveBG" />
 		<link rel="manifest" href="/site.webmanifest" />
 		<meta name="generator" content={Astro.generator} />
-		
+
 		<!-- Open Graph -->
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:type" content="website" />
-		
+		<meta property="og:url" content={canonical} />
+		<meta property="og:site_name" content="Free Remove BG" />
+		<meta property="og:locale" content="en_US" />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:image:alt" content="Free Remove BG - free AI background remover" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
+
+		<!-- Structured data -->
+		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
 		<!-- Fonts -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-		
-		<title>{title}</title>
 	</head>
 	<body>
 		<slot />
