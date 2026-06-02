@@ -45,6 +45,12 @@
   --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
 }
 
+/* Transparency checkerboard shown behind background-removed images.
+   Not expressible as a stock utility, so exposed as a Tailwind class. */
+@utility bg-checkerboard {
+  background: repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 0 0 / 16px 16px;
+}
+
 /* ── Dark mode ──────────────────────────────────────────────────────────────
    Overriding the design-system variables here means every `var(--color-*)`
    consumer (Header, Footer, and the inline styles on the home page) adapts
