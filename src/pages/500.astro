@@ -1,0 +1,23 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ErrorState from '../components/ErrorState.astro';
+
+const title = 'Server Error (500): Free Remove BG';
+const description = 'Something went wrong on our end. Try again in a moment, or head back to Free Remove BG to remove image backgrounds for free.';
+---
+
+<Layout title={title} description={description} noindex={true}>
+  <div class="min-h-screen flex flex-col">
+    <Header />
+    <main class="flex-1 flex items-center">
+      <ErrorState
+        code="500"
+        heading="Something went wrong"
+        message="An unexpected error occurred on our end. Please try again in a moment. If the problem keeps happening, let us know."
+      />
+    </main>
+    <Footer />
+  </div>
+</Layout>

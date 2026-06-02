@@ -1,0 +1,23 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ErrorState from '../components/ErrorState.astro';
+
+const title = 'Page Not Found (404): Free Remove BG';
+const description = 'The page you were looking for could not be found. Head back to Free Remove BG to remove image backgrounds for free.';
+---
+
+<Layout title={title} description={description} noindex={true}>
+  <div class="min-h-screen flex flex-col">
+    <Header />
+    <main class="flex-1 flex items-center">
+      <ErrorState
+        code="404"
+        heading="This page wandered off"
+        message="The page you're looking for doesn't exist or may have moved. Let's get you back to removing backgrounds."
+      />
+    </main>
+    <Footer />
+  </div>
+</Layout>

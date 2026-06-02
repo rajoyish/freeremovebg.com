@@ -7,6 +7,7 @@ interface Props {
 	keywords?: string;
 	canonical?: string;
 	ogImage?: string;
+	noindex?: boolean;
 }
 
 const SITE = 'https://freeremovebg.com';
@@ -17,6 +18,7 @@ const {
 	keywords = 'free remove bg, remove bg, free ai bg remove, remove bg app image, remove bg free, remove bg from image, remove bg from gif, remove bg ai, remove bg online, remove bg background, remove bg gif, remove bg hd, remove bg high quality, background remove bg, multiple image bg remove, batch bg remove, bg remove ai, remove bg ms word, remove bg ppt, remove bg canva, remove bg web, remove bg offline',
 	canonical = `${SITE}/`,
 	ogImage = `${SITE}/web-app-manifest-512x512.png`,
+	noindex = false,
 } = Astro.props;
 
 // Structured data: helps search engines understand the tool.
@@ -65,7 +67,7 @@ const jsonLd = {
 		<title>{title}</title>
 		<meta name="description" content={description} />
 		<meta name="keywords" content={keywords} />
-		<meta name="robots" content="index, follow, max-image-preview:large" />
+		<meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
 		<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
 		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
 		<link rel="canonical" href={canonical} />

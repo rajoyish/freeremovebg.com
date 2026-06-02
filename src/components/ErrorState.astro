@@ -1,0 +1,38 @@
+---
+// Reusable error-page body shared by 404, 500 and any future error routes.
+// Keeps the layout, spacing and CTA styling consistent across status codes.
+interface Props {
+  code: string;
+  heading: string;
+  message: string;
+}
+
+const { code, heading, message } = Astro.props;
+---
+
+<section class="w-full px-6 py-24 sm:py-32 text-center">
+  <div class="max-w-[560px] mx-auto">
+    <p class="text-[clamp(4rem,18vw,8rem)] font-bold leading-none tracking-[-4px] text-ink m-0">
+      {code}
+    </p>
+    <h1 class="text-[clamp(1.5rem,4vw,2.25rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-4 mb-4">
+      {heading}
+    </h1>
+    <p class="text-base text-body leading-[1.7] mt-0 mb-8 max-w-[440px] mx-auto">
+      {message}
+    </p>
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <a
+        href="/"
+        class="inline-flex items-center gap-2 px-6 py-3 bg-ink text-on-primary rounded-pill text-sm font-medium no-underline transition-opacity hover:opacity-[0.85]">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/></svg>
+        Back to Home
+      </a>
+      <a
+        href="/contact"
+        class="inline-flex items-center gap-2 px-6 py-3 bg-transparent text-ink border border-hairline rounded-pill text-sm font-medium no-underline transition-colors hover:border-ink">
+        Contact Support
+      </a>
+    </div>
+  </div>
+</section>
