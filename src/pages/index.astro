@@ -13,14 +13,14 @@ import Footer from '../components/Footer.astro';
       <!-- Hero -->
       <section style="padding: 64px 24px 32px; text-align:center;">
         <div style="max-width:800px; margin:0 auto;">
-          <h1 style="font-size:clamp(2rem,5vw,3.5rem); font-weight:600; letter-spacing:-2px; line-height:1.1; margin:0 0 20px; color:#171717;">
+          <h1 style="font-size:clamp(2rem,5vw,3.5rem); font-weight:600; letter-spacing:-2px; line-height:1.1; margin:0 0 20px; color:var(--color-ink);">
             Remove Image Backgrounds with AI.
           </h1>
-          <p style="font-size:1.125rem; color:#4d4d4d; line-height:1.7; margin:0 0 32px; max-width:600px; margin-left:auto; margin-right:auto;">
+          <p style="font-size:1.125rem; color:var(--color-body); line-height:1.7; margin:0 0 32px; max-width:600px; margin-left:auto; margin-right:auto;">
             High-quality background removal powered by AI. 100% client-side — your images never leave your device. No sign-up, unlimited HD downloads.
           </p>
-          <div style="display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:#f5f5f5; border:1px solid #ebebeb; border-radius:100px; font-size:13px; color:#4d4d4d; font-weight:500;">
-            <svg width="14" height="14" fill="none" stroke="#0070f3" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <div style="display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:var(--color-canvas-soft-2); border:1px solid var(--color-hairline); border-radius:100px; font-size:13px; color:var(--color-body); font-weight:500;">
+            <svg width="14" height="14" fill="none" stroke="var(--color-link)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             100% Private — Processed Locally in Your Browser
           </div>
         </div>
@@ -32,41 +32,41 @@ import Footer from '../components/Footer.astro';
 
           <!-- Model selector -->
           <div style="margin-bottom:20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-            <span style="font-size:13px; font-weight:500; color:#4d4d4d;">Quality:</span>
-            <div id="model-selector" style="display:inline-flex; background:#f5f5f5; border:1px solid #ebebeb; border-radius:8px; padding:3px; gap:2px;">
+            <span style="font-size:13px; font-weight:500; color:var(--color-body);">Quality:</span>
+            <div id="model-selector" style="display:inline-flex; background:var(--color-canvas-soft-2); border:1px solid var(--color-hairline); border-radius:8px; padding:3px; gap:2px;">
               <button data-model="auto"
-                style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:#171717; color:#fff;">
+                style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:var(--color-ink); color:var(--color-on-primary);">
                 ✦ Smart
               </button>
               <button data-model="portrait"
-                style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:transparent; color:#4d4d4d;">
+                style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:transparent; color:var(--color-body);">
                 People & Portraits
               </button>
               <button data-model="general"
-                style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:transparent; color:#4d4d4d;">
+                style="padding:6px 14px; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:all .15s; background:transparent; color:var(--color-body);">
                 Objects & Graphics
               </button>
             </div>
-            <span id="model-hint" style="font-size:12px; color:#888; font-style:italic;">
+            <span id="model-hint" style="font-size:12px; color:var(--color-mute); font-style:italic;">
               Analyses your image and automatically selects the best engine for the result
             </span>
           </div>
 
           <!-- Drop zone -->
           <div id="upload-zone"
-            style="border:2px dashed #a1a1a1; border-radius:12px; background:#fff; cursor:pointer; transition:border-color .2s, background .2s; overflow:hidden;"
-            onmouseenter="if(!this.classList.contains('has-files')){this.style.borderColor='#171717';this.style.background='#fafafa';}"
-            onmouseleave="if(!this.classList.contains('has-files')){this.style.borderColor='#a1a1a1';this.style.background='#fff';}">
+            style="border:2px dashed var(--color-hairline-strong); border-radius:12px; background:var(--color-canvas); cursor:pointer; transition:border-color .2s, background .2s; overflow:hidden;"
+            onmouseenter="if(!this.classList.contains('has-files')){this.style.borderColor='var(--color-ink)';this.style.background='var(--color-canvas-soft)';}"
+            onmouseleave="if(!this.classList.contains('has-files')){this.style.borderColor='var(--color-hairline-strong)';this.style.background='var(--color-canvas)';}">
 
             <!-- Empty state -->
             <div id="zone-empty" style="padding:64px 24px; text-align:center;">
-              <svg width="48" height="48" fill="none" stroke="#888" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 16px; display:block;">
+              <svg width="48" height="48" fill="none" stroke="var(--color-mute)" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 16px; display:block;">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
               </svg>
-              <p style="font-size:1.125rem; font-weight:600; color:#171717; margin:0 0 8px;">Drop images here or click to upload</p>
-              <p style="font-size:14px; color:#888; margin:0 0 24px;">Supports JPG, PNG, WebP · Multiple files supported</p>
+              <p style="font-size:1.125rem; font-weight:600; color:var(--color-ink); margin:0 0 8px;">Drop images here or click to upload</p>
+              <p style="font-size:14px; color:var(--color-mute); margin:0 0 24px;">Supports JPG, PNG, WebP · Multiple files supported</p>
               <button id="browse-btn"
-                style="padding:10px 24px; background:#171717; color:#fff; border:none; border-radius:100px; font-size:14px; font-weight:500; cursor:pointer; transition:opacity .2s;"
+                style="padding:10px 24px; background:var(--color-ink); color:var(--color-on-primary); border:none; border-radius:100px; font-size:14px; font-weight:500; cursor:pointer; transition:opacity .2s;"
                 onmouseenter="this.style.opacity='.85';" onmouseleave="this.style.opacity='1';">
                 Browse Files
               </button>
@@ -76,10 +76,10 @@ import Footer from '../components/Footer.astro';
             <div id="zone-filled" style="display:none; padding:16px;">
               <div id="thumb-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:10px; margin-bottom:12px;"></div>
               <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-                <span id="zone-count" style="font-size:13px; color:#888;"></span>
+                <span id="zone-count" style="font-size:13px; color:var(--color-mute);"></span>
                 <button id="add-more-btn"
-                  style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:transparent; color:#171717; border:1px solid #ebebeb; border-radius:100px; font-size:13px; font-weight:500; cursor:pointer; transition:border-color .15s;"
-                  onmouseenter="this.style.borderColor='#171717';" onmouseleave="this.style.borderColor='#ebebeb';">
+                  style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:transparent; color:var(--color-ink); border:1px solid var(--color-hairline); border-radius:100px; font-size:13px; font-weight:500; cursor:pointer; transition:border-color .15s;"
+                  onmouseenter="this.style.borderColor='var(--color-ink)';" onmouseleave="this.style.borderColor='var(--color-hairline)';">
                   <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                   Add more
                 </button>
@@ -91,19 +91,19 @@ import Footer from '../components/Footer.astro';
 
           <!-- Unified progress bar (hidden until processing starts) -->
           <div id="progress-state" style="display:none; margin-top:20px;">
-            <div style="background:#fff; border:1px solid #ebebeb; border-radius:10px; padding:16px 20px;">
+            <div style="background:var(--color-canvas); border:1px solid var(--color-hairline); border-radius:10px; padding:16px 20px;">
               <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px;">
                 <div style="display:flex; align-items:center; gap:10px; min-width:0;">
-                  <div id="spinner" style="flex-shrink:0; width:16px; height:16px; border:2px solid #ebebeb; border-top-color:#171717; border-radius:50%;"></div>
-                  <span id="loading-text" style="font-size:13px; font-weight:500; color:#171717; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Processing…</span>
+                  <div id="spinner" style="flex-shrink:0; width:16px; height:16px; border:2px solid var(--color-hairline); border-top-color:var(--color-ink); border-radius:50%;"></div>
+                  <span id="loading-text" style="font-size:13px; font-weight:500; color:var(--color-ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Processing…</span>
                 </div>
-                <span id="progress-text" style="flex-shrink:0; font-size:13px; color:#888; font-variant-numeric:tabular-nums;">0 / 0</span>
+                <span id="progress-text" style="flex-shrink:0; font-size:13px; color:var(--color-mute); font-variant-numeric:tabular-nums;">0 / 0</span>
               </div>
               <!-- Semantic progress bar: role + aria attributes for accessibility -->
               <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
                 id="progress-track"
-                style="background:#f5f5f5; border-radius:100px; height:6px; overflow:hidden;">
-                <div id="progress-bar" style="background:#171717; height:100%; width:0%; border-radius:100px; transition:width .4s cubic-bezier(.4,0,.2,1);"></div>
+                style="background:var(--color-canvas-soft-2); border-radius:100px; height:6px; overflow:hidden;">
+                <div id="progress-bar" style="background:var(--color-ink); height:100%; width:0%; border-radius:100px; transition:width .4s cubic-bezier(.4,0,.2,1);"></div>
               </div>
             </div>
           </div>
@@ -111,9 +111,9 @@ import Footer from '../components/Footer.astro';
           <!-- Results grid -->
           <div id="image-grid" style="display:none; margin-top:40px;">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
-              <h2 style="font-size:1.5rem; font-weight:600; color:#171717; margin:0;">Processed Images</h2>
+              <h2 style="font-size:1.5rem; font-weight:600; color:var(--color-ink); margin:0;">Processed Images</h2>
               <button id="download-all-btn"
-                style="display:flex; align-items:center; gap:8px; padding:10px 20px; background:#171717; color:#fff; border:none; border-radius:100px; font-size:14px; font-weight:500; cursor:pointer; transition:opacity .2s;"
+                style="display:flex; align-items:center; gap:8px; padding:10px 20px; background:var(--color-ink); color:var(--color-on-primary); border:none; border-radius:100px; font-size:14px; font-weight:500; cursor:pointer; transition:opacity .2s;"
                 onmouseenter="this.style.opacity='.85';"
                 onmouseleave="this.style.opacity='1';">
                 <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
@@ -127,28 +127,28 @@ import Footer from '../components/Footer.astro';
       </section>
 
       <!-- Features -->
-      <section style="padding:64px 24px; background:#f5f5f5; border-top:1px solid #ebebeb;">
+      <section style="padding:64px 24px; background:var(--color-canvas-soft-2); border-top:1px solid var(--color-hairline);">
         <div style="max-width:960px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:40px;">
           <div style="text-align:center;">
-            <div style="width:44px; height:44px; background:#171717; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
-              <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <div style="width:44px; height:44px; background:var(--color-ink); border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+              <svg width="22" height="22" fill="none" stroke="var(--color-on-primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <h3 style="font-size:1rem; font-weight:600; color:#171717; margin:0 0 8px;">100% Private</h3>
-            <p style="font-size:14px; color:#4d4d4d; line-height:1.6; margin:0;">All processing happens in your browser. Your images never leave your device.</p>
+            <h3 style="font-size:1rem; font-weight:600; color:var(--color-ink); margin:0 0 8px;">100% Private</h3>
+            <p style="font-size:14px; color:var(--color-body); line-height:1.6; margin:0;">All processing happens in your browser. Your images never leave your device.</p>
           </div>
           <div style="text-align:center;">
-            <div style="width:44px; height:44px; background:#171717; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
-              <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <div style="width:44px; height:44px; background:var(--color-ink); border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+              <svg width="22" height="22" fill="none" stroke="var(--color-on-primary)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
-            <h3 style="font-size:1rem; font-weight:600; color:#171717; margin:0 0 8px;">Smart Model Selection</h3>
-            <p style="font-size:14px; color:#4d4d4d; line-height:1.6; margin:0;">Auto mode detects people and picks the best AI model for each image automatically.</p>
+            <h3 style="font-size:1rem; font-weight:600; color:var(--color-ink); margin:0 0 8px;">Smart Model Selection</h3>
+            <p style="font-size:14px; color:var(--color-body); line-height:1.6; margin:0;">Auto mode detects people and picks the best AI model for each image automatically.</p>
           </div>
           <div style="text-align:center;">
-            <div style="width:44px; height:44px; background:#171717; border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
-              <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <div style="width:44px; height:44px; background:var(--color-ink); border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px;">
+              <svg width="22" height="22" fill="none" stroke="var(--color-on-primary)" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
             </div>
-            <h3 style="font-size:1rem; font-weight:600; color:#171717; margin:0 0 8px;">HD Downloads</h3>
-            <p style="font-size:14px; color:#4d4d4d; line-height:1.6; margin:0;">Download transparent PNGs in their original full resolution, every time.</p>
+            <h3 style="font-size:1rem; font-weight:600; color:var(--color-ink); margin:0 0 8px;">HD Downloads</h3>
+            <p style="font-size:14px; color:var(--color-body); line-height:1.6; margin:0;">Download transparent PNGs in their original full resolution, every time.</p>
           </div>
         </div>
       </section>
@@ -216,8 +216,8 @@ import Footer from '../components/Footer.astro';
     currentMode = mode;
     document.querySelectorAll<HTMLButtonElement>('#model-selector button').forEach(b => {
       const active = b.dataset.model === mode;
-      b.style.background = active ? '#171717' : 'transparent';
-      b.style.color      = active ? '#fff'    : '#4d4d4d';
+      b.style.background = active ? 'var(--color-ink)' : 'transparent';
+      b.style.color      = active ? 'var(--color-on-primary)' : 'var(--color-body)';
     });
     modelHint.textContent = HINTS[mode];
   });
@@ -234,7 +234,7 @@ import Footer from '../components/Footer.astro';
   function addThumb(file: File, index: number) {
     const wrap = document.createElement('div');
     wrap.id = `thumb-${index}`;
-    wrap.style.cssText = 'position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; background:#f5f5f5;';
+    wrap.style.cssText = 'position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; background:var(--color-canvas-soft-2);';
 
     const img = document.createElement('img');
     const objUrl = URL.createObjectURL(file);
@@ -356,29 +356,29 @@ import Footer from '../components/Footer.astro';
   // ── Result card ───────────────────────────────────────────────────────────
   function addCard(name: string, originalUrl: string, processedUrl: string, modelLabel: string) {
     const card = document.createElement('div');
-    card.style.cssText = 'background:#fff; border:1px solid #ebebeb; border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.06);';
+    card.style.cssText = 'background:var(--color-canvas); border:1px solid var(--color-hairline); border-radius:10px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,.06);';
     card.innerHTML = `
       <div style="position:relative; aspect-ratio:4/3; display:grid; grid-template-columns:1fr 1fr;">
-        <div style="position:relative; overflow:hidden; border-right:1px solid #ebebeb;">
+        <div style="position:relative; overflow:hidden; border-right:1px solid var(--color-hairline);">
           <img src="${originalUrl}" alt="Original" style="width:100%; height:100%; object-fit:cover; display:block;" />
-          <span style="position:absolute; top:8px; left:8px; padding:3px 8px; background:#171717; color:#fff; font-size:11px; font-weight:500; border-radius:4px;">Original</span>
+          <span style="position:absolute; top:8px; left:8px; padding:3px 8px; background:var(--color-ink); color:var(--color-on-primary); font-size:11px; font-weight:500; border-radius:4px;">Original</span>
         </div>
         <div style="position:relative; overflow:hidden; background:repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 0 0 / 16px 16px;">
           <img src="${processedUrl}" alt="Background removed" style="width:100%; height:100%; object-fit:cover; display:block;" />
-          <span style="position:absolute; top:8px; right:8px; padding:3px 8px; background:#0070f3; color:#fff; font-size:11px; font-weight:500; border-radius:4px;">Removed</span>
+          <span style="position:absolute; top:8px; right:8px; padding:3px 8px; background:var(--color-link); color:#fff; font-size:11px; font-weight:500; border-radius:4px;">Removed</span>
         </div>
       </div>
-      <div style="padding:12px 16px 14px; border-top:1px solid #f5f5f5;">
+      <div style="padding:12px 16px 14px; border-top:1px solid var(--color-canvas-soft-2);">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px;">
-          <p style="font-size:13px; font-weight:500; color:#171717; margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">${name}</p>
+          <p style="font-size:13px; font-weight:500; color:var(--color-ink); margin:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">${name}</p>
           <button class="dl-btn"
-            style="flex-shrink:0; padding:7px 16px; background:#171717; color:#fff; border:none; border-radius:100px; font-size:13px; font-weight:500; cursor:pointer; transition:opacity .2s;"
+            style="flex-shrink:0; padding:7px 16px; background:var(--color-ink); color:var(--color-on-primary); border:none; border-radius:100px; font-size:13px; font-weight:500; cursor:pointer; transition:opacity .2s;"
             onmouseenter="this.style.opacity='.8';" onmouseleave="this.style.opacity='1';">
             Download PNG
           </button>
         </div>
-        <p style="margin:0; font-size:11px; color:#888; font-family:ui-monospace,monospace;">
-          <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#0070f3; margin-right:5px; vertical-align:middle;"></span>
+        <p style="margin:0; font-size:11px; color:var(--color-mute); font-family:ui-monospace,monospace;">
+          <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--color-link); margin-right:5px; vertical-align:middle;"></span>
           ${modelLabel}
         </p>
       </div>
@@ -445,17 +445,17 @@ import Footer from '../components/Footer.astro';
   });
   uploadZone.addEventListener('dragover', (e) => {
     e.preventDefault();
-    uploadZone.style.borderColor = '#171717';
-    uploadZone.style.background  = '#fafafa';
+    uploadZone.style.borderColor = 'var(--color-ink)';
+    uploadZone.style.background  = 'var(--color-canvas-soft)';
   });
   uploadZone.addEventListener('dragleave', () => {
-    uploadZone.style.borderColor = '#a1a1a1';
-    uploadZone.style.background  = '#fff';
+    uploadZone.style.borderColor = 'var(--color-hairline-strong)';
+    uploadZone.style.background  = 'var(--color-canvas)';
   });
   uploadZone.addEventListener('drop', (e) => {
     e.preventDefault();
-    uploadZone.style.borderColor = '#a1a1a1';
-    uploadZone.style.background  = '#fff';
+    uploadZone.style.borderColor = 'var(--color-hairline-strong)';
+    uploadZone.style.background  = 'var(--color-canvas)';
     if (e.dataTransfer?.files.length) handleFiles(Array.from(e.dataTransfer.files));
   });
   downloadAllBtn.addEventListener('click', downloadZip);

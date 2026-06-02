@@ -16,6 +16,16 @@ const {
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
+		<!-- Set theme before first paint to avoid a flash of the wrong theme -->
+		<script is:inline>
+			(() => {
+				const stored = localStorage.getItem('theme');
+				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				if (stored === 'dark' || (!stored && prefersDark)) {
+					document.documentElement.classList.add('dark');
+				}
+			})();
+		</script>
 		<meta name="description" content={description} />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />

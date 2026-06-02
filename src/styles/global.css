@@ -1,7 +1,12 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: the `dark:` variant responds to `.dark` on <html>
+   (set by the no-flash script in Layout.astro), instead of the OS-only
+   prefers-color-scheme default. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  /* Vercel Design System Colors */
+  /* Vercel Design System Colors — light (default) */
   --color-ink: #171717;
   --color-on-primary: #ffffff;
   --color-body: #4d4d4d;
@@ -40,6 +45,32 @@
   --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
 }
 
+/* ── Dark mode ──────────────────────────────────────────────────────────────
+   Overriding the design-system variables here means every `var(--color-*)`
+   consumer (Header, Footer, and the inline styles on the home page) adapts
+   automatically when the `.dark` class is present on <html>. */
+:root {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+
+  --color-ink: #ededed;          /* primary foreground / inverted button bg */
+  --color-on-primary: #0a0a0a;   /* text/icons on the light primary surface */
+  --color-body: #a3a3a3;
+  --color-mute: #737373;
+  --color-hairline: #2a2a2a;
+  --color-hairline-strong: #525252;
+  --color-canvas: #0a0a0a;
+  --color-canvas-soft: #161616;
+  --color-canvas-soft-2: #1f1f1f;
+  --color-link: #3b82f6;
+  --color-link-deep: #2563eb;
+  --color-success: #3b82f6;
+  --color-error: #f87171;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -52,6 +83,7 @@ body {
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Selection */
