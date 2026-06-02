@@ -714,16 +714,16 @@ const faqs = [
 
   // ── Output filename ─────────────────────────────────────────────────────────
   // Take up to the first 6 characters of the original base name and append the
-  // brand suffix, e.g. "image.jpg" -> "image_freeremovebg.com.png".
+  // brand suffix, e.g. "image.jpg" -> "image_freeremovebg.png".
   // Sanitises odd characters and de-duplicates so a batch never collides.
   function buildOutName(originalName: string): string {
     const base = originalName.replace(/\.[^/.]+$/, '');
     let stub = base.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toLowerCase();
     if (!stub) stub = 'image';
-    let candidate = `${stub}_freeremovebg.com.png`;
+    let candidate = `${stub}_freeremovebg.png`;
     let n = 2;
     while (usedNames.has(candidate)) {
-      candidate = `${stub}-${n}_freeremovebg.com.png`;
+      candidate = `${stub}-${n}_freeremovebg.png`;
       n++;
     }
     usedNames.add(candidate);
@@ -930,7 +930,7 @@ const faqs = [
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(zipBlob);
-    a.download = 'freeremovebg.com.zip';
+    a.download = 'freeremovebg.zip';
     a.click();
   }
 
