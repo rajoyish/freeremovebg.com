@@ -351,6 +351,29 @@ const faqs = [
   import * as ort from 'onnxruntime-web';
   import JSZip from 'jszip';
 
+  // ── One-time cache self-heal ────────────────────────────────────────────────
+  // transformers.js and @imgly/background-removal persist model files in the
+  // Cache Storage API so the tool can work offline after first load. An earlier
+  // deploy briefly sent COOP/COEP cross-origin-isolation headers, under which
+  // the cross-origin model fetch from huggingface.co was blocked; the failed /
+  // opaque responses got written into Cache Storage. Browsers then replay those
+  // poisoned entries, which surfaces as "No Access-Control-Allow-Origin header"
+  // plus a 404 even though the live server (and curl) return a clean 200.
+  //
+  // Bumping CACHE_EPOCH purges every Cache Storage bucket once per visitor, so
+  // existing users self-heal on their next load without manually clearing data.
+  // Wrapped in try/catch and awaited before any model loads.
+  const CACHE_EPOCH = '2026-06-02-coep-fix';
+  try {
+    if (localStorage.getItem('frbg-cache-epoch') !== CACHE_EPOCH) {
+      if (typeof caches !== 'undefined') {
+        const names = await caches.keys();
+        await Promise.all(names.map((n) => caches.delete(n)));
+      }
+      localStorage.setItem('frbg-cache-epoch', CACHE_EPOCH);
+    }
+  } catch { /* private mode / storage disabled — fetch fresh, nothing to purge */ }
+
   env.allowLocalModels  = false;
   env.allowRemoteModels = true;
 

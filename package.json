@@ -9,7 +9,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "cf:preview": "astro build && wrangler dev",
+    "deploy": "astro build && wrangler deploy"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
@@ -20,5 +22,8 @@
     "onnxruntime-web": "1.21.0",
     "tailwindcss": "^4.3.0"
   },
-  "packageManager": "pnpm@11.5.0+sha512.dbfcc4f81cf48597afd4bc391ffdf12c11f1a9fb83a395bfa6b0a2d9cc2fd8ffebafdb1ccbd529632153f793904c2615b7f09fe1a345473fd1c35845172a8eb1"
+  "packageManager": "pnpm@11.5.0+sha512.dbfcc4f81cf48597afd4bc391ffdf12c11f1a9fb83a395bfa6b0a2d9cc2fd8ffebafdb1ccbd529632153f793904c2615b7f09fe1a345473fd1c35845172a8eb1",
+  "devDependencies": {
+    "wrangler": "^4.96.0"
+  }
 }
