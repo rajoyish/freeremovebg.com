@@ -240,10 +240,40 @@ import Footer from '../components/Footer.astro';
 <script>
   import { pipeline, env } from '@huggingface/transformers';
   import { removeBackground } from '@imgly/background-removal';
+  import * as ort from 'onnxruntime-web';
   import JSZip from 'jszip';
 
   env.allowLocalModels  = false;
   env.allowRemoteModels = true;
+
+  // ── Force single-threaded ONNX Runtime ──────────────────────────────────────
+  // onnxruntime-web defaults numThreads to navigator.hardwareConcurrency. Multi-
+  // threaded WASM needs SharedArrayBuffer, which is only available when the page
+  // is cross-origin isolated (COOP/COEP). This static site is not isolated, so
+  // the threaded path silently falls back and races, producing corrupted output
+  // (torn horizontal bands in the result). Pinning to a single thread makes
+  // every cutout deterministic and correct. Both @imgly/background-removal and
+  // @huggingface/transformers share this same ort module instance.
+  //
+  // imgly re-assigns numThreads (to navigator.hardwareConcurrency) at session
+  // creation time, which would clobber a plain assignment. We instead lock the
+  // property so any later write of a value > 1 is forced back down to 1.
+  try {
+    let threads = 1;
+    Object.defineProperty(ort.env.wasm, 'numThreads', {
+      configurable: true,
+      enumerable: true,
+      get: () => threads,
+      set: (v: number) => { threads = (typeof v === 'number' && v > 0) ? Math.min(v, 1) : 1; },
+    });
+  } catch {
+    ort.env.wasm.numThreads = 1;
+  }
+  ort.env.wasm.proxy = false;
+  // Mirror the setting on the transformers backend for its own session creation.
+  if (env.backends?.onnx?.wasm) {
+    env.backends.onnx.wasm.numThreads = 1;
+  }
 
   type ModelMode = 'auto' | 'portrait' | 'general';
   type ThumbStatus = 'queued' | 'analysing' | 'processing' | 'done' | 'error';
@@ -252,9 +282,23 @@ import Footer from '../components/Footer.astro';
   let detector: any     = null;
   let portraitPipe: any = null;
 
-  // Accumulated queue across multiple "Add more" drops
-  let allFiles: File[] = [];
-  const processedImages: Array<{ name: string; blob: Blob; url: string }> = [];
+  // Accumulated queue across multiple "Add more" drops. Each item carries a
+  // stable id so thumbnails and result cards stay correctly linked even after
+  // the user removes images from the zone (array indices would shift and break).
+  interface QueueItem {
+    id: string;
+    file: File;
+    status: ThumbStatus;
+    originalUrl?: string;
+    resultUrl?: string;
+    outName?: string;
+    blob?: Blob;
+    cardEl?: HTMLElement;
+  }
+  let queue: QueueItem[] = [];
+  let idCounter = 0;
+  const nextId = () => `img-${++idCounter}`;
+  const usedNames = new Set<string>();
 
   // ── DOM refs ──────────────────────────────────────────────────────────────
   const uploadZone    = document.getElementById('upload-zone')!;
@@ -308,52 +352,139 @@ import Footer from '../components/Footer.astro';
   };
   const ALL_STATUS_BG = ['bg-black/45', 'bg-amber-500/90', 'bg-link/90', 'bg-error/85'];
 
-  function addThumb(file: File, index: number) {
+  // An image can only be removed while it is still waiting in the queue or has
+  // errored out. Once it is analysing/processing or already done, the remove
+  // control is hidden (there is no point removing a finished cutout).
+  function isRemovable(status: ThumbStatus): boolean {
+    return status === 'queued' || status === 'error';
+  }
+
+  function addThumb(item: QueueItem) {
     const wrap = document.createElement('div');
-    wrap.id = `thumb-${index}`;
+    wrap.id = `thumb-${item.id}`;
     wrap.className = 'relative aspect-square rounded-md overflow-hidden bg-canvas-soft-2';
 
     const img = document.createElement('img');
-    const objUrl = URL.createObjectURL(file);
+    const objUrl = URL.createObjectURL(item.file);
     img.src = objUrl;
-    img.alt = file.name;
+    img.alt = item.file.name;
     img.className = 'w-full h-full object-cover block';
     img.onload = () => URL.revokeObjectURL(objUrl);
 
     const overlay = document.createElement('div');
-    overlay.id = `thumb-overlay-${index}`;
+    overlay.id = `thumb-overlay-${item.id}`;
     overlay.className = 'absolute inset-0 flex items-center justify-center bg-black/45 transition-all duration-300';
 
     const badge = document.createElement('span');
-    badge.id = `thumb-badge-${index}`;
+    badge.id = `thumb-badge-${item.id}`;
     badge.className = 'text-[10px] font-semibold text-white tracking-wide uppercase';
-    badge.textContent = 'Queued';
+    badge.textContent = STATUS[item.status].label;
+
+    // Remove button (top-right). Always visible while the image is removable
+    // (queued or errored) so users can drop it before it is processed.
+    const removeBtn = document.createElement('button');
+    removeBtn.id = `thumb-remove-${item.id}`;
+    removeBtn.type = 'button';
+    removeBtn.setAttribute('aria-label', `Remove ${item.file.name}`);
+    removeBtn.title = 'Remove image';
+    removeBtn.className = 'absolute top-1 right-1 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-error text-white shadow-sm transition-opacity duration-150 cursor-pointer hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white';
+    removeBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>';
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeItem(item.id);
+    });
+    if (!isRemovable(item.status)) removeBtn.classList.add('hidden');
 
     overlay.appendChild(badge);
     wrap.appendChild(img);
     wrap.appendChild(overlay);
+    wrap.appendChild(removeBtn);
     thumbGrid.appendChild(wrap);
   }
 
-  function setThumbStatus(index: number, status: ThumbStatus) {
-    const overlay = document.getElementById(`thumb-overlay-${index}`);
-    const badge   = document.getElementById(`thumb-badge-${index}`);
+  function setThumbStatus(id: string, status: ThumbStatus) {
+    const item = queue.find(q => q.id === id);
+    if (item) item.status = status;
+    const overlay = document.getElementById(`thumb-overlay-${id}`);
+    const badge   = document.getElementById(`thumb-badge-${id}`);
+    // Show the remove control only while the image is still removable.
+    document.getElementById(`thumb-remove-${id}`)?.classList.toggle('hidden', !isRemovable(status));
     if (!overlay || !badge) return;
     const s = STATUS[status];
-    overlay.classList.remove(...ALL_STATUS_BG);
+    overlay.classList.remove(...ALL_STATUS_BG, 'opacity-0');
     overlay.classList.add(s.bg);
     badge.textContent = s.label;
     if (status === 'done') setTimeout(() => { overlay.classList.add('opacity-0'); }, 800);
   }
 
+  // ── Remove an item from the zone ────────────────────────────────────────────
+  // Only queued or errored images can be removed. The state is updated instantly
+  // so the action feels immediate, while the thumbnail plays a quick scale/fade
+  // collapse before being detached from the DOM.
+  function removeItem(id: string) {
+    const idx = queue.findIndex(q => q.id === id);
+    if (idx === -1) return;
+    const item = queue[idx];
+    if (!isRemovable(item.status)) return; // guard: never remove while processing or done
+
+    // Free resources and update state immediately (feels instant).
+    if (item.originalUrl) URL.revokeObjectURL(item.originalUrl);
+    if (item.resultUrl)   URL.revokeObjectURL(item.resultUrl);
+    if (item.outName)     usedNames.delete(item.outName);
+    item.cardEl?.remove();
+    queue.splice(idx, 1);
+
+    if (queue.length === 0) {
+      // Animate the last thumb out, then reset the zone once it's gone.
+      animateThumbOut(id, resetZone);
+    } else {
+      zoneCount.textContent = `${queue.length} image${queue.length !== 1 ? 's' : ''} selected`;
+      if (!queue.some(q => q.resultUrl)) imageGrid.classList.add('hidden');
+      animateThumbOut(id);
+    }
+  }
+
+  // Play a short collapse animation on a thumbnail, then remove it from the DOM.
+  function animateThumbOut(id: string, done?: () => void) {
+    const el = document.getElementById(`thumb-${id}`);
+    if (!el) { done?.(); return; }
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) { el.remove(); done?.(); return; }
+
+    el.classList.add('thumb-removing');
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      el.remove();
+      done?.();
+    };
+    el.addEventListener('transitionend', finish, { once: true });
+    // Fallback in case transitionend doesn't fire (e.g. element already detached).
+    setTimeout(finish, 260);
+  }
+
+  // Reset the drop zone back to its initial empty state.
+  function resetZone() {
+    thumbGrid.innerHTML = '';
+    imagesContainer.innerHTML = '';
+    zoneFilled.classList.add('hidden');
+    zoneEmpty.classList.remove('hidden');
+    imageGrid.classList.add('hidden');
+    progressState.classList.add('hidden');
+    uploadZone.classList.remove('has-files', 'cursor-default');
+    uploadZone.classList.add('cursor-pointer');
+    zoneCount.textContent = '';
+  }
+
   // ── Show uploaded files in the zone ──────────────────────────────────────
-  function showFilesInZone(files: File[], startIndex: number) {
+  function showFilesInZone(items: QueueItem[]) {
     zoneEmpty.classList.add('hidden');
     zoneFilled.classList.remove('hidden');
     uploadZone.classList.add('has-files', 'cursor-default');
     uploadZone.classList.remove('cursor-pointer');
-    files.forEach((f, i) => addThumb(f, startIndex + i));
-    zoneCount.textContent = `${allFiles.length} image${allFiles.length !== 1 ? 's' : ''} selected`;
+    items.forEach(addThumb);
+    zoneCount.textContent = `${queue.length} image${queue.length !== 1 ? 's' : ''} selected`;
   }
 
   // ── Progress helpers ──────────────────────────────────────────────────────
@@ -386,25 +517,25 @@ import Footer from '../components/Footer.astro';
   }
 
   // ── Core removal ──────────────────────────────────────────────────────────
-  async function removeBg(file: Blob, objectUrl: string, idx: number): Promise<{ blob: Blob; usedModel: string }> {
+  async function removeBg(file: Blob, objectUrl: string, id: string): Promise<{ blob: Blob; usedModel: string }> {
     if (currentMode === 'portrait') {
       await ensurePortraitPipe();
-      setThumbStatus(idx, 'processing');
+      setThumbStatus(id, 'processing');
       loadingText.textContent = 'Removing background…';
       const output = await portraitPipe(objectUrl);
       return { blob: await output.toBlob('image/png'), usedModel: 'People & Portraits' };
     }
     if (currentMode === 'general') {
-      setThumbStatus(idx, 'processing');
+      setThumbStatus(id, 'processing');
       loadingText.textContent = 'Removing background…';
       const blob = await removeBackground(file, { model: 'isnet_fp16', output: { format: 'image/png', quality: 1 } });
       return { blob, usedModel: 'Objects & Graphics' };
     }
     // Auto
-    setThumbStatus(idx, 'analysing');
+    setThumbStatus(id, 'analysing');
     loadingText.textContent = 'Analysing image…';
     const hasPerson = await containsPerson(objectUrl);
-    setThumbStatus(idx, 'processing');
+    setThumbStatus(id, 'processing');
     loadingText.textContent = 'Removing background…';
     if (hasPerson) {
       await ensurePortraitPipe();
@@ -450,23 +581,43 @@ import Footer from '../components/Footer.astro';
     }
   }
 
+  // ── Output filename ─────────────────────────────────────────────────────────
+  // Take up to the first 6 characters of the original base name and append the
+  // brand suffix, e.g. "image.jpg" -> "image_freeremovebg.com.png".
+  // Sanitises odd characters and de-duplicates so a batch never collides.
+  function buildOutName(originalName: string): string {
+    const base = originalName.replace(/\.[^/.]+$/, '');
+    let stub = base.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toLowerCase();
+    if (!stub) stub = 'image';
+    let candidate = `${stub}_freeremovebg.com.png`;
+    let n = 2;
+    while (usedNames.has(candidate)) {
+      candidate = `${stub}-${n}_freeremovebg.com.png`;
+      n++;
+    }
+    usedNames.add(candidate);
+    return candidate;
+  }
+
   // ── Process one image ─────────────────────────────────────────────────────
-  async function processImage(file: File, thumbIdx: number): Promise<void> {
-    const originalUrl = URL.createObjectURL(file);
+  async function processImage(item: QueueItem): Promise<void> {
+    const originalUrl = URL.createObjectURL(item.file);
+    item.originalUrl = originalUrl;
     let workingUrl: string | null = null;
     try {
       // Normalise to PNG so every engine receives a format it can reliably decode.
-      const pngBlob = await normalizeToPng(file);
+      const pngBlob = await normalizeToPng(item.file);
       workingUrl = URL.createObjectURL(pngBlob);
-      const { blob, usedModel } = await removeBg(pngBlob, workingUrl, thumbIdx);
+      const { blob, usedModel } = await removeBg(pngBlob, workingUrl, item.id);
       const resultUrl = URL.createObjectURL(blob);
-      const name = file.name.replace(/\.[^/.]+$/, '') + '_nobg.png';
-      processedImages.push({ name, blob, url: resultUrl });
-      addCard(name, originalUrl, resultUrl, usedModel);
-      setThumbStatus(thumbIdx, 'done');
+      const name = buildOutName(item.file.name);
+      item.resultUrl = resultUrl;
+      item.outName = name;
+      item.blob = blob;
+      item.cardEl = addCard(name, originalUrl, resultUrl, usedModel);
+      setThumbStatus(item.id, 'done');
     } catch (err) {
-      URL.revokeObjectURL(originalUrl);
-      setThumbStatus(thumbIdx, 'error');
+      setThumbStatus(item.id, 'error');
       throw err;
     } finally {
       if (workingUrl) URL.revokeObjectURL(workingUrl);
@@ -474,7 +625,7 @@ import Footer from '../components/Footer.astro';
   }
 
   // ── Result card ───────────────────────────────────────────────────────────
-  function addCard(name: string, originalUrl: string, processedUrl: string, modelLabel: string) {
+  function addCard(name: string, originalUrl: string, processedUrl: string, modelLabel: string): HTMLElement {
     const card = document.createElement('div');
     card.className = 'bg-canvas border border-hairline rounded-[10px] overflow-hidden shadow-sm';
     card.innerHTML = `
@@ -509,6 +660,7 @@ import Footer from '../components/Footer.astro';
       a.download = name;
       a.click();
     });
+    return card;
   }
 
   // ── Main handler ──────────────────────────────────────────────────────────
@@ -524,38 +676,42 @@ import Footer from '../components/Footer.astro';
     const imgs = newFiles.filter(isImageFile);
     if (!imgs.length) { alert('Please select image files (JPG, PNG, WebP, GIF, BMP, AVIF, and more).'); return; }
 
-    const startIndex = allFiles.length;
-    allFiles.push(...imgs);
-    showFilesInZone(imgs, startIndex);
+    // Wrap each new file in a queue item with a stable id, then render thumbs.
+    const newItems: QueueItem[] = imgs.map(file => ({ id: nextId(), file, status: 'queued' as ThumbStatus }));
+    queue.push(...newItems);
+    showFilesInZone(newItems);
 
     progressState.classList.remove('hidden');
-    let doneCount = processedImages.length;
-    const total   = allFiles.length;
-    setProgress(doneCount, total, 'Starting…');
+    const total = newItems.length;
+    let done = 0;
+    setProgress(done, total, 'Starting…');
 
-    for (let i = 0; i < imgs.length; i++) {
-      setProgress(doneCount, total, `Processing ${imgs[i].name}…`);
+    for (const item of newItems) {
+      // The item may have been removed from the zone before we reached it.
+      if (!queue.includes(item)) { done++; setProgress(done, total, 'Processing…'); continue; }
+      setProgress(done, total, `Processing ${item.file.name}…`);
       try {
-        await processImage(imgs[i], startIndex + i);
+        await processImage(item);
       } catch (err) {
-        console.error(`Skipping ${imgs[i].name}:`, err);
+        console.error(`Skipping ${item.file.name}:`, err);
       }
-      doneCount++;
-      setProgress(doneCount, total, doneCount === total ? 'All done!' : 'Processing…');
+      done++;
+      setProgress(done, total, done === total ? 'All done!' : 'Processing…');
     }
 
-    if (doneCount === total) setTimeout(() => { progressState.classList.add('hidden'); }, 2000);
+    if (done === total) setTimeout(() => { progressState.classList.add('hidden'); }, 2000);
   }
 
   // ── ZIP download ──────────────────────────────────────────────────────────
   async function downloadZip() {
-    if (!processedImages.length) return;
+    const ready = queue.filter(q => q.blob && q.outName);
+    if (!ready.length) return;
     const zip = new JSZip();
-    processedImages.forEach(({ name, blob }) => zip.file(name, blob));
+    ready.forEach(({ outName, blob }) => zip.file(outName!, blob!));
     const zipBlob = await zip.generateAsync({ type: 'blob' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(zipBlob);
-    a.download = 'removed-backgrounds.zip';
+    a.download = 'freeremovebg.com.zip';
     a.click();
   }
 

@@ -23,6 +23,9 @@ importers:
       jszip:
         specifier: ^3.10.1
         version: 3.10.1
+      onnxruntime-web:
+        specifier: 1.21.0
+        version: 1.21.0
       tailwindcss:
         specifier: ^4.3.0
         version: 4.3.0
