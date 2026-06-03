@@ -27,6 +27,28 @@ const dict = getDictionary(lang);
 const t = dict.tool;
 const faqs = dict.faq.items;
 
+// Per-feature icons (Lucide outline paths), index-aligned with
+// dict.features.items. Rendered inside the shared icon chip below so each
+// feature gets a distinct, relevant glyph instead of one repeated icon.
+const featureIcons = [
+  // 100% Free & Completely Private → shield-check
+  '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  // Smart Model Selection → sparkles
+  '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>',
+  // HD Downloads → download
+  '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
+  // Batch Processing → layers
+  '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12.18a1 1 0 0 0 .6.91l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 .6-.92"/><path d="M2 16.18a1 1 0 0 0 .6.91l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 .6-.92"/>',
+  // No Sign-Up, No Limits → infinity
+  '<path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/>',
+  // Works Offline → cloud-off
+  '<path d="m2 2 20 20"/><path d="M5.782 5.782A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.307-.193"/><path d="M21.532 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7.008 7.008 0 0 0 10 5.07"/>',
+  // Crisp Edge Detail → scissors
+  '<circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>',
+  // Any Device, Any Format → monitor-smartphone
+  '<path d="M18 8V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8"/><path d="M7 19h5"/><path d="M10 15v4"/><rect width="6" height="10" x="16" y="12" rx="2"/>',
+];
+
 // FAQ answers carry inline HTML for on-page rendering. For the JSON-LD
 // structured data, flatten to clean plain text (strip tags, decode entities).
 const faqText = (html: string) =>
@@ -178,10 +200,10 @@ const toolStrings = {
             <p class="text-base text-body leading-relaxed max-w-[600px] mx-auto m-0">{dict.features.subheading}</p>
           </div>
           <div class="grid gap-x-10 gap-y-12 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
-            {dict.features.items.map((item) => (
+            {dict.features.items.map((item, i) => (
               <div class="text-center">
                 <div class="w-11 h-11 bg-ink rounded-[10px] flex items-center justify-center mx-auto mb-3.5">
-                  <svg width="22" height="22" fill="none" class="stroke-on-primary" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <svg width="22" height="22" fill="none" class="stroke-on-primary" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" set:html={featureIcons[i % featureIcons.length]} />
                 </div>
                 <h3 class="text-base font-semibold text-ink mt-0 mb-2">{item.title}</h3>
                 <p class="text-sm text-body leading-relaxed m-0">{item.body}</p>
