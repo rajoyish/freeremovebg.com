@@ -16,7 +16,6 @@ const canonical = 'https://freeremovebg.com/about';
 
     <main class="flex-1">
 
-      <!-- Hero -->
       <section class="px-6 pt-16 pb-8 text-center">
         <div class="max-w-[760px] mx-auto">
           <h1 class="text-[clamp(2rem,5vw,3.25rem)] font-semibold tracking-[-2px] leading-[1.1] mt-0 mb-5 text-ink">
@@ -28,7 +27,6 @@ const canonical = 'https://freeremovebg.com/about';
         </div>
       </section>
 
-      <!-- Article -->
       <section class="px-6 py-16">
         <article class="max-w-[760px] mx-auto">
           <div class="reveal" data-reveal>
@@ -73,7 +71,6 @@ const canonical = 'https://freeremovebg.com/about';
 </Layout>
 
 <script>
-  // Scroll-reveal for the article blocks (same behaviour as the home page).
   const revealEls = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

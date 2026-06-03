@@ -21,7 +21,6 @@ const {
 	noindex = false,
 } = Astro.props;
 
-// Structured data: helps search engines understand the tool.
 const jsonLd = {
 	'@context': 'https://schema.org',
 	'@type': 'WebApplication',
@@ -63,7 +62,6 @@ const jsonLd = {
 		</script>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-		<!-- Primary SEO -->
 		<title>{title}</title>
 		<meta name="description" content={description} />
 		<meta name="keywords" content={keywords} />
@@ -72,7 +70,6 @@ const jsonLd = {
 		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
 		<link rel="canonical" href={canonical} />
 
-		<!-- Icons / PWA -->
 		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="shortcut icon" href="/favicon.ico" />
@@ -81,7 +78,6 @@ const jsonLd = {
 		<link rel="manifest" href="/site.webmanifest" />
 		<meta name="generator" content={Astro.generator} />
 
-		<!-- Open Graph -->
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:type" content="website" />
@@ -91,16 +87,13 @@ const jsonLd = {
 		<meta property="og:image" content={ogImage} />
 		<meta property="og:image:alt" content="Free Remove BG - free AI background remover" />
 
-		<!-- Twitter -->
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={ogImage} />
 
-		<!-- Structured data -->
 		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
-		<!-- Google Analytics -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-7NSS890Q9C"></script>
 		<script is:inline>
 			window.dataLayer = window.dataLayer || [];
@@ -109,7 +102,6 @@ const jsonLd = {
 			gtag('config', 'G-7NSS890Q9C');
 		</script>
 
-		<!-- Fonts -->
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />

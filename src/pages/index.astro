@@ -3,9 +3,6 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 
-// FAQ content. A single source drives both the visible accordion and the
-// FAQPage JSON-LD below, so the structured data can never drift from the page.
-// Answers contain light HTML and are rendered with set:html.
 const faqs = [
   {
     q: 'What is Remove BG?',
@@ -80,7 +77,6 @@ const faqs = [
 
     <main class="flex-1">
 
-      <!-- Hero -->
       <section class="px-6 pt-16 pb-8 text-center">
         <div class="max-w-7xl mx-auto">
           <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-semibold tracking-[-2px] leading-[1.1] mt-0 mb-5 text-ink">
@@ -96,11 +92,9 @@ const faqs = [
         </div>
       </section>
 
-      <!-- Upload Zone -->
       <section class="px-6 pb-16">
         <div class="max-w-[960px] mx-auto">
 
-          <!-- Model selector -->
           <div class="mb-5 flex items-center gap-3 flex-wrap">
             <span class="text-[13px] font-medium text-body">Quality:</span>
             <div id="model-selector" class="inline-flex bg-canvas-soft-2 border border-hairline rounded-md p-[3px] gap-0.5">
@@ -122,11 +116,9 @@ const faqs = [
             </span>
           </div>
 
-          <!-- Drop zone -->
           <div id="upload-zone"
             class="rounded-lg overflow-hidden border-2 border-dashed border-hairline-strong bg-canvas cursor-pointer transition-[border-color,background] duration-200 [&:not(.has-files):hover]:border-ink [&:not(.has-files):hover]:bg-canvas-soft">
 
-            <!-- Empty state -->
             <div id="zone-empty" class="px-6 py-16 text-center">
               <svg width="48" height="48" fill="none" class="stroke-mute mx-auto mb-4 block" stroke-width="1.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
@@ -139,9 +131,8 @@ const faqs = [
               </button>
             </div>
 
-            <!-- Filled state: thumbnail grid -->
             <div id="zone-filled" class="hidden p-4">
-              <div id="thumb-grid" class="grid gap-2.5 mb-3 [grid-template-columns:repeat(auto-fill,minmax(100px,1fr))]"></div>
+              <div id="thumb-grid" class="grid gap-2.5 mb-3 grid-cols-[repeat(auto-fill,minmax(100px,1fr))]"></div>
               <div class="flex items-center justify-between flex-wrap gap-2">
                 <span id="zone-count" class="text-[13px] text-mute"></span>
                 <button id="add-more-btn"
@@ -155,7 +146,6 @@ const faqs = [
             <input type="file" id="file-input" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,.svg,.ico,.tif,.tiff" multiple class="hidden" />
           </div>
 
-          <!-- Unified progress bar (hidden until processing starts) -->
           <div id="progress-state" class="hidden mt-5">
             <div class="bg-canvas border border-hairline rounded-[10px] px-5 py-4">
               <div class="flex items-center justify-between gap-3 mb-2.5">
@@ -165,17 +155,15 @@ const faqs = [
                 </div>
                 <span id="progress-text" class="shrink-0 text-[13px] text-mute tabular-nums">0 / 0</span>
               </div>
-              <!-- Semantic progress bar: role + aria attributes for accessibility -->
               <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
                 id="progress-track"
                 class="bg-canvas-soft-2 rounded-pill h-1.5 overflow-hidden">
                 <div id="progress-bar"
-                  class="bg-ink h-full rounded-pill w-(--progress) [--progress:0%] transition-[width] duration-[400ms] ease-[cubic-bezier(.4,0,.2,1)]"></div>
+                  class="bg-ink h-full rounded-pill w-(--progress) [--progress:0%] transition-[width] duration-400 ease-in-out"></div>
               </div>
             </div>
           </div>
 
-          <!-- Results grid -->
           <div id="image-grid" class="hidden mt-10">
             <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
               <h2 class="text-2xl font-semibold text-ink m-0">Processed Images</h2>
@@ -185,20 +173,19 @@ const faqs = [
                 Download All (ZIP)
               </button>
             </div>
-            <div id="images-container" class="grid gap-5 [grid-template-columns:repeat(auto-fill,minmax(280px,1fr))]"></div>
+            <div id="images-container" class="grid gap-5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]"></div>
           </div>
 
         </div>
       </section>
 
-      <!-- Features -->
       <section class="px-6 py-16 bg-canvas-soft-2 border-t border-hairline">
         <div class="max-w-[1000px] mx-auto">
           <div class="text-center mb-12">
             <h2 class="text-[clamp(1.5rem,4vw,2.25rem)] font-semibold tracking-[-1px] text-ink mt-0 mb-3">Everything you need to cut out backgrounds</h2>
             <p class="text-base text-body leading-relaxed max-w-[600px] mx-auto m-0">A complete background removal toolkit that runs entirely on your device. It's fast, free, and built for real work.</p>
           </div>
-          <div class="grid gap-x-10 gap-y-12 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+          <div class="grid gap-x-10 gap-y-12 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
             <div class="text-center">
               <div class="w-11 h-11 bg-ink rounded-[10px] flex items-center justify-center mx-auto mb-3.5">
                 <svg width="22" height="22" fill="none" class="stroke-on-primary" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -266,7 +253,6 @@ const faqs = [
         </div>
       </section>
 
-      <!-- SEO Article (scroll-reveal) -->
       <section class="px-6 py-20 border-t border-hairline">
         <article id="seo-article" class="max-w-[760px] mx-auto">
           <div class="reveal" data-reveal>
@@ -301,7 +287,6 @@ const faqs = [
         </article>
       </section>
 
-      <!-- FAQ -->
       <section class="px-6 py-20 bg-canvas-soft-2 border-t border-hairline">
         <div class="max-w-[760px] mx-auto">
           <div class="reveal text-center mb-10" data-reveal>
@@ -325,7 +310,6 @@ const faqs = [
         </div>
       </section>
 
-      <!-- FAQPage structured data -->
       <script type="application/ld+json" set:html={JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
@@ -340,7 +324,6 @@ const faqs = [
 
     <Footer />
 
-    <!-- Toast notification container (fixed bottom-center) -->
     <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none"></div>
   </div>
 </Layout>
@@ -351,18 +334,6 @@ const faqs = [
   import * as ort from 'onnxruntime-web';
   import JSZip from 'jszip';
 
-  // ── One-time cache self-heal ────────────────────────────────────────────────
-  // transformers.js and @imgly/background-removal persist model files in the
-  // Cache Storage API so the tool can work offline after first load. An earlier
-  // deploy briefly sent COOP/COEP cross-origin-isolation headers, under which
-  // the cross-origin model fetch from huggingface.co was blocked; the failed /
-  // opaque responses got written into Cache Storage. Browsers then replay those
-  // poisoned entries, which surfaces as "No Access-Control-Allow-Origin header"
-  // plus a 404 even though the live server (and curl) return a clean 200.
-  //
-  // Bumping CACHE_EPOCH purges every Cache Storage bucket once per visitor, so
-  // existing users self-heal on their next load without manually clearing data.
-  // Wrapped in try/catch and awaited before any model loads.
   const CACHE_EPOCH = '2026-06-02-coep-fix';
   try {
     if (localStorage.getItem('frbg-cache-epoch') !== CACHE_EPOCH) {
@@ -372,23 +343,15 @@ const faqs = [
       }
       localStorage.setItem('frbg-cache-epoch', CACHE_EPOCH);
     }
-  } catch { /* private mode / storage disabled — fetch fresh, nothing to purge */ }
+  } catch { /* storage disabled — nothing to purge */ }
 
   env.allowLocalModels  = false;
   env.allowRemoteModels = true;
 
-  // ── Force single-threaded ONNX Runtime ──────────────────────────────────────
-  // onnxruntime-web defaults numThreads to navigator.hardwareConcurrency. Multi-
-  // threaded WASM needs SharedArrayBuffer, which is only available when the page
-  // is cross-origin isolated (COOP/COEP). This static site is not isolated, so
-  // the threaded path silently falls back and races, producing corrupted output
-  // (torn horizontal bands in the result). Pinning to a single thread makes
-  // every cutout deterministic and correct. Both @imgly/background-removal and
-  // @huggingface/transformers share this same ort module instance.
-  //
-  // imgly re-assigns numThreads (to navigator.hardwareConcurrency) at session
-  // creation time, which would clobber a plain assignment. We instead lock the
-  // property so any later write of a value > 1 is forced back down to 1.
+  // Pin ONNX Runtime to a single thread. Multi-threaded WASM needs
+  // SharedArrayBuffer (cross-origin isolation), which this site does not have;
+  // the threaded path races and produces corrupted output. imgly re-assigns
+  // numThreads at session creation, so lock the property to force it back to 1.
   try {
     let threads = 1;
     Object.defineProperty(ort.env.wasm, 'numThreads', {
@@ -401,7 +364,6 @@ const faqs = [
     ort.env.wasm.numThreads = 1;
   }
   ort.env.wasm.proxy = false;
-  // Mirror the setting on the transformers backend for its own session creation.
   if (env.backends?.onnx?.wasm) {
     env.backends.onnx.wasm.numThreads = 1;
   }
@@ -413,9 +375,6 @@ const faqs = [
   let detector: any     = null;
   let portraitPipe: any = null;
 
-  // Accumulated queue across multiple "Add more" drops. Each item carries a
-  // stable id so thumbnails and result cards stay correctly linked even after
-  // the user removes images from the zone (array indices would shift and break).
   interface QueueItem {
     id: string;
     file: File;
@@ -431,7 +390,6 @@ const faqs = [
   const nextId = () => `img-${++idCounter}`;
   const usedNames = new Set<string>();
 
-  // ── DOM refs ──────────────────────────────────────────────────────────────
   const uploadZone    = document.getElementById('upload-zone')!;
   const fileInput     = document.getElementById('file-input') as HTMLInputElement;
   const browseBtn     = document.getElementById('browse-btn')!;
@@ -450,7 +408,6 @@ const faqs = [
   const downloadAllBtn  = document.getElementById('download-all-btn')!;
   const modelHint       = document.getElementById('model-hint')!;
 
-  // ── Model selector ────────────────────────────────────────────────────────
   const HINTS: Record<ModelMode, string> = {
     auto:     'Analyses your image and automatically selects the best engine for the result',
     portrait: 'Optimised for sharp edges on hair, skin and fine detail in people',
@@ -473,7 +430,6 @@ const faqs = [
     modelHint.textContent = HINTS[mode];
   });
 
-  // ── Thumbnail helpers ─────────────────────────────────────────────────────
   const STATUS: Record<ThumbStatus, { bg: string; label: string }> = {
     queued:     { bg: 'bg-black/45',     label: 'Queued'      },
     analysing:  { bg: 'bg-amber-500/90', label: 'Analysing…' },
@@ -483,9 +439,6 @@ const faqs = [
   };
   const ALL_STATUS_BG = ['bg-black/45', 'bg-amber-500/90', 'bg-link/90', 'bg-error/85'];
 
-  // An image can only be removed while it is still waiting in the queue or has
-  // errored out. Once it is analysing/processing or already done, the remove
-  // control is hidden (there is no point removing a finished cutout).
   function isRemovable(status: ThumbStatus): boolean {
     return status === 'queued' || status === 'error';
   }
@@ -500,7 +453,9 @@ const faqs = [
     img.src = objUrl;
     img.alt = item.file.name;
     img.className = 'w-full h-full object-cover block';
-    img.onload = () => URL.revokeObjectURL(objUrl);
+    const revokeThumb = () => URL.revokeObjectURL(objUrl);
+    img.onload = revokeThumb;
+    img.onerror = revokeThumb;
 
     const overlay = document.createElement('div');
     overlay.id = `thumb-overlay-${item.id}`;
@@ -511,8 +466,6 @@ const faqs = [
     badge.className = 'text-[10px] font-semibold text-white tracking-wide uppercase';
     badge.textContent = STATUS[item.status].label;
 
-    // Remove button (top-right). Always visible while the image is removable
-    // (queued or errored) so users can drop it before it is processed.
     const removeBtn = document.createElement('button');
     removeBtn.id = `thumb-remove-${item.id}`;
     removeBtn.type = 'button';
@@ -538,7 +491,6 @@ const faqs = [
     if (item) item.status = status;
     const overlay = document.getElementById(`thumb-overlay-${id}`);
     const badge   = document.getElementById(`thumb-badge-${id}`);
-    // Show the remove control only while the image is still removable.
     document.getElementById(`thumb-remove-${id}`)?.classList.toggle('hidden', !isRemovable(status));
     if (!overlay || !badge) return;
     const s = STATUS[status];
@@ -548,17 +500,12 @@ const faqs = [
     if (status === 'done') setTimeout(() => { overlay.classList.add('opacity-0'); }, 800);
   }
 
-  // ── Remove an item from the zone ────────────────────────────────────────────
-  // Only queued or errored images can be removed. The state is updated instantly
-  // so the action feels immediate, while the thumbnail plays a quick scale/fade
-  // collapse before being detached from the DOM.
   function removeItem(id: string) {
     const idx = queue.findIndex(q => q.id === id);
     if (idx === -1) return;
     const item = queue[idx];
     if (!isRemovable(item.status)) return; // guard: never remove while processing or done
 
-    // Free resources and update state immediately (feels instant).
     if (item.originalUrl) URL.revokeObjectURL(item.originalUrl);
     if (item.resultUrl)   URL.revokeObjectURL(item.resultUrl);
     if (item.outName)     usedNames.delete(item.outName);
@@ -566,7 +513,6 @@ const faqs = [
     queue.splice(idx, 1);
 
     if (queue.length === 0) {
-      // Animate the last thumb out, then reset the zone once it's gone.
       animateThumbOut(id, resetZone);
     } else {
       zoneCount.textContent = `${queue.length} image${queue.length !== 1 ? 's' : ''} selected`;
@@ -575,7 +521,6 @@ const faqs = [
     }
   }
 
-  // Play a short collapse animation on a thumbnail, then remove it from the DOM.
   function animateThumbOut(id: string, done?: () => void) {
     const el = document.getElementById(`thumb-${id}`);
     if (!el) { done?.(); return; }
@@ -591,11 +536,9 @@ const faqs = [
       done?.();
     };
     el.addEventListener('transitionend', finish, { once: true });
-    // Fallback in case transitionend doesn't fire (e.g. element already detached).
     setTimeout(finish, 260);
   }
 
-  // Reset the drop zone back to its initial empty state.
   function resetZone() {
     thumbGrid.innerHTML = '';
     imagesContainer.innerHTML = '';
@@ -608,7 +551,6 @@ const faqs = [
     zoneCount.textContent = '';
   }
 
-  // ── Show uploaded files in the zone ──────────────────────────────────────
   function showFilesInZone(items: QueueItem[]) {
     zoneEmpty.classList.add('hidden');
     zoneFilled.classList.remove('hidden');
@@ -618,17 +560,14 @@ const faqs = [
     zoneCount.textContent = `${queue.length} image${queue.length !== 1 ? 's' : ''} selected`;
   }
 
-  // ── Progress helpers ──────────────────────────────────────────────────────
   function setProgress(done: number, total: number, msg: string) {
     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-    // The bar consumes this custom property via the `w-(--progress)` utility.
     progressBar.style.setProperty('--progress', `${pct}%`);
     progressTrack.setAttribute('aria-valuenow', String(pct));
     progressText.textContent = `${done} / ${total}`;
     loadingText.textContent  = msg;
   }
 
-  // ── Lazy model loaders ────────────────────────────────────────────────────
   async function ensureDetector() {
     if (detector) return;
     loadingText.textContent = 'Preparing smart detection…';
@@ -647,7 +586,6 @@ const faqs = [
     return dets.some(d => d.label.toLowerCase() === 'person');
   }
 
-  // ── Core removal ──────────────────────────────────────────────────────────
   async function removeBg(file: Blob, objectUrl: string, id: string): Promise<{ blob: Blob; usedModel: string }> {
     if (currentMode === 'portrait') {
       await ensurePortraitPipe();
@@ -677,11 +615,8 @@ const faqs = [
     return { blob, usedModel: 'Smart · Objects & Graphics' };
   }
 
-  // ── Image normalisation ─────────────────────────────────────────────────────
-  // Some formats (notably certain WebP files) fail to decode consistently inside
-  // the AI engines, which both rely on createImageBitmap. To make every upload
-  // work, we first decode the file with the browser's most tolerant decoder (an
-  // <img> element) and re-encode it to a lossless PNG that the engines accept.
+  // Decode with a tolerant <img> element and re-encode to PNG so every engine
+  // receives a format it can reliably decode (some WebP files fail otherwise).
   async function normalizeToPng(file: File): Promise<Blob> {
     const url = URL.createObjectURL(file);
     try {
@@ -712,10 +647,7 @@ const faqs = [
     }
   }
 
-  // ── Output filename ─────────────────────────────────────────────────────────
-  // Take up to the first 6 characters of the original base name and append the
-  // brand suffix, e.g. "image.jpg" -> "image_freeremovebg.png".
-  // Sanitises odd characters and de-duplicates so a batch never collides.
+  // "image.jpg" -> "image_freeremovebg.png", sanitised and de-duplicated.
   function buildOutName(originalName: string): string {
     const base = originalName.replace(/\.[^/.]+$/, '');
     let stub = base.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toLowerCase();
@@ -730,22 +662,20 @@ const faqs = [
     return candidate;
   }
 
-  // ── Toast notifications ────────────────────────────────────────────────────
   const toastContainer = document.getElementById('toast-container')!;
-
   function showToast(message: string, durationMs = 30000) {
     const toast = document.createElement('div');
     toast.className = 'toast flex items-center gap-3 px-5 py-3 bg-ink text-on-primary text-sm font-medium rounded-lg shadow-lg max-w-[90vw]';
     toast.setAttribute('role', 'alert');
     toast.innerHTML = `
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="shrink-0 stroke-amber-400"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-      <span class="flex-1">${message}</span>
+      <span class="flex-1"></span>
       <button type="button" aria-label="Dismiss" class="toast-close shrink-0 -mr-1 flex items-center justify-center w-6 h-6 rounded-full text-on-primary/70 transition-colors cursor-pointer hover:bg-on-primary/15 hover:text-on-primary">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     `;
+    toast.querySelector('span')!.textContent = message;
     toastContainer.appendChild(toast);
-    // Trigger reflow so the transition plays.
     void toast.offsetWidth;
     toast.classList.add('toast-visible');
 
@@ -758,19 +688,13 @@ const faqs = [
       toast.addEventListener('transitionend', () => toast.remove(), { once: true });
       setTimeout(() => toast.remove(), 400); // fallback if transitionend doesn't fire
     }
-
     toast.querySelector('.toast-close')?.addEventListener('click', dismiss);
     const timer = setTimeout(dismiss, durationMs);
   }
 
-  // ── Glitch detection ──────────────────────────────────────────────────────
-  // The ONNX threading race corrupts results as blocky garbage: chunks of opaque
-  // pixels get displaced into a diagonal staircase, leaving islands that are
-  // disconnected from the real subject and a ragged left/right silhouette. We
-  // detect two independent signals and flag if either fires (a missed glitch is
-  // worse than an extra, dismissible warning):
-  //   A) Disconnected opaque "islands" away from the main subject blob.
-  //   B) A ragged outline whose left/right edge jumps abruptly between rows.
+  // Flags corrupted output (from the ONNX threading race) via two signals:
+  //   A) disconnected opaque "islands" away from the main subject blob, or
+  //   B) a ragged outline whose left/right edge jumps abruptly between rows.
   async function isGlitched(blob: Blob): Promise<boolean> {
     const url = URL.createObjectURL(blob);
     try {
@@ -781,7 +705,6 @@ const faqs = [
       const h = img.naturalHeight;
       if (w < 48 || h < 48) return false;
 
-      // Downscale to keep the analysis fast.
       const scale = Math.min(1, 256 / w);
       const gw = Math.max(1, Math.round(w * scale));
       const gh = Math.max(1, Math.round(h * scale));
@@ -793,18 +716,16 @@ const faqs = [
       ctx.drawImage(img, 0, 0, gw, gh);
       const { data } = ctx.getImageData(0, 0, gw, gh);
 
-      // Binary opaque mask (alpha above a small threshold ignores anti-aliasing).
       const n = gw * gh;
       const mask = new Uint8Array(n);
       let totalOpaque = 0;
       for (let i = 0; i < n; i++) {
         if (data[i * 4 + 3] > 32) { mask[i] = 1; totalOpaque++; }
       }
-      // Nothing meaningful to analyse if the image is almost empty or fully opaque.
       const opaqueRatio = totalOpaque / n;
       if (opaqueRatio < 0.02 || opaqueRatio > 0.98) return false;
 
-      // ── Signal A: connected components (8-connectivity, iterative flood fill) ──
+      // Signal A: connected components (8-connectivity, iterative flood fill).
       const labels = new Int32Array(n).fill(-1);
       const stack: number[] = [];
       const areas: number[] = [];
@@ -833,15 +754,13 @@ const faqs = [
         areas.push(area);
       }
 
-      const maxArea = areas.length ? Math.max(...areas) : 0;
+      const maxArea = areas.length ? areas.reduce((m, a) => (a > m ? a : m), 0) : 0;
       const strayArea = totalOpaque - maxArea;
-      // Significant islands are >= 0.3% of opaque area (filters specks/noise).
       const minIsland = totalOpaque * 0.003;
       const significant = areas.filter(a => a >= minIsland).length;
-      // Multiple significant blobs whose strays add up to a real chunk = glitch.
       const glitchByIslands = significant >= 2 && strayArea >= totalOpaque * 0.03;
 
-      // ── Signal B: ragged silhouette boundary ──────────────────────────────
+      // Signal B: ragged silhouette boundary.
       let prevL = -1, prevR = -1, jumps = 0;
       const jumpThresh = gw * 0.12;
       for (let y = 0; y < gh; y++) {
@@ -865,18 +784,15 @@ const faqs = [
     }
   }
 
-  // ── Process one image ─────────────────────────────────────────────────────
   async function processImage(item: QueueItem): Promise<void> {
     const originalUrl = URL.createObjectURL(item.file);
     item.originalUrl = originalUrl;
     let workingUrl: string | null = null;
     try {
-      // Normalise to PNG so every engine receives a format it can reliably decode.
       const pngBlob = await normalizeToPng(item.file);
       workingUrl = URL.createObjectURL(pngBlob);
       const { blob, usedModel } = await removeBg(pngBlob, workingUrl, item.id);
 
-      // Check for the torn-band glitch and warn the user if detected.
       const glitched = await isGlitched(blob);
       if (glitched) {
         showToast(`"${item.file.name}" may have processed with a glitch. Remove it and upload the same image again to redo it.`);
@@ -897,7 +813,6 @@ const faqs = [
     }
   }
 
-  // ── Result card ───────────────────────────────────────────────────────────
   function addCard(name: string, originalUrl: string, processedUrl: string, modelLabel: string): HTMLElement {
     const card = document.createElement('div');
     card.className = 'bg-canvas border border-hairline rounded-[10px] overflow-hidden shadow-sm';
@@ -936,10 +851,6 @@ const faqs = [
     return card;
   }
 
-  // ── Main handler ──────────────────────────────────────────────────────────
-  // Accept anything the browser can decode as an image. We check the MIME type
-  // first, then fall back to the file extension for files that arrive with an
-  // empty or generic type (common with some WebP/AVIF downloads).
   const IMAGE_EXT = /\.(jpe?g|png|webp|gif|bmp|avif|svg|ico|tiff?)$/i;
   function isImageFile(f: File): boolean {
     return f.type.startsWith('image/') || IMAGE_EXT.test(f.name);
@@ -949,7 +860,6 @@ const faqs = [
     const imgs = newFiles.filter(isImageFile);
     if (!imgs.length) { alert('Please select image files (JPG, PNG, WebP, GIF, BMP, AVIF, and more).'); return; }
 
-    // Wrap each new file in a queue item with a stable id, then render thumbs.
     const newItems: QueueItem[] = imgs.map(file => ({ id: nextId(), file, status: 'queued' as ThumbStatus }));
     queue.push(...newItems);
     showFilesInZone(newItems);
@@ -975,20 +885,20 @@ const faqs = [
     if (done === total) setTimeout(() => { progressState.classList.add('hidden'); }, 2000);
   }
 
-  // ── ZIP download ──────────────────────────────────────────────────────────
   async function downloadZip() {
     const ready = queue.filter(q => q.blob && q.outName);
     if (!ready.length) return;
     const zip = new JSZip();
     ready.forEach(({ outName, blob }) => zip.file(outName!, blob!));
     const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(zipBlob);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(zipBlob);
+    a.href = url;
     a.download = 'freeremovebg.zip';
     a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
-  // ── Event wiring ──────────────────────────────────────────────────────────
   const DRAG_ON  = ['border-ink', 'bg-canvas-soft'];
   const DRAG_OFF = ['border-hairline-strong', 'bg-canvas'];
 
@@ -1020,20 +930,17 @@ const faqs = [
   });
   downloadAllBtn.addEventListener('click', downloadZip);
 
-  // ── Scroll-reveal for the SEO article ───────────────────────────────────────
-  // Each [data-reveal] block fades/slides into place as it scrolls into view.
   const revealEls = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   if (prefersReducedMotion || !('IntersectionObserver' in window)) {
-    // Show everything immediately when motion is reduced or unsupported.
     revealEls.forEach(el => el.classList.add('is-visible'));
   } else {
     const revealObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target); // reveal once, then stop watching
+          observer.unobserve(entry.target);
         }
       });
     }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });

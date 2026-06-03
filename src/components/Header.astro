@@ -1,5 +1,4 @@
 ---
-// Header component following Vercel design system
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 const navLinks = [
@@ -19,13 +18,11 @@ function isActive(href: string) {
 <header class="sticky top-0 z-50 border-b border-hairline bg-canvas/80 backdrop-blur-sm">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
-      <!-- Logo -->
       <a href="/" class="flex items-center gap-2 no-underline">
         <img src="/favicon.svg" alt="FreeRemoveBG logo" class="w-8 h-8" />
         <span class="text-lg font-semibold tracking-tight text-ink">FreeRemoveBG</span>
       </a>
 
-      <!-- Desktop navigation -->
       <nav class="hidden md:flex items-center gap-6" aria-label="Main">
         {navLinks.map(({ href, label }) => (
           <a
@@ -42,7 +39,6 @@ function isActive(href: string) {
       </nav>
 
       <div class="flex items-center gap-3">
-        <!-- Theme toggle switch -->
         <button
           id="theme-toggle"
           type="button"
@@ -50,13 +46,10 @@ function isActive(href: string) {
           aria-label="Toggle dark mode"
           title="Toggle dark mode"
           class="relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-hairline bg-canvas-soft-2 transition-colors duration-200 cursor-pointer hover:border-hairline-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
-          <!-- Sliding knob -->
           <span class="inline-flex h-5 w-5 translate-x-1 items-center justify-center rounded-full bg-ink text-on-primary shadow-sm transition-transform duration-200 dark:translate-x-6">
-            <!-- Moon (light mode → click for dark) -->
             <svg class="block h-3 w-3 dark:hidden" fill="currentColor" viewBox="0 0 24 24">
               <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
             </svg>
-            <!-- Sun (dark mode → click for light) -->
             <svg class="hidden h-3 w-3 dark:block" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="4" />
               <path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" />
@@ -64,7 +57,6 @@ function isActive(href: string) {
           </span>
         </button>
 
-        <!-- Mobile hamburger button -->
         <button
           id="mobile-menu-btn"
           type="button"
@@ -72,11 +64,9 @@ function isActive(href: string) {
           aria-expanded="false"
           aria-controls="mobile-menu"
           class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-hairline bg-canvas-soft-2 cursor-pointer transition-colors hover:border-hairline-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
-          <!-- Hamburger icon -->
           <svg id="menu-icon-open" class="w-5 h-5 text-ink" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
-          <!-- Close icon -->
           <svg id="menu-icon-close" class="hidden w-5 h-5 text-ink" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -84,7 +74,6 @@ function isActive(href: string) {
       </div>
     </div>
 
-    <!-- Mobile menu -->
     <nav id="mobile-menu" class="hidden md:hidden border-t border-hairline py-4" aria-label="Mobile">
       <ul class="flex flex-col gap-1 list-none m-0 p-0">
         {navLinks.map(({ href, label }) => (
@@ -113,7 +102,6 @@ function isActive(href: string) {
   const iconOpen = document.getElementById('menu-icon-open');
   const iconClose = document.getElementById('menu-icon-close');
 
-  // Theme toggle
   function syncState() {
     const isDark = document.documentElement.classList.contains('dark');
     toggle?.setAttribute('aria-checked', String(isDark));
@@ -127,7 +115,6 @@ function isActive(href: string) {
     syncState();
   });
 
-  // Mobile menu toggle
   menuBtn?.addEventListener('click', () => {
     const isOpen = mobileMenu?.classList.toggle('hidden') === false;
     menuBtn.setAttribute('aria-expanded', String(isOpen));
