@@ -8,38 +8,6 @@
     "countries": []
   },
   {
-    "code": "es",
-    "endonym": "Español",
-    "englishName": "Spanish",
-    "flag": "es",
-    "dir": "ltr",
-    "countries": ["ES", "MX", "AR", "CO", "CL", "PE", "VE", "EC", "GT", "CU", "BO", "DO", "HN", "PY", "SV", "NI", "CR", "PA", "UY"]
-  },
-  {
-    "code": "hi",
-    "endonym": "हिन्दी",
-    "englishName": "Hindi",
-    "flag": "in",
-    "dir": "ltr",
-    "countries": ["IN"]
-  },
-  {
-    "code": "ne",
-    "endonym": "नेपाली",
-    "englishName": "Nepali",
-    "flag": "np",
-    "dir": "ltr",
-    "countries": ["NP"]
-  },
-  {
-    "code": "bn",
-    "endonym": "বাংলা",
-    "englishName": "Bengali",
-    "flag": "bd",
-    "dir": "ltr",
-    "countries": ["BD"]
-  },
-  {
     "code": "zh",
     "endonym": "中文",
     "englishName": "Chinese",
@@ -48,12 +16,28 @@
     "countries": ["CN", "TW", "HK", "SG", "MO"]
   },
   {
+    "code": "es",
+    "endonym": "Español",
+    "englishName": "Spanish",
+    "flag": "es",
+    "dir": "ltr",
+    "countries": ["ES", "MX", "AR", "CO", "CL", "PE", "VE", "EC", "GT", "CU", "BO", "DO", "HN", "PY", "SV", "NI", "CR", "PA", "UY"]
+  },
+  {
     "code": "ar",
     "endonym": "العربية",
     "englishName": "Arabic",
     "flag": "sa",
     "dir": "rtl",
     "countries": ["SA", "AE", "EG", "QA", "KW", "OM", "BH", "JO", "IQ", "DZ", "MA", "TN", "LY"]
+  },
+  {
+    "code": "id",
+    "endonym": "Bahasa Indonesia",
+    "englishName": "Indonesian",
+    "flag": "id",
+    "dir": "ltr",
+    "countries": ["ID"]
   },
   {
     "code": "pt",
@@ -72,12 +56,12 @@
     "countries": ["FR", "BE", "CD", "CI", "SN", "CM"]
   },
   {
-    "code": "de",
-    "endonym": "Deutsch",
-    "englishName": "German",
-    "flag": "de",
+    "code": "ja",
+    "endonym": "日本語",
+    "englishName": "Japanese",
+    "flag": "jp",
     "dir": "ltr",
-    "countries": ["DE", "AT", "CH"]
+    "countries": ["JP"]
   },
   {
     "code": "ru",
@@ -88,19 +72,331 @@
     "countries": ["RU", "BY", "KZ", "KG"]
   },
   {
-    "code": "ja",
-    "endonym": "日本語",
-    "englishName": "Japanese",
-    "flag": "jp",
+    "code": "de",
+    "endonym": "Deutsch",
+    "englishName": "German",
+    "flag": "de",
     "dir": "ltr",
-    "countries": ["JP"]
+    "countries": ["DE", "AT", "CH"]
   },
   {
-    "code": "id",
-    "endonym": "Bahasa Indonesia",
-    "englishName": "Indonesian",
-    "flag": "id",
+    "code": "hi",
+    "endonym": "हिन्दी",
+    "englishName": "Hindi",
+    "flag": "in",
     "dir": "ltr",
-    "countries": ["ID"]
+    "countries": ["IN"]
+  },
+  {
+    "code": "ko",
+    "endonym": "한국어",
+    "englishName": "Korean",
+    "flag": "kr",
+    "dir": "ltr",
+    "countries": ["KR"]
+  },
+  {
+    "code": "tr",
+    "endonym": "Türkçe",
+    "englishName": "Turkish",
+    "flag": "tr",
+    "dir": "ltr",
+    "countries": ["TR"]
+  },
+  {
+    "code": "it",
+    "endonym": "Italiano",
+    "englishName": "Italian",
+    "flag": "it",
+    "dir": "ltr",
+    "countries": ["IT", "SM", "VA"]
+  },
+  {
+    "code": "vi",
+    "endonym": "Tiếng Việt",
+    "englishName": "Vietnamese",
+    "flag": "vn",
+    "dir": "ltr",
+    "countries": ["VN"]
+  },
+  {
+    "code": "pl",
+    "endonym": "Polski",
+    "englishName": "Polish",
+    "flag": "pl",
+    "dir": "ltr",
+    "countries": ["PL"]
+  },
+  {
+    "code": "fa",
+    "endonym": "فارسی",
+    "englishName": "Persian",
+    "flag": "ir",
+    "dir": "rtl",
+    "countries": ["IR"]
+  },
+  {
+    "code": "th",
+    "endonym": "ไทย",
+    "englishName": "Thai",
+    "flag": "th",
+    "dir": "ltr",
+    "countries": ["TH"]
+  },
+  {
+    "code": "nl",
+    "endonym": "Nederlands",
+    "englishName": "Dutch",
+    "flag": "nl",
+    "dir": "ltr",
+    "countries": ["NL", "SR"]
+  },
+  {
+    "code": "uk",
+    "endonym": "Українська",
+    "englishName": "Ukrainian",
+    "flag": "ua",
+    "dir": "ltr",
+    "countries": ["UA"]
+  },
+  {
+    "code": "tl",
+    "endonym": "Tagalog",
+    "englishName": "Filipino",
+    "flag": "ph",
+    "dir": "ltr",
+    "countries": ["PH"]
+  },
+  {
+    "code": "ro",
+    "endonym": "Română",
+    "englishName": "Romanian",
+    "flag": "ro",
+    "dir": "ltr",
+    "countries": ["RO", "MD"]
+  },
+  {
+    "code": "el",
+    "endonym": "Ελληνικά",
+    "englishName": "Greek",
+    "flag": "gr",
+    "dir": "ltr",
+    "countries": ["GR", "CY"]
+  },
+  {
+    "code": "hu",
+    "endonym": "Magyar",
+    "englishName": "Hungarian",
+    "flag": "hu",
+    "dir": "ltr",
+    "countries": ["HU"]
+  },
+  {
+    "code": "sv",
+    "endonym": "Svenska",
+    "englishName": "Swedish",
+    "flag": "se",
+    "dir": "ltr",
+    "countries": ["SE"]
+  },
+  {
+    "code": "cs",
+    "endonym": "Čeština",
+    "englishName": "Czech",
+    "flag": "cz",
+    "dir": "ltr",
+    "countries": ["CZ"]
+  },
+  {
+    "code": "he",
+    "endonym": "עברית",
+    "englishName": "Hebrew",
+    "flag": "il",
+    "dir": "rtl",
+    "countries": ["IL"]
+  },
+  {
+    "code": "ms",
+    "endonym": "Bahasa Melayu",
+    "englishName": "Malay",
+    "flag": "my",
+    "dir": "ltr",
+    "countries": ["MY", "BN"]
+  },
+  {
+    "code": "bn",
+    "endonym": "বাংলা",
+    "englishName": "Bengali",
+    "flag": "bd",
+    "dir": "ltr",
+    "countries": ["BD"]
+  },
+  {
+    "code": "da",
+    "endonym": "Dansk",
+    "englishName": "Danish",
+    "flag": "dk",
+    "dir": "ltr",
+    "countries": ["DK"]
+  },
+  {
+    "code": "fi",
+    "endonym": "Suomi",
+    "englishName": "Finnish",
+    "flag": "fi",
+    "dir": "ltr",
+    "countries": ["FI"]
+  },
+  {
+    "code": "no",
+    "endonym": "Norsk",
+    "englishName": "Norwegian",
+    "flag": "no",
+    "dir": "ltr",
+    "countries": ["NO"]
+  },
+  {
+    "code": "sk",
+    "endonym": "Slovenčina",
+    "englishName": "Slovak",
+    "flag": "sk",
+    "dir": "ltr",
+    "countries": ["SK"]
+  },
+  {
+    "code": "bg",
+    "endonym": "Български",
+    "englishName": "Bulgarian",
+    "flag": "bg",
+    "dir": "ltr",
+    "countries": ["BG"]
+  },
+  {
+    "code": "hr",
+    "endonym": "Hrvatski",
+    "englishName": "Croatian",
+    "flag": "hr",
+    "dir": "ltr",
+    "countries": ["HR"]
+  },
+  {
+    "code": "sr",
+    "endonym": "Српски",
+    "englishName": "Serbian",
+    "flag": "rs",
+    "dir": "ltr",
+    "countries": ["RS"]
+  },
+  {
+    "code": "lt",
+    "endonym": "Lietuvių",
+    "englishName": "Lithuanian",
+    "flag": "lt",
+    "dir": "ltr",
+    "countries": ["LT"]
+  },
+  {
+    "code": "sl",
+    "endonym": "Slovenščina",
+    "englishName": "Slovenian",
+    "flag": "si",
+    "dir": "ltr",
+    "countries": ["SI"]
+  },
+  {
+    "code": "lv",
+    "endonym": "Latviešu",
+    "englishName": "Latvian",
+    "flag": "lv",
+    "dir": "ltr",
+    "countries": ["LV"]
+  },
+  {
+    "code": "et",
+    "endonym": "Eesti",
+    "englishName": "Estonian",
+    "flag": "ee",
+    "dir": "ltr",
+    "countries": ["EE"]
+  },
+  {
+    "code": "ur",
+    "endonym": "اردو",
+    "englishName": "Urdu",
+    "flag": "pk",
+    "dir": "rtl",
+    "countries": ["PK"]
+  },
+  {
+    "code": "ta",
+    "endonym": "தமிழ்",
+    "englishName": "Tamil",
+    "flag": "in",
+    "dir": "ltr",
+    "countries": []
+  },
+  {
+    "code": "te",
+    "endonym": "తెలుగు",
+    "englishName": "Telugu",
+    "flag": "in",
+    "dir": "ltr",
+    "countries": []
+  },
+  {
+    "code": "mr",
+    "endonym": "मराठी",
+    "englishName": "Marathi",
+    "flag": "in",
+    "dir": "ltr",
+    "countries": []
+  },
+  {
+    "code": "sw",
+    "endonym": "Kiswahili",
+    "englishName": "Swahili",
+    "flag": "ke",
+    "dir": "ltr",
+    "countries": ["KE", "TZ"]
+  },
+  {
+    "code": "ca",
+    "endonym": "Català",
+    "englishName": "Catalan",
+    "flag": "es-ct",
+    "dir": "ltr",
+    "countries": []
+  },
+  {
+    "code": "af",
+    "endonym": "Afrikaans",
+    "englishName": "Afrikaans",
+    "flag": "za",
+    "dir": "ltr",
+    "countries": []
+  },
+  {
+    "code": "ne",
+    "endonym": "नेपाली",
+    "englishName": "Nepali",
+    "flag": "np",
+    "dir": "ltr",
+    "countries": ["NP"]
+  },
+  {
+    "code": "pa",
+    "endonym": "ਪੰਜਾਬੀ",
+    "englishName": "Punjabi",
+    "flag": "in",
+    "dir": "ltr",
+    "countries": []
+  },
+  {
+    "code": "gu",
+    "endonym": "ગુજરાતી",
+    "englishName": "Gujarati",
+    "flag": "in",
+    "dir": "ltr",
+    "countries": []
   }
 ]
