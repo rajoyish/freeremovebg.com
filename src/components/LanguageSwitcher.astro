@@ -65,14 +65,16 @@ const catalogue = LANGUAGES.map((l) => ({
 >
   <button
     type="button"
-    class="ls-trigger inline-flex items-center gap-2 h-9 px-3 rounded-pill border border-hairline bg-canvas-soft-2 text-sm font-medium text-ink cursor-pointer transition-colors hover:border-hairline-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
+    class="ls-trigger inline-flex items-center gap-1.5 lg:gap-2 h-9 px-2.5 lg:px-3 rounded-pill border border-hairline bg-canvas-soft-2 text-sm font-medium text-ink cursor-pointer transition-colors hover:border-hairline-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link"
     aria-haspopup="listbox"
     aria-expanded="false"
     aria-label={labels.label}
   >
-    <span class={`fi fi-${active.flag} rounded-[2px]`} aria-hidden="true"></span>
-    <span class="ls-active-name">{active.endonym}</span>
-    <svg class="w-3.5 h-3.5 text-mute" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+    <span class={`fi fi-${active.flag} rounded-[2px] shrink-0`} aria-hidden="true"></span>
+    {/* Full native name on desktop; compact ISO Alpha-2 country code on mobile/tablet. */}
+    <span class="ls-active-name hidden lg:inline">{active.endonym}</span>
+    <span class="ls-active-code lg:hidden uppercase">{active.flag}</span>
+    <svg class="w-3.5 h-3.5 text-mute shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
       <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
     </svg>
   </button>
