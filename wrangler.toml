@@ -1,6 +1,11 @@
 name = "freeremovebg"
 compatibility_date = "2025-06-01"
 
+# Edge geo-routing Worker. It runs in front of the static assets to handle
+# country-based language redirects, the `lang` cookie override, and crawler
+# bypass. All localized HTML is pre-built; the Worker never calls any API.
+main = "./worker/index.js"
+
 # Serve only on the real domain. workers.dev is disabled because (1) Google
 # flags the duplicate *.workers.dev URL as duplicate content, and (2)
 # huggingface.co blocks the workers.dev referer, which breaks model downloads.
@@ -14,10 +19,16 @@ routes = [
   { pattern = "freeremovebg.com", custom_domain = true },
 ]
 
-# Static Astro build output. Workers serves these files directly; no server
-# runtime or SSR adapter is needed for this site.
+# Static Astro build output, exposed to the Worker via the ASSETS binding so it
+# can fall back to serving files with `env.ASSETS.fetch(request)`.
 [assets]
 directory = "./dist"
+binding = "ASSETS"
 
 # Serve /404.html for unmatched routes instead of a generic Worker error.
 not_found_handling = "404-page"
+
+# Only invoke the Worker first on the bare root, where geo-redirect decisions
+# happen. Every other request (localized routes, JS/WASM/model assets, images)
+# is served asset-first for lowest latency and zero Worker billing.
+run_worker_first = ["/"]

@@ -1,0 +1,106 @@
+[
+  {
+    "code": "en",
+    "endonym": "English",
+    "englishName": "English",
+    "flag": "us",
+    "dir": "ltr",
+    "countries": []
+  },
+  {
+    "code": "es",
+    "endonym": "Español",
+    "englishName": "Spanish",
+    "flag": "es",
+    "dir": "ltr",
+    "countries": ["ES", "MX", "AR", "CO", "CL", "PE", "VE", "EC", "GT", "CU", "BO", "DO", "HN", "PY", "SV", "NI", "CR", "PA", "UY"]
+  },
+  {
+    "code": "hi",
+    "endonym": "हिन्दी",
+    "englishName": "Hindi",
+    "flag": "in",
+    "dir": "ltr",
+    "countries": ["IN"]
+  },
+  {
+    "code": "ne",
+    "endonym": "नेपाली",
+    "englishName": "Nepali",
+    "flag": "np",
+    "dir": "ltr",
+    "countries": ["NP"]
+  },
+  {
+    "code": "bn",
+    "endonym": "বাংলা",
+    "englishName": "Bengali",
+    "flag": "bd",
+    "dir": "ltr",
+    "countries": ["BD"]
+  },
+  {
+    "code": "zh",
+    "endonym": "中文",
+    "englishName": "Chinese",
+    "flag": "cn",
+    "dir": "ltr",
+    "countries": ["CN", "TW", "HK", "SG", "MO"]
+  },
+  {
+    "code": "ar",
+    "endonym": "العربية",
+    "englishName": "Arabic",
+    "flag": "sa",
+    "dir": "rtl",
+    "countries": ["SA", "AE", "EG", "QA", "KW", "OM", "BH", "JO", "IQ", "DZ", "MA", "TN", "LY"]
+  },
+  {
+    "code": "pt",
+    "endonym": "Português",
+    "englishName": "Portuguese",
+    "flag": "br",
+    "dir": "ltr",
+    "countries": ["BR", "PT", "AO", "MZ"]
+  },
+  {
+    "code": "fr",
+    "endonym": "Français",
+    "englishName": "French",
+    "flag": "fr",
+    "dir": "ltr",
+    "countries": ["FR", "BE", "CD", "CI", "SN", "CM"]
+  },
+  {
+    "code": "de",
+    "endonym": "Deutsch",
+    "englishName": "German",
+    "flag": "de",
+    "dir": "ltr",
+    "countries": ["DE", "AT", "CH"]
+  },
+  {
+    "code": "ru",
+    "endonym": "Русский",
+    "englishName": "Russian",
+    "flag": "ru",
+    "dir": "ltr",
+    "countries": ["RU", "BY", "KZ", "KG"]
+  },
+  {
+    "code": "ja",
+    "endonym": "日本語",
+    "englishName": "Japanese",
+    "flag": "jp",
+    "dir": "ltr",
+    "countries": ["JP"]
+  },
+  {
+    "code": "id",
+    "endonym": "Bahasa Indonesia",
+    "englishName": "Indonesian",
+    "flag": "id",
+    "dir": "ltr",
+    "countries": ["ID"]
+  }
+]

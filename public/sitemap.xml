@@ -1,7 +1,250 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://freeremovebg.com/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/es/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/hi/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/ne/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/bn/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/zh/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/ar/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/pt/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/fr/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/de/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/ru/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/ja/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://freeremovebg.com/id/</loc>
+      <xhtml:link rel="alternate" hreflang="en" href="https://freeremovebg.com/" />
+      <xhtml:link rel="alternate" hreflang="es" href="https://freeremovebg.com/es/" />
+      <xhtml:link rel="alternate" hreflang="hi" href="https://freeremovebg.com/hi/" />
+      <xhtml:link rel="alternate" hreflang="ne" href="https://freeremovebg.com/ne/" />
+      <xhtml:link rel="alternate" hreflang="bn" href="https://freeremovebg.com/bn/" />
+      <xhtml:link rel="alternate" hreflang="zh" href="https://freeremovebg.com/zh/" />
+      <xhtml:link rel="alternate" hreflang="ar" href="https://freeremovebg.com/ar/" />
+      <xhtml:link rel="alternate" hreflang="pt" href="https://freeremovebg.com/pt/" />
+      <xhtml:link rel="alternate" hreflang="fr" href="https://freeremovebg.com/fr/" />
+      <xhtml:link rel="alternate" hreflang="de" href="https://freeremovebg.com/de/" />
+      <xhtml:link rel="alternate" hreflang="ru" href="https://freeremovebg.com/ru/" />
+      <xhtml:link rel="alternate" hreflang="ja" href="https://freeremovebg.com/ja/" />
+      <xhtml:link rel="alternate" hreflang="id" href="https://freeremovebg.com/id/" />
+      <xhtml:link rel="alternate" hreflang="x-default" href="https://freeremovebg.com/" />
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>

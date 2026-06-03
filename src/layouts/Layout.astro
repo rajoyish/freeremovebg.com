@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { SITE, LANGUAGES, DEFAULT_LANG, LANG_BY_CODE, localizedUrl } from '../i18n/config';
 
 interface Props {
 	title?: string;
@@ -8,18 +9,36 @@ interface Props {
 	canonical?: string;
 	ogImage?: string;
 	noindex?: boolean;
+	/** Active ISO 639-1 language for this page. Drives <html lang/dir> + hreflang. */
+	lang?: string;
+	/** Path of the page WITHOUT any language prefix, e.g. "/about" or "/". */
+	basePath?: string;
+	/** Whether localized variants of THIS page exist (emit hreflang alternates). */
+	localized?: boolean;
 }
-
-const SITE = 'https://freeremovebg.com';
 
 const {
 	title = 'Free Remove BG: Free AI Background Remover Online',
 	description = 'Free Remove BG is a free AI background remover. Remove bg from image, GIF and batches online in HD. 100% private, no sign-up, unlimited downloads.',
 	keywords = 'free remove bg, remove bg, free ai bg remove, remove bg app image, remove bg free, remove bg from image, remove bg from gif, remove bg ai, remove bg online, remove bg background, remove bg gif, remove bg hd, remove bg high quality, background remove bg, multiple image bg remove, batch bg remove, bg remove ai, remove bg ms word, remove bg ppt, remove bg canva, remove bg web, remove bg offline',
-	canonical = `${SITE}/`,
+	lang = DEFAULT_LANG,
+	basePath = '/',
+	localized = true,
+	canonical = localizedUrl(lang, basePath),
 	ogImage = `${SITE}/images/og-frbg.png`,
 	noindex = false,
 } = Astro.props;
+
+const activeLang = LANG_BY_CODE[lang] ?? LANG_BY_CODE[DEFAULT_LANG];
+
+// hreflang alternates: one per supported language for THIS page, plus the
+// mandatory x-default pointing at the English root so search engines know what
+// to serve users who match no explicit geolocation rule. Only emitted for pages
+// that actually have localized variants (the home page).
+const hreflangAlternates = localized
+	? LANGUAGES.map((l) => ({ hreflang: l.code, href: localizedUrl(l.code, basePath) }))
+	: [];
+const ogLocale = `${lang}${lang === 'en' ? '_US' : ''}`;
 
 const jsonLd = {
 	'@context': 'https://schema.org',
@@ -47,7 +66,7 @@ const jsonLd = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang} dir={activeLang.dir}>
 	<head>
 		<meta charset="UTF-8" />
 		<!-- Set theme before first paint to avoid a flash of the wrong theme -->
@@ -70,6 +89,15 @@ const jsonLd = {
 		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
 		<link rel="canonical" href={canonical} />
 
+		<!-- Localization alternates: every supported language for this page, plus
+		     x-default pointing at the English root for users who match no rule. -->
+		{hreflangAlternates.map((alt) => (
+			<link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+		))}
+		{localized && (
+			<link rel="alternate" hreflang="x-default" href={localizedUrl(DEFAULT_LANG, basePath)} />
+		)}
+
 		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="shortcut icon" href="/favicon.ico" />
@@ -83,7 +111,7 @@ const jsonLd = {
 		<meta property="og:type" content="website" />
 		<meta property="og:url" content={canonical} />
 		<meta property="og:site_name" content="Free Remove BG" />
-		<meta property="og:locale" content="en_US" />
+		<meta property="og:locale" content={ogLocale} />
 		<meta property="og:image" content={ogImage} />
 		<meta property="og:image:alt" content="Free Remove BG - free AI background remover" />
 

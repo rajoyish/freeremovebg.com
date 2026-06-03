@@ -1,37 +1,62 @@
 ---
-const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { getDictionary } from '../i18n/dictionaries';
+import { DEFAULT_LANG, localizedUrl } from '../i18n/config';
+
+interface Props {
+  /** Active language code. */
+  lang?: string;
+  /** Page path WITHOUT a language prefix, e.g. "/about". */
+  basePath?: string;
+}
+
+const { lang = DEFAULT_LANG, basePath = '/' } = Astro.props;
+const dict = getDictionary(lang);
+const t = dict.nav;
+
+// Prefix nav hrefs with the active language so navigation stays in-locale.
+const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
+const href = (p: string) => {
+  if (p === '/') return prefix === '' ? '/' : `${prefix}/`;
+  return `${prefix}${p}`;
+};
+
+const currentPath = (basePath.replace(/\/$/, '') || '/');
 
 const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/about', label: 'About' },
-  { href: '/privacy-policy', label: 'Privacy Policy' },
-  { href: '/terms', label: 'Terms' },
-  { href: '/contact', label: 'Contact' },
+  { path: '/', label: t.home },
+  { path: '/about', label: t.about },
+  { path: '/privacy-policy', label: t.privacy },
+  { path: '/terms', label: t.terms },
+  { path: '/contact', label: t.contact },
 ];
 
-function isActive(href: string) {
-  if (href === '/') return currentPath === '/';
-  return currentPath === href || currentPath === href + '/';
+function isActive(path: string) {
+  if (path === '/') return currentPath === '/';
+  return currentPath === path || currentPath === path + '/';
 }
+
+// Full pathname (with prefix) for the switcher so it can preserve location.
+const switcherPath = href(currentPath);
 ---
 
 <header class="sticky top-0 z-50 border-b border-hairline bg-canvas/80 backdrop-blur-sm">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
-      <a href="/" class="flex items-center gap-2 no-underline">
+      <a href={href('/')} class="flex items-center gap-2 no-underline">
         <img src="/favicon.svg" alt="FreeRemoveBG logo" class="w-8 h-8" />
         <span class="text-lg font-semibold tracking-tight text-ink">FreeRemoveBG</span>
       </a>
 
       <nav class="hidden md:flex items-center gap-6" aria-label="Main">
-        {navLinks.map(({ href, label }) => (
+        {navLinks.map(({ path, label }) => (
           <a
-            href={href}
+            href={href(path)}
             class:list={[
               'text-sm no-underline transition-colors',
-              isActive(href) ? 'font-bold text-ink' : 'text-body hover:text-ink',
+              isActive(path) ? 'font-bold text-ink' : 'text-body hover:text-ink',
             ]}
-            aria-current={isActive(href) ? 'page' : undefined}
+            aria-current={isActive(path) ? 'page' : undefined}
           >
             {label}
           </a>
@@ -39,12 +64,18 @@ function isActive(href: string) {
       </nav>
 
       <div class="flex items-center gap-3">
+        <LanguageSwitcher
+          lang={lang}
+          pathname={switcherPath}
+          labels={dict.switcher}
+        />
+
         <button
           id="theme-toggle"
           type="button"
           role="switch"
-          aria-label="Toggle dark mode"
-          title="Toggle dark mode"
+          aria-label={t.toggleTheme}
+          title={t.toggleTheme}
           class="relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-hairline bg-canvas-soft-2 transition-colors duration-200 cursor-pointer hover:border-hairline-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
           <span class="inline-flex h-5 w-5 translate-x-1 items-center justify-center rounded-full bg-ink text-on-primary shadow-sm transition-transform duration-200 dark:translate-x-6">
             <svg class="block h-3 w-3 dark:hidden" fill="currentColor" viewBox="0 0 24 24">
@@ -60,7 +91,7 @@ function isActive(href: string) {
         <button
           id="mobile-menu-btn"
           type="button"
-          aria-label="Open menu"
+          aria-label={t.openMenu}
           aria-expanded="false"
           aria-controls="mobile-menu"
           class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-hairline bg-canvas-soft-2 cursor-pointer transition-colors hover:border-hairline-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
@@ -76,15 +107,15 @@ function isActive(href: string) {
 
     <nav id="mobile-menu" class="hidden md:hidden border-t border-hairline py-4" aria-label="Mobile">
       <ul class="flex flex-col gap-1 list-none m-0 p-0">
-        {navLinks.map(({ href, label }) => (
+        {navLinks.map(({ path, label }) => (
           <li>
             <a
-              href={href}
+              href={href(path)}
               class:list={[
                 'block px-3 py-2.5 text-sm no-underline rounded-md transition-colors',
-                isActive(href) ? 'font-bold text-ink bg-canvas-soft-2' : 'text-body hover:bg-canvas-soft-2 hover:text-ink',
+                isActive(path) ? 'font-bold text-ink bg-canvas-soft-2' : 'text-body hover:bg-canvas-soft-2 hover:text-ink',
               ]}
-              aria-current={isActive(href) ? 'page' : undefined}
+              aria-current={isActive(path) ? 'page' : undefined}
             >
               {label}
             </a>
@@ -118,7 +149,6 @@ function isActive(href: string) {
   menuBtn?.addEventListener('click', () => {
     const isOpen = mobileMenu?.classList.toggle('hidden') === false;
     menuBtn.setAttribute('aria-expanded', String(isOpen));
-    menuBtn.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
     iconOpen?.classList.toggle('hidden', isOpen);
     iconClose?.classList.toggle('hidden', !isOpen);
   });

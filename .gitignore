@@ -13,9 +13,18 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# environment variables
+# environment variables — NEVER commit real secrets
+# Ignore every .env variant, but keep the documented template (.env.example).
 .env
-.env.production
+.env.*
+!.env.example
+
+# Cloudflare: wrangler.toml is committed on purpose — it holds only non-secret
+# config (routes, asset dir). Production secrets are uploaded via
+# `wrangler secret put` and stored encrypted by Cloudflare, NOT in this file.
+# If you ever add a [vars] secret or a .dev.vars file, ignore those instead:
+.dev.vars
+.dev.vars.*
 
 # macOS-specific files
 .DS_Store

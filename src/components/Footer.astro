@@ -1,48 +1,55 @@
 ---
+import { getDictionary } from '../i18n/dictionaries';
+import { DEFAULT_LANG } from '../i18n/config';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = DEFAULT_LANG } = Astro.props;
+const dict = getDictionary(lang);
+const t = dict.footer;
+const nav = dict.nav;
+
+const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
+const href = (p: string) => {
+  if (p === '/') return prefix === '' ? '/' : `${prefix}/`;
+  return `${prefix}${p}`;
+};
 ---
 
 <footer class="bg-[#0a0a0a] border-t border-[#2a2a2a] mt-auto">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       <div>
-        <h3 class="text-sm font-semibold mb-3 text-[#ededed]">About</h3>
-        <p class="text-sm text-[#a3a3a3] leading-relaxed">
-          A free, privacy-first background remover that runs entirely in your browser. Your images never leave your device, so there are no uploads, no accounts, and no waiting.
-        </p>
+        <h3 class="text-sm font-semibold mb-3 text-[#ededed]">{t.aboutHeading}</h3>
+        <p class="text-sm text-[#a3a3a3] leading-relaxed">{t.aboutBody}</p>
       </div>
 
       <div>
-        <h3 class="text-sm font-semibold mb-3 text-[#ededed]">Features</h3>
+        <h3 class="text-sm font-semibold mb-3 text-[#ededed]">{t.featuresHeading}</h3>
         <ul class="space-y-2 text-sm text-[#a3a3a3]">
-          <li>✓ 100% Private, On-Device Processing</li>
-          <li>✓ No Sign-Up or Watermarks</li>
-          <li>✓ Unlimited Full-Resolution Downloads</li>
-          <li>✓ Batch Processing with ZIP Export</li>
-          <li>✓ Smart AI Engine Selection</li>
-          <li>✓ Works Offline After First Load</li>
+          {t.features.map((f) => <li>✓ {f}</li>)}
         </ul>
       </div>
 
       <div>
-        <h3 class="text-sm font-semibold mb-3 text-[#ededed]">Great For</h3>
+        <h3 class="text-sm font-semibold mb-3 text-[#ededed]">{t.greatForHeading}</h3>
         <ul class="space-y-2 text-sm text-[#a3a3a3]">
-          <li>Product photos &amp; online listings</li>
-          <li>Profile pictures &amp; avatars</li>
-          <li>Logos, graphics &amp; design assets</li>
-          <li>Transparent stickers &amp; cutouts</li>
+          {t.greatFor.map((g) => <li set:html={g} />)}
         </ul>
       </div>
     </div>
 
     <div class="mt-8 pt-8 border-t border-[#2a2a2a] flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[#737373]">
       <nav class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2" aria-label="Footer">
-        <a href="/" class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">Home</a>
-        <a href="/about" class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">About</a>
-        <a href="/privacy-policy" class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">Privacy Policy</a>
-        <a href="/terms" class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">Terms &amp; Conditions</a>
-        <a href="/contact" class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">Contact</a>
+        <a href={href('/')} class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">{nav.home}</a>
+        <a href={href('/about')} class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">{nav.about}</a>
+        <a href={href('/privacy-policy')} class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">{nav.privacy}</a>
+        <a href={href('/terms')} class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">{nav.terms}</a>
+        <a href={href('/contact')} class="text-[#737373] no-underline hover:text-[#ededed] transition-colors">{nav.contact}</a>
       </nav>
-      <p class="m-0 whitespace-nowrap">&copy; {new Date().getFullYear()} FreeRemoveBG. All rights reserved.</p>
+      <p class="m-0 whitespace-nowrap">&copy; {new Date().getFullYear()} FreeRemoveBG. {t.rights}</p>
     </div>
   </div>
 </footer>

@@ -1,0 +1,120 @@
+{
+  "meta": {
+    "title": "Free Remove BG: Free AI Background Remover Online",
+    "description": "Free Remove BG is a free AI background remover. Remove bg from image, GIF and batches online in HD. 100% private, no sign-up, unlimited downloads."
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "privacy": "Privacy Policy",
+    "terms": "Terms",
+    "contact": "Contact",
+    "toggleTheme": "Toggle dark mode",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "switcher": {
+    "label": "Choose language",
+    "searchPlaceholder": "Search language or code…",
+    "noResults": "No languages found"
+  },
+  "hero": {
+    "titleLead": "Free Remove BG:",
+    "titleAccent": "AI Background Remover",
+    "subtitle": "Free Remove BG is a free AI bg remove tool that erases backgrounds from any image, GIF or batch in HD. Everything runs on your device, so your images never leave your browser. No sign-up, and unlimited HD downloads.",
+    "privacyBadge": "100% Private. Processed Locally in Your Browser"
+  },
+  "tool": {
+    "qualityLabel": "Quality:",
+    "modelSmart": "✦ Smart",
+    "modelPortrait": "People & Portraits",
+    "modelGeneral": "Objects & Graphics",
+    "hintAuto": "Analyses your image and automatically selects the best engine for the result",
+    "hintPortrait": "Optimised for sharp edges on hair, skin and fine detail in people",
+    "hintGeneral": "Optimised for logos, products, objects, animals and flat graphics",
+    "dropTitle": "Drop images here or click to upload",
+    "dropSubtitle": "Supports JPG, PNG, WebP, GIF, BMP, AVIF and more · Multiple files supported",
+    "browse": "Browse Files",
+    "addMore": "Add more",
+    "processedImages": "Processed Images",
+    "downloadAll": "Download All (ZIP)",
+    "original": "Original",
+    "removed": "Removed",
+    "downloadPng": "Download PNG",
+    "removeImage": "Remove image",
+    "statusQueued": "Queued",
+    "statusAnalysing": "Analysing…",
+    "statusProcessing": "Processing…",
+    "statusDone": "✓ Done",
+    "statusError": "✗ Error",
+    "preparingDetection": "Preparing smart detection…",
+    "loadingPortrait": "Loading portrait engine…",
+    "analysingImage": "Analysing image…",
+    "removingBackground": "Removing background…",
+    "starting": "Starting…",
+    "allDone": "All done!",
+    "selectImages": "Please select image files (JPG, PNG, WebP, GIF, BMP, AVIF, and more).",
+    "glitchWarning": "may have processed with a glitch. Remove it and upload the same image again to redo it.",
+    "imagesSelected": "images selected",
+    "imageSelected": "image selected"
+  },
+  "features": {
+    "heading": "Everything you need to cut out backgrounds",
+    "subheading": "A complete background removal toolkit that runs entirely on your device. It's fast, free, and built for real work.",
+    "items": [
+      { "title": "100% Free & Completely Private", "body": "Every cutout is completely free and happens directly in your browser. There are no uploads and no servers, so your images never leave your device." },
+      { "title": "Smart Model Selection", "body": "Auto mode detects people and picks the best AI model for each image, so every cutout looks its sharpest." },
+      { "title": "HD Downloads", "body": "Export transparent PNGs at their original full resolution every time. There's no quality loss and no upscaling tricks." },
+      { "title": "Batch Processing", "body": "Drop in dozens of images at once and download the whole set as a single ZIP when they're done." },
+      { "title": "No Sign-Up, No Limits", "body": "No account, no watermarks, no credit system. Open the page and start removing backgrounds instantly." },
+      { "title": "Works Offline", "body": "After the first load the AI runs locally, so you can keep cutting out backgrounds even without a connection." },
+      { "title": "Crisp Edge Detail", "body": "A dedicated portrait engine preserves fine strands of hair, fur, and soft edges that simple cutout tools miss." },
+      { "title": "Any Device, Any Format", "body": "Upload JPG, PNG, or WebP from desktop, tablet, or phone. The interface adapts to whatever screen you're on." },
+      { "title": "Instant Side-by-Side", "body": "Compare the original and the cutout the moment processing finishes, on a transparency checkerboard preview." }
+    ]
+  },
+  "article": {
+    "blocks": [
+      { "heading": "Free Remove BG: The Free AI Background Remover", "body": "Free Remove BG is a free online background remover that erases the background from any picture in seconds. Powered by AI, it lets you remove bg from image files of every kind, no sign-up, no watermark, and no cost. Whether you need a transparent cutout for a product listing, a profile picture, a logo, or a design mockup, just drop in a photo and let the AI bg remove the background for you. Because the tool is free, unlimited, and works right in your browser, it is a faster, more private alternative to the usual remove bg online services." },
+      { "heading": "Remove BG From Image, GIF and More", "body": "This is more than a single-format tool. You can remove bg from image formats including JPG, PNG, WebP and AVIF, and you can even remove bg from GIF frames to create clean, transparent graphics. The AI bg remove engine handles people, products, logos, animals and flat artwork, so the background remove bg result stays sharp around hair, edges and fine detail. Every export is a remove bg HD, full-resolution transparent PNG, giving you high quality cutouts that drop straight into your next project." },
+      { "heading": "Batch and Multiple Image BG Remove", "body": "Need to clear backgrounds from a whole folder? The batch bg remove mode lets you drop dozens of files at once for a true multiple image bg remove workflow. The bg remove AI processes each one, shows a live before-and-after preview, and bundles every cutout into a single ZIP download. There is no queue, no credit system, and no limit, so a remove bg free batch of catalogue photos is just as easy as a single quick edit." },
+      { "heading": "Your Images Never Leave Your Device", "body": "Most remove bg online tools upload your photos to a cloud server. Free Remove BG does the opposite, running the entire cutout locally inside your browser. Your images are never uploaded, stored, or seen by anyone, which makes this remove bg web app ideal for sensitive product shots, client work, and personal photos. Once the page has loaded you can even remove bg offline, since the AI keeps working without a connection." },
+      { "heading": "How to Remove a Background for Free", "body": "Using this free remove bg tool takes three steps. First, drag your image onto the upload zone or click to browse, adding one or many files. Second, the AI detects the subject and erases everything behind it, with Smart mode picking the best engine automatically. Third, download your remove bg high quality PNG, or grab the whole batch as a ZIP. The transparent cutouts you create are perfect to remove bg for Canva designs, drop a clean subject into a remove bg PPT slide, or place a cutout in a remove bg MS Word document." },
+      { "heading": "Free, Unlimited and Watermark-Free", "body": "There is no paywall hiding the good output and no stamp across your downloads. Every cutout comes out at the original resolution, free to use for personal and commercial projects alike. Online sellers, designers, photographers, students and everyday creators all rely on a dependable remove bg free workflow, and Free Remove BG delivers it without an account or install. Install nothing, sign up for nothing, and open the page whenever you need a fast, private, free AI bg remove that just works." }
+    ]
+  },
+  "faq": {
+    "heading": "Frequently Asked Questions",
+    "subheading": "Everything you need to know about removing image backgrounds for free with FreeRemoveBG.",
+    "items": [
+      { "q": "What is Remove BG?", "a": "Remove BG means removing the background from an image so the subject sits on a transparent canvas. FreeRemoveBG is a free AI background remover that does this right in your browser, exporting a clean transparent PNG with no sign-up and no watermark." },
+      { "q": "How to remove bg from an image?", "a": "Open FreeRemoveBG, drag your photo onto the upload zone (or click to browse), and the AI erases the background automatically. When it finishes, download the transparent PNG. You can add several images at once for batch processing." },
+      { "q": "Is Remove BG free?", "a": "Yes. FreeRemoveBG is completely free with no account, no credits, and no watermarks. You get unlimited HD downloads at the original resolution of your image." },
+      { "q": "Is Remove BG safe?", "a": "Yes, it is private by design. FreeRemoveBG runs the entire cutout locally inside your browser, so your images are never uploaded, stored, or seen by anyone. Once the page has loaded you can even work offline." },
+      { "q": "How to remove a background for free?", "a": "Use FreeRemoveBG. Upload your image, let the free AI bg remove engine cut out the subject, and download the transparent result. There is no paywall and no limit on how many images you process." },
+      { "q": "Can I remove bg from a GIF?", "a": "Yes. FreeRemoveBG can remove the background from GIF images to produce clean, transparent graphics, alongside JPG, PNG, WebP and AVIF." },
+      { "q": "Can I remove backgrounds from multiple images at once?", "a": "Yes. Drop in many files for a batch bg remove, watch each one process with a live preview, and download every transparent cutout together as a single ZIP file." }
+    ]
+  },
+  "footer": {
+    "aboutHeading": "About",
+    "aboutBody": "A free, privacy-first background remover that runs entirely in your browser. Your images never leave your device, so there are no uploads, no accounts, and no waiting.",
+    "featuresHeading": "Features",
+    "features": [
+      "100% Private, On-Device Processing",
+      "No Sign-Up or Watermarks",
+      "Unlimited Full-Resolution Downloads",
+      "Batch Processing with ZIP Export",
+      "Smart AI Engine Selection",
+      "Works Offline After First Load"
+    ],
+    "greatForHeading": "Great For",
+    "greatFor": [
+      "Product photos & online listings",
+      "Profile pictures & avatars",
+      "Logos, graphics & design assets",
+      "Transparent stickers & cutouts"
+    ],
+    "rights": "All rights reserved."
+  }
+}

@@ -7,9 +7,14 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "node scripts/gen-region-map.mjs && node scripts/gen-sitemap.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "translate": "node scripts/translate.js",
+    "translate:dry": "node scripts/translate.js --dry-run",
+    "i18n:regionmap": "node scripts/gen-region-map.mjs",
+    "i18n:sitemap": "node scripts/gen-sitemap.mjs",
     "cf:preview": "astro build && wrangler dev",
     "deploy": "astro build && wrangler deploy"
   },
@@ -18,6 +23,7 @@
     "@imgly/background-removal": "^1.7.0",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.4.2",
+    "flag-icons": "^7.5.0",
     "jszip": "^3.10.1",
     "onnxruntime-web": "1.21.0",
     "tailwindcss": "^4.3.0"

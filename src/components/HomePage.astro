@@ -1,0 +1,882 @@
+---
+/**
+ * Dictionary-driven home page.
+ *
+ * Rendered by BOTH the English root (`/`) and every localized route
+ * (`/<lang>/`). All visible copy comes from the resolved dictionary, so a
+ * single source of markup produces fully static, pre-translated pages — the
+ * Google Translation API is only ever touched at build time by the script that
+ * generates `src/i18n/locales/*.json`.
+ *
+ * Strings the browser-side tool needs at runtime are serialized into a
+ * <script type="application/json"> block and read by the client script, so the
+ * interactive UI is localized without re-fetching anything.
+ */
+import Layout from '../layouts/Layout.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import { getDictionary } from '../i18n/dictionaries';
+import { DEFAULT_LANG } from '../i18n/config';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = DEFAULT_LANG } = Astro.props;
+const dict = getDictionary(lang);
+const t = dict.tool;
+const faqs = dict.faq.items;
+
+// Strings consumed by the client tool script (status labels, progress
+// messages, dynamic alerts). Serialized below as JSON for the browser.
+const toolStrings = {
+  preparingDetection: t.preparingDetection,
+  loadingPortrait: t.loadingPortrait,
+  analysingImage: t.analysingImage,
+  removingBackground: t.removingBackground,
+  starting: t.starting,
+  allDone: t.allDone,
+  processing: t.statusProcessing,
+  selectImages: t.selectImages,
+  glitchWarning: t.glitchWarning,
+  imagesSelected: t.imagesSelected,
+  imageSelected: t.imageSelected,
+  removeImage: t.removeImage,
+  downloadPng: t.downloadPng,
+  original: t.original,
+  removed: t.removed,
+  status: {
+    queued: t.statusQueued,
+    analysing: t.statusAnalysing,
+    processing: t.statusProcessing,
+    done: t.statusDone,
+    error: t.statusError,
+  },
+};
+---
+
+<Layout title={dict.meta.title} description={dict.meta.description} lang={lang} basePath="/">
+  <div class="min-h-screen flex flex-col">
+    <Header lang={lang} basePath="/" />
+
+    <main class="flex-1">
+
+      <section class="px-6 pt-16 pb-8 text-center">
+        <div class="max-w-7xl mx-auto">
+          <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-semibold tracking-[-2px] leading-[1.1] mt-0 mb-5 text-ink">
+            {dict.hero.titleLead} <br> {dict.hero.titleAccent}
+          </h1>
+          <p class="text-lg text-body leading-[1.7] mt-0 mb-8 max-w-[700px] mx-auto">
+            {dict.hero.subtitle}
+          </p>
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-canvas-soft-2 border border-hairline rounded-pill text-[13px] text-body font-medium">
+            <svg width="14" height="14" fill="none" class="stroke-link" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            {dict.hero.privacyBadge}
+          </div>
+        </div>
+      </section>
+
+      <section class="px-6 pb-16">
+        <div class="max-w-[960px] mx-auto">
+
+          <div class="mb-5 flex items-center gap-3 flex-wrap">
+            <span class="text-[13px] font-medium text-body">{t.qualityLabel}</span>
+            <div id="model-selector" class="inline-flex bg-canvas-soft-2 border border-hairline rounded-md p-[3px] gap-0.5">
+              <button data-model="auto"
+                class="px-3.5 py-1.5 border-none rounded-sm text-[13px] font-medium cursor-pointer transition-colors bg-ink text-on-primary">
+                {t.modelSmart}
+              </button>
+              <button data-model="portrait"
+                class="px-3.5 py-1.5 border-none rounded-sm text-[13px] font-medium cursor-pointer transition-colors bg-transparent text-body">
+                {t.modelPortrait}
+              </button>
+              <button data-model="general"
+                class="px-3.5 py-1.5 border-none rounded-sm text-[13px] font-medium cursor-pointer transition-colors bg-transparent text-body">
+                {t.modelGeneral}
+              </button>
+            </div>
+            <span id="model-hint" class="text-xs text-mute italic" data-portrait={t.hintPortrait} data-general={t.hintGeneral}>{t.hintAuto}</span>
+          </div>
+
+          <div id="upload-zone"
+            class="rounded-lg overflow-hidden border-2 border-dashed border-hairline-strong bg-canvas cursor-pointer transition-[border-color,background] duration-200 [&:not(.has-files):hover]:border-ink [&:not(.has-files):hover]:bg-canvas-soft">
+
+            <div id="zone-empty" class="px-6 py-16 text-center">
+              <svg width="48" height="48" fill="none" class="stroke-mute mx-auto mb-4 block" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+              </svg>
+              <p class="text-lg font-semibold text-ink mt-0 mb-2">{t.dropTitle}</p>
+              <p class="text-sm text-mute mt-0 mb-6">{t.dropSubtitle}</p>
+              <button id="browse-btn"
+                class="px-6 py-2.5 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85]">
+                {t.browse}
+              </button>
+            </div>
+
+            <div id="zone-filled" class="hidden p-4">
+              <div id="thumb-grid" class="grid gap-2.5 mb-3 grid-cols-[repeat(auto-fill,minmax(100px,1fr))]"></div>
+              <div class="flex items-center justify-between flex-wrap gap-2">
+                <span id="zone-count" class="text-[13px] text-mute"></span>
+                <button id="add-more-btn"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-transparent text-ink border border-hairline rounded-pill text-[13px] font-medium cursor-pointer transition-colors hover:border-ink">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  {t.addMore}
+                </button>
+              </div>
+            </div>
+
+            <input type="file" id="file-input" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,.svg,.ico,.tif,.tiff" multiple class="hidden" />
+          </div>
+
+          <div id="progress-state" class="hidden mt-5">
+            <div class="bg-canvas border border-hairline rounded-[10px] px-5 py-4">
+              <div class="flex items-center justify-between gap-3 mb-2.5">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div id="spinner" class="shrink-0 w-4 h-4 border-2 border-hairline border-t-ink rounded-full animate-spin"></div>
+                  <span id="loading-text" class="text-[13px] font-medium text-ink whitespace-nowrap overflow-hidden text-ellipsis">{t.statusProcessing}</span>
+                </div>
+                <span id="progress-text" class="shrink-0 text-[13px] text-mute tabular-nums">0 / 0</span>
+              </div>
+              <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+                id="progress-track"
+                class="bg-canvas-soft-2 rounded-pill h-1.5 overflow-hidden">
+                <div id="progress-bar"
+                  class="bg-ink h-full rounded-pill w-(--progress) [--progress:0%] transition-[width] duration-400 ease-in-out"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="image-grid" class="hidden mt-10">
+            <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+              <h2 class="text-2xl font-semibold text-ink m-0">{t.processedImages}</h2>
+              <button id="download-all-btn"
+                class="flex items-center gap-2 px-5 py-2.5 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85]">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                {t.downloadAll}
+              </button>
+            </div>
+            <div id="images-container" class="grid gap-5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]"></div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="px-6 py-16 bg-canvas-soft-2 border-t border-hairline">
+        <div class="max-w-[1000px] mx-auto">
+          <div class="text-center mb-12">
+            <h2 class="text-[clamp(1.5rem,4vw,2.25rem)] font-semibold tracking-[-1px] text-ink mt-0 mb-3">{dict.features.heading}</h2>
+            <p class="text-base text-body leading-relaxed max-w-[600px] mx-auto m-0">{dict.features.subheading}</p>
+          </div>
+          <div class="grid gap-x-10 gap-y-12 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
+            {dict.features.items.map((item) => (
+              <div class="text-center">
+                <div class="w-11 h-11 bg-ink rounded-[10px] flex items-center justify-center mx-auto mb-3.5">
+                  <svg width="22" height="22" fill="none" class="stroke-on-primary" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <h3 class="text-base font-semibold text-ink mt-0 mb-2">{item.title}</h3>
+                <p class="text-sm text-body leading-relaxed m-0">{item.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="px-6 py-20 border-t border-hairline">
+        <article id="seo-article" class="max-w-[760px] mx-auto">
+          {dict.article.blocks.map((block, i) => (
+            <div class:list={['reveal', i > 0 && 'mt-12']} data-reveal>
+              {i === 0 ? (
+                <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-5">{block.heading}</h2>
+              ) : (
+                <h3 class="text-[1.3rem] font-semibold text-ink mt-0 mb-4">{block.heading}</h3>
+              )}
+              <p class="text-base text-body leading-[1.8] m-0">{block.body}</p>
+            </div>
+          ))}
+        </article>
+      </section>
+
+      <section class="px-6 py-20 bg-canvas-soft-2 border-t border-hairline">
+        <div class="max-w-[760px] mx-auto">
+          <div class="reveal text-center mb-10" data-reveal>
+            <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-3">{dict.faq.heading}</h2>
+            <p class="text-base text-body leading-relaxed m-0 max-w-[560px] mx-auto">{dict.faq.subheading}</p>
+          </div>
+
+          <div class="reveal flex flex-col gap-3" data-reveal>
+            {faqs.map((faq) => (
+              <details class="group bg-canvas border border-hairline rounded-lg overflow-hidden">
+                <summary class="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer list-none text-[15px] font-medium text-ink select-none">
+                  <span>{faq.q}</span>
+                  <svg class="shrink-0 w-4 h-4 text-mute transition-transform duration-200 group-open:rotate-45" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+                  </svg>
+                </summary>
+                <div class="px-5 pb-4 pt-0 text-[14px] text-body leading-[1.7]"><p class="m-0">{faq.a}</p></div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <script type="application/ld+json" set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((faq) => ({
+          '@type': 'Question',
+          name: faq.q,
+          acceptedAnswer: { '@type': 'Answer', text: faq.a },
+        })),
+      })} />
+
+    </main>
+
+    <Footer lang={lang} />
+
+    <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none"></div>
+  </div>
+
+  <!-- Localized strings for the client-side background-removal tool. -->
+  <script type="application/json" id="tool-i18n" set:html={JSON.stringify(toolStrings)} />
+</Layout>
+
+<script>
+  import { pipeline, env } from '@huggingface/transformers';
+  import { removeBackground } from '@imgly/background-removal';
+  import * as ort from 'onnxruntime-web';
+  import JSZip from 'jszip';
+
+  // ── Localized strings ──────────────────────────────────────────────────────
+  // Read the build-time-translated copy injected by HomePage.astro. Falls back
+  // to English defaults so the tool never breaks if a string is missing.
+  interface ToolI18n {
+    preparingDetection: string; loadingPortrait: string; analysingImage: string;
+    removingBackground: string; starting: string; allDone: string; processing: string;
+    selectImages: string; glitchWarning: string; imagesSelected: string;
+    imageSelected: string; removeImage: string; downloadPng: string;
+    original: string; removed: string;
+    status: { queued: string; analysing: string; processing: string; done: string; error: string };
+  }
+  const I18N: ToolI18n = (() => {
+    try { return JSON.parse(document.getElementById('tool-i18n')?.textContent || '{}'); }
+    catch { return {} as ToolI18n; }
+  })();
+
+  const CACHE_EPOCH = '2026-06-02-coep-fix';
+  try {
+    if (localStorage.getItem('frbg-cache-epoch') !== CACHE_EPOCH) {
+      if (typeof caches !== 'undefined') {
+        const names = await caches.keys();
+        await Promise.all(names.map((n) => caches.delete(n)));
+      }
+      localStorage.setItem('frbg-cache-epoch', CACHE_EPOCH);
+    }
+  } catch { /* storage disabled — nothing to purge */ }
+
+  env.allowLocalModels  = false;
+  env.allowRemoteModels = true;
+
+  // Pin ONNX Runtime to a single thread. Multi-threaded WASM needs
+  // SharedArrayBuffer (cross-origin isolation), which this site does not have;
+  // the threaded path races and produces corrupted output. imgly re-assigns
+  // numThreads at session creation, so lock the property to force it back to 1.
+  try {
+    let threads = 1;
+    Object.defineProperty(ort.env.wasm, 'numThreads', {
+      configurable: true,
+      enumerable: true,
+      get: () => threads,
+      set: (v: number) => { threads = (typeof v === 'number' && v > 0) ? Math.min(v, 1) : 1; },
+    });
+  } catch {
+    ort.env.wasm.numThreads = 1;
+  }
+  ort.env.wasm.proxy = false;
+  if (env.backends?.onnx?.wasm) {
+    env.backends.onnx.wasm.numThreads = 1;
+  }
+
+  type ModelMode = 'auto' | 'portrait' | 'general';
+  type ThumbStatus = 'queued' | 'analysing' | 'processing' | 'done' | 'error';
+
+  let currentMode: ModelMode = 'auto';
+  let detector: any     = null;
+  let portraitPipe: any = null;
+
+  interface QueueItem {
+    id: string;
+    file: File;
+    status: ThumbStatus;
+    originalUrl?: string;
+    resultUrl?: string;
+    outName?: string;
+    blob?: Blob;
+    cardEl?: HTMLElement;
+  }
+  let queue: QueueItem[] = [];
+  let idCounter = 0;
+  const nextId = () => `img-${++idCounter}`;
+  const usedNames = new Set<string>();
+
+  function countLabel(n: number): string {
+    return `${n} ${n !== 1 ? I18N.imagesSelected : I18N.imageSelected}`;
+  }
+
+  const uploadZone    = document.getElementById('upload-zone')!;
+  const fileInput     = document.getElementById('file-input') as HTMLInputElement;
+  const browseBtn     = document.getElementById('browse-btn')!;
+  const addMoreBtn    = document.getElementById('add-more-btn')!;
+  const zoneEmpty     = document.getElementById('zone-empty')!;
+  const zoneFilled    = document.getElementById('zone-filled')!;
+  const thumbGrid     = document.getElementById('thumb-grid')!;
+  const zoneCount     = document.getElementById('zone-count')!;
+  const progressState = document.getElementById('progress-state')!;
+  const progressTrack = document.getElementById('progress-track')!;
+  const progressBar   = document.getElementById('progress-bar') as HTMLElement;
+  const progressText  = document.getElementById('progress-text')!;
+  const loadingText   = document.getElementById('loading-text')!;
+  const imageGrid     = document.getElementById('image-grid')!;
+  const imagesContainer = document.getElementById('images-container')!;
+  const downloadAllBtn  = document.getElementById('download-all-btn')!;
+  const modelHint       = document.getElementById('model-hint')!;
+
+  const HINTS: Record<ModelMode, string> = {
+    auto:     modelHint.textContent || '',
+    portrait: modelHint.dataset.portrait || '',
+    general:  modelHint.dataset.general || '',
+  };
+
+  const ACTIVE_BTN   = ['bg-ink', 'text-on-primary'];
+  const INACTIVE_BTN = ['bg-transparent', 'text-body'];
+
+  document.getElementById('model-selector')!.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('button[data-model]') as HTMLButtonElement | null;
+    if (!btn) return;
+    const mode = btn.dataset.model as ModelMode;
+    currentMode = mode;
+    document.querySelectorAll<HTMLButtonElement>('#model-selector button').forEach(b => {
+      const active = b.dataset.model === mode;
+      b.classList.remove(...(active ? INACTIVE_BTN : ACTIVE_BTN));
+      b.classList.add(...(active ? ACTIVE_BTN : INACTIVE_BTN));
+    });
+    modelHint.textContent = HINTS[mode];
+  });
+
+  const STATUS: Record<ThumbStatus, { bg: string; label: string }> = {
+    queued:     { bg: 'bg-black/45',     label: I18N.status?.queued     ?? 'Queued'      },
+    analysing:  { bg: 'bg-amber-500/90', label: I18N.status?.analysing  ?? 'Analysing…'  },
+    processing: { bg: 'bg-link/90',      label: I18N.status?.processing ?? 'Processing…' },
+    done:       { bg: 'bg-link/90',      label: I18N.status?.done       ?? '✓ Done'      },
+    error:      { bg: 'bg-error/85',     label: I18N.status?.error      ?? '✗ Error'     },
+  };
+  const ALL_STATUS_BG = ['bg-black/45', 'bg-amber-500/90', 'bg-link/90', 'bg-error/85'];
+
+  function isRemovable(status: ThumbStatus): boolean {
+    return status === 'queued' || status === 'error';
+  }
+
+  function addThumb(item: QueueItem) {
+    const wrap = document.createElement('div');
+    wrap.id = `thumb-${item.id}`;
+    wrap.className = 'relative aspect-square rounded-md overflow-hidden bg-canvas-soft-2';
+
+    const img = document.createElement('img');
+    const objUrl = URL.createObjectURL(item.file);
+    img.src = objUrl;
+    img.alt = item.file.name;
+    img.className = 'w-full h-full object-cover block';
+    const revokeThumb = () => URL.revokeObjectURL(objUrl);
+    img.onload = revokeThumb;
+    img.onerror = revokeThumb;
+
+    const overlay = document.createElement('div');
+    overlay.id = `thumb-overlay-${item.id}`;
+    overlay.className = 'absolute inset-0 flex items-center justify-center bg-black/45 transition-all duration-300';
+
+    const badge = document.createElement('span');
+    badge.id = `thumb-badge-${item.id}`;
+    badge.className = 'text-[10px] font-semibold text-white tracking-wide uppercase';
+    badge.textContent = STATUS[item.status].label;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.id = `thumb-remove-${item.id}`;
+    removeBtn.type = 'button';
+    removeBtn.setAttribute('aria-label', `${I18N.removeImage}: ${item.file.name}`);
+    removeBtn.title = I18N.removeImage;
+    removeBtn.className = 'absolute top-1 right-1 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-error text-white shadow-sm transition-opacity duration-150 cursor-pointer hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white';
+    removeBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>';
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      removeItem(item.id);
+    });
+    if (!isRemovable(item.status)) removeBtn.classList.add('hidden');
+
+    overlay.appendChild(badge);
+    wrap.appendChild(img);
+    wrap.appendChild(overlay);
+    wrap.appendChild(removeBtn);
+    thumbGrid.appendChild(wrap);
+  }
+
+  function setThumbStatus(id: string, status: ThumbStatus) {
+    const item = queue.find(q => q.id === id);
+    if (item) item.status = status;
+    const overlay = document.getElementById(`thumb-overlay-${id}`);
+    const badge   = document.getElementById(`thumb-badge-${id}`);
+    document.getElementById(`thumb-remove-${id}`)?.classList.toggle('hidden', !isRemovable(status));
+    if (!overlay || !badge) return;
+    const s = STATUS[status];
+    overlay.classList.remove(...ALL_STATUS_BG, 'opacity-0');
+    overlay.classList.add(s.bg);
+    badge.textContent = s.label;
+    if (status === 'done') setTimeout(() => { overlay.classList.add('opacity-0'); }, 800);
+  }
+
+  function removeItem(id: string) {
+    const idx = queue.findIndex(q => q.id === id);
+    if (idx === -1) return;
+    const item = queue[idx];
+    if (!isRemovable(item.status)) return; // guard: never remove while processing or done
+
+    if (item.originalUrl) URL.revokeObjectURL(item.originalUrl);
+    if (item.resultUrl)   URL.revokeObjectURL(item.resultUrl);
+    if (item.outName)     usedNames.delete(item.outName);
+    item.cardEl?.remove();
+    queue.splice(idx, 1);
+
+    if (queue.length === 0) {
+      animateThumbOut(id, resetZone);
+    } else {
+      zoneCount.textContent = countLabel(queue.length);
+      if (!queue.some(q => q.resultUrl)) imageGrid.classList.add('hidden');
+      animateThumbOut(id);
+    }
+  }
+
+  function animateThumbOut(id: string, done?: () => void) {
+    const el = document.getElementById(`thumb-${id}`);
+    if (!el) { done?.(); return; }
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) { el.remove(); done?.(); return; }
+
+    el.classList.add('thumb-removing');
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      el.remove();
+      done?.();
+    };
+    el.addEventListener('transitionend', finish, { once: true });
+    setTimeout(finish, 260);
+  }
+
+  function resetZone() {
+    thumbGrid.innerHTML = '';
+    imagesContainer.innerHTML = '';
+    zoneFilled.classList.add('hidden');
+    zoneEmpty.classList.remove('hidden');
+    imageGrid.classList.add('hidden');
+    progressState.classList.add('hidden');
+    uploadZone.classList.remove('has-files', 'cursor-default');
+    uploadZone.classList.add('cursor-pointer');
+    zoneCount.textContent = '';
+  }
+
+  function showFilesInZone(items: QueueItem[]) {
+    zoneEmpty.classList.add('hidden');
+    zoneFilled.classList.remove('hidden');
+    uploadZone.classList.add('has-files', 'cursor-default');
+    uploadZone.classList.remove('cursor-pointer');
+    items.forEach(addThumb);
+    zoneCount.textContent = countLabel(queue.length);
+  }
+
+  function setProgress(done: number, total: number, msg: string) {
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    progressBar.style.setProperty('--progress', `${pct}%`);
+    progressTrack.setAttribute('aria-valuenow', String(pct));
+    progressText.textContent = `${done} / ${total}`;
+    loadingText.textContent  = msg;
+  }
+
+  async function ensureDetector() {
+    if (detector) return;
+    loadingText.textContent = I18N.preparingDetection;
+    detector = await pipeline('object-detection', 'Xenova/detr-resnet-50', { dtype: 'fp32' });
+  }
+
+  async function ensurePortraitPipe() {
+    if (portraitPipe) return;
+    loadingText.textContent = I18N.loadingPortrait;
+    portraitPipe = await pipeline('background-removal', 'Xenova/modnet', { dtype: 'fp32' });
+  }
+
+  async function containsPerson(objectUrl: string): Promise<boolean> {
+    await ensureDetector();
+    const dets = await detector(objectUrl, { threshold: 0.5 }) as Array<{ label: string }>;
+    return dets.some(d => d.label.toLowerCase() === 'person');
+  }
+
+  async function removeBg(file: Blob, objectUrl: string, id: string): Promise<{ blob: Blob; usedModel: string }> {
+    if (currentMode === 'portrait') {
+      await ensurePortraitPipe();
+      setThumbStatus(id, 'processing');
+      loadingText.textContent = I18N.removingBackground;
+      const output = await portraitPipe(objectUrl);
+      return { blob: await output.toBlob('image/png'), usedModel: 'People & Portraits' };
+    }
+    if (currentMode === 'general') {
+      setThumbStatus(id, 'processing');
+      loadingText.textContent = I18N.removingBackground;
+      const blob = await removeBackground(file, { model: 'isnet_fp16', output: { format: 'image/png', quality: 1 } });
+      return { blob, usedModel: 'Objects & Graphics' };
+    }
+    // Auto
+    setThumbStatus(id, 'analysing');
+    loadingText.textContent = I18N.analysingImage;
+    const hasPerson = await containsPerson(objectUrl);
+    setThumbStatus(id, 'processing');
+    loadingText.textContent = I18N.removingBackground;
+    if (hasPerson) {
+      await ensurePortraitPipe();
+      const output = await portraitPipe(objectUrl);
+      return { blob: await output.toBlob('image/png'), usedModel: 'Smart · People & Portraits' };
+    }
+    const blob = await removeBackground(file, { model: 'isnet_fp16', output: { format: 'image/png', quality: 1 } });
+    return { blob, usedModel: 'Smart · Objects & Graphics' };
+  }
+
+  // Decode with a tolerant <img> element and re-encode to PNG so every engine
+  // receives a format it can reliably decode (some WebP files fail otherwise).
+  async function normalizeToPng(file: File): Promise<Blob> {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = url;
+      try {
+        await img.decode();
+      } catch {
+        throw new Error(`Could not decode "${file.name}". The file may be corrupt or an unsupported format.`);
+      }
+      const width  = img.naturalWidth;
+      const height = img.naturalHeight;
+      if (!width || !height) throw new Error(`"${file.name}" has no readable image data.`);
+
+      const canvas = document.createElement('canvas');
+      canvas.width  = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas 2D context is unavailable in this browser.');
+      ctx.drawImage(img, 0, 0);
+
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('Failed to convert the image to PNG.');
+      return blob;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  // "image.jpg" -> "image_freeremovebg.png", sanitised and de-duplicated.
+  function buildOutName(originalName: string): string {
+    const base = originalName.replace(/\.[^/.]+$/, '');
+    let stub = base.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toLowerCase();
+    if (!stub) stub = 'image';
+    let candidate = `${stub}_freeremovebg.png`;
+    let n = 2;
+    while (usedNames.has(candidate)) {
+      candidate = `${stub}-${n}_freeremovebg.png`;
+      n++;
+    }
+    usedNames.add(candidate);
+    return candidate;
+  }
+
+  const toastContainer = document.getElementById('toast-container')!;
+  function showToast(message: string, durationMs = 30000) {
+    const toast = document.createElement('div');
+    toast.className = 'toast flex items-center gap-3 px-5 py-3 bg-ink text-on-primary text-sm font-medium rounded-lg shadow-lg max-w-[90vw]';
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="shrink-0 stroke-amber-400"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      <span class="flex-1"></span>
+      <button type="button" aria-label="Dismiss" class="toast-close shrink-0 -mr-1 flex items-center justify-center w-6 h-6 rounded-full text-on-primary/70 transition-colors cursor-pointer hover:bg-on-primary/15 hover:text-on-primary">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    `;
+    toast.querySelector('span')!.textContent = message;
+    toastContainer.appendChild(toast);
+    void toast.offsetWidth;
+    toast.classList.add('toast-visible');
+
+    let dismissed = false;
+    function dismiss() {
+      if (dismissed) return;
+      dismissed = true;
+      clearTimeout(timer);
+      toast.classList.remove('toast-visible');
+      toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+      setTimeout(() => toast.remove(), 400); // fallback if transitionend doesn't fire
+    }
+    toast.querySelector('.toast-close')?.addEventListener('click', dismiss);
+    const timer = setTimeout(dismiss, durationMs);
+  }
+
+  // Flags corrupted output (from the ONNX threading race) via two signals:
+  //   A) disconnected opaque "islands" away from the main subject blob, or
+  //   B) a ragged outline whose left/right edge jumps abruptly between rows.
+  async function isGlitched(blob: Blob): Promise<boolean> {
+    const url = URL.createObjectURL(blob);
+    try {
+      const img = new Image();
+      img.src = url;
+      await img.decode();
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      if (w < 48 || h < 48) return false;
+
+      const scale = Math.min(1, 256 / w);
+      const gw = Math.max(1, Math.round(w * scale));
+      const gh = Math.max(1, Math.round(h * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = gw;
+      canvas.height = gh;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) return false;
+      ctx.drawImage(img, 0, 0, gw, gh);
+      const { data } = ctx.getImageData(0, 0, gw, gh);
+
+      const n = gw * gh;
+      const mask = new Uint8Array(n);
+      let totalOpaque = 0;
+      for (let i = 0; i < n; i++) {
+        if (data[i * 4 + 3] > 32) { mask[i] = 1; totalOpaque++; }
+      }
+      const opaqueRatio = totalOpaque / n;
+      if (opaqueRatio < 0.02 || opaqueRatio > 0.98) return false;
+
+      // Signal A: connected components (8-connectivity, iterative flood fill).
+      const labels = new Int32Array(n).fill(-1);
+      const stack: number[] = [];
+      const areas: number[] = [];
+      for (let start = 0; start < n; start++) {
+        if (!mask[start] || labels[start] !== -1) continue;
+        const id = areas.length;
+        let area = 0;
+        stack.push(start);
+        labels[start] = id;
+        while (stack.length) {
+          const p = stack.pop()!;
+          area++;
+          const px = p % gw;
+          const py = (p / gw) | 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              if (dx === 0 && dy === 0) continue;
+              const nx = px + dx;
+              const ny = py + dy;
+              if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue;
+              const q = ny * gw + nx;
+              if (mask[q] && labels[q] === -1) { labels[q] = id; stack.push(q); }
+            }
+          }
+        }
+        areas.push(area);
+      }
+
+      const maxArea = areas.length ? areas.reduce((m, a) => (a > m ? a : m), 0) : 0;
+      const strayArea = totalOpaque - maxArea;
+      const minIsland = totalOpaque * 0.003;
+      const significant = areas.filter(a => a >= minIsland).length;
+      const glitchByIslands = significant >= 2 && strayArea >= totalOpaque * 0.03;
+
+      // Signal B: ragged silhouette boundary.
+      let prevL = -1, prevR = -1, jumps = 0;
+      const jumpThresh = gw * 0.12;
+      for (let y = 0; y < gh; y++) {
+        let l = -1, r = -1;
+        const rowStart = y * gw;
+        for (let x = 0; x < gw; x++) {
+          if (mask[rowStart + x]) { if (l === -1) l = x; r = x; }
+        }
+        if (l !== -1 && prevL !== -1) {
+          if (Math.abs(l - prevL) > jumpThresh || Math.abs(r - prevR) > jumpThresh) jumps++;
+        }
+        prevL = l; prevR = r;
+      }
+      const glitchByBoundary = jumps >= 6;
+
+      return glitchByIslands || glitchByBoundary;
+    } catch {
+      return false;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  async function processImage(item: QueueItem): Promise<void> {
+    const originalUrl = URL.createObjectURL(item.file);
+    item.originalUrl = originalUrl;
+    let workingUrl: string | null = null;
+    try {
+      const pngBlob = await normalizeToPng(item.file);
+      workingUrl = URL.createObjectURL(pngBlob);
+      const { blob, usedModel } = await removeBg(pngBlob, workingUrl, item.id);
+
+      const glitched = await isGlitched(blob);
+      if (glitched) {
+        showToast(`"${item.file.name}" ${I18N.glitchWarning}`);
+      }
+
+      const resultUrl = URL.createObjectURL(blob);
+      const name = buildOutName(item.file.name);
+      item.resultUrl = resultUrl;
+      item.outName = name;
+      item.blob = blob;
+      item.cardEl = addCard(name, originalUrl, resultUrl, usedModel);
+      setThumbStatus(item.id, 'done');
+    } catch (err) {
+      setThumbStatus(item.id, 'error');
+      throw err;
+    } finally {
+      if (workingUrl) URL.revokeObjectURL(workingUrl);
+    }
+  }
+
+  function addCard(name: string, originalUrl: string, processedUrl: string, modelLabel: string): HTMLElement {
+    const card = document.createElement('div');
+    card.className = 'bg-canvas border border-hairline rounded-[10px] overflow-hidden shadow-sm';
+    card.innerHTML = `
+      <div class="relative aspect-[4/3] grid grid-cols-2">
+        <div class="relative overflow-hidden border-r border-hairline">
+          <img src="${originalUrl}" alt="${I18N.original}" class="w-full h-full object-cover block" />
+          <span class="absolute top-2 left-2 px-2 py-[3px] bg-ink text-on-primary text-[11px] font-medium rounded-[4px]">${I18N.original}</span>
+        </div>
+        <div class="relative overflow-hidden bg-checkerboard">
+          <img src="${processedUrl}" alt="${I18N.removed}" class="w-full h-full object-cover block" />
+          <span class="absolute top-2 right-2 px-2 py-[3px] bg-link text-white text-[11px] font-medium rounded-[4px]">${I18N.removed}</span>
+        </div>
+      </div>
+      <div class="px-4 pt-3 pb-3.5 border-t border-canvas-soft-2">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[13px] font-medium text-ink m-0 overflow-hidden text-ellipsis whitespace-nowrap flex-1">${name}</p>
+          <button class="dl-btn shrink-0 px-4 py-[7px] bg-ink text-on-primary border-none rounded-pill text-[13px] font-medium cursor-pointer transition-opacity hover:opacity-80">
+            ${I18N.downloadPng}
+          </button>
+        </div>
+        <p class="m-0 text-[11px] text-mute font-mono">
+          <span class="inline-block w-[7px] h-[7px] rounded-full bg-link mr-[5px] align-middle"></span>
+          ${modelLabel}
+        </p>
+      </div>
+    `;
+    imagesContainer.appendChild(card);
+    imageGrid.classList.remove('hidden');
+    (card.querySelector('.dl-btn') as HTMLButtonElement).addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = processedUrl;
+      a.download = name;
+      a.click();
+    });
+    return card;
+  }
+
+  const IMAGE_EXT = /\.(jpe?g|png|webp|gif|bmp|avif|svg|ico|tiff?)$/i;
+  function isImageFile(f: File): boolean {
+    return f.type.startsWith('image/') || IMAGE_EXT.test(f.name);
+  }
+
+  async function handleFiles(newFiles: File[]) {
+    const imgs = newFiles.filter(isImageFile);
+    if (!imgs.length) { alert(I18N.selectImages); return; }
+
+    const newItems: QueueItem[] = imgs.map(file => ({ id: nextId(), file, status: 'queued' as ThumbStatus }));
+    queue.push(...newItems);
+    showFilesInZone(newItems);
+
+    progressState.classList.remove('hidden');
+    const total = newItems.length;
+    let done = 0;
+    setProgress(done, total, I18N.starting);
+
+    for (const item of newItems) {
+      // The item may have been removed from the zone before we reached it.
+      if (!queue.includes(item)) { done++; setProgress(done, total, I18N.processing); continue; }
+      setProgress(done, total, `${I18N.processing}`);
+      try {
+        await processImage(item);
+      } catch (err) {
+        console.error(`Skipping ${item.file.name}:`, err);
+      }
+      done++;
+      setProgress(done, total, done === total ? I18N.allDone : I18N.processing);
+    }
+
+    if (done === total) setTimeout(() => { progressState.classList.add('hidden'); }, 2000);
+  }
+
+  async function downloadZip() {
+    const ready = queue.filter(q => q.blob && q.outName);
+    if (!ready.length) return;
+    const zip = new JSZip();
+    ready.forEach(({ outName, blob }) => zip.file(outName!, blob!));
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'freeremovebg.zip';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
+  const DRAG_ON  = ['border-ink', 'bg-canvas-soft'];
+  const DRAG_OFF = ['border-hairline-strong', 'bg-canvas'];
+
+  function setDragState(active: boolean) {
+    uploadZone.classList.remove(...(active ? DRAG_OFF : DRAG_ON));
+    uploadZone.classList.add(...(active ? DRAG_ON : DRAG_OFF));
+  }
+
+  uploadZone.addEventListener('click', () => {
+    if (!uploadZone.classList.contains('has-files')) fileInput.click();
+  });
+  browseBtn.addEventListener('click',  (e) => { e.stopPropagation(); fileInput.click(); });
+  addMoreBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files?.length) handleFiles(Array.from(fileInput.files));
+    fileInput.value = '';
+  });
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if (!uploadZone.classList.contains('has-files')) setDragState(true);
+  });
+  uploadZone.addEventListener('dragleave', () => {
+    if (!uploadZone.classList.contains('has-files')) setDragState(false);
+  });
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (!uploadZone.classList.contains('has-files')) setDragState(false);
+    if (e.dataTransfer?.files.length) handleFiles(Array.from(e.dataTransfer.files));
+  });
+  downloadAllBtn.addEventListener('click', downloadZip);
+
+  const revealEls = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+    revealEls.forEach(el => el.classList.add('is-visible'));
+  } else {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+
+    revealEls.forEach(el => revealObserver.observe(el));
+  }
+</script>
