@@ -73,7 +73,10 @@ const FORCE = args.includes("--force");
 const langsArg = (() => {
   const i = args.indexOf("--langs");
   return i !== -1 && args[i + 1]
-    ? args[i + 1].split(",").map((s) => s.trim()).filter(Boolean)
+    ? args[i + 1]
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
     : null;
 })();
 
@@ -119,7 +122,18 @@ function collectStrings(value, out) {
  * Translate strings via Google Cloud Translation v2 (REST).
  * Up to 128 `q` segments are allowed per request; we chunk to 100 to stay safe.
  * Order in === order out, per the API contract.
+ *
+ * We use format=html so the API preserves HTML tags (<strong>, <p>, etc.) and
+ * only translates the visible text content. The API may entity-encode quotes
+ * and apostrophes in the result; we decode those back to plain characters.
  */
+function decodeHtmlEntities(str) {
+  return str
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&");
+}
+
 async function translateBatch(texts, target) {
   const CHUNK = 100;
   const out = [];
@@ -130,7 +144,7 @@ async function translateBatch(texts, target) {
     chunk.forEach((q) => body.append("q", q));
     body.set("source", "en");
     body.set("target", target);
-    body.set("format", "text");
+    body.set("format", "html");
 
     const res = await fetch(ENDPOINT, {
       method: "POST",
@@ -142,7 +156,8 @@ async function translateBatch(texts, target) {
       throw new Error(`Google Translate API ${res.status}: ${detail}`);
     }
     const json = await res.json();
-    for (const t of json.data.translations) out.push(t.translatedText);
+    for (const t of json.data.translations)
+      out.push(decodeHtmlEntities(t.translatedText));
   }
   return out;
 }
@@ -181,7 +196,9 @@ async function main() {
 
   console.log(`\n🌍 Translation sync`);
   console.log(`   Source strings : ${sourceStrings.length}`);
-  console.log(`   Target langs   : ${targets.map((l) => l.code).join(", ") || "(none)"}`);
+  console.log(
+    `   Target langs   : ${targets.map((l) => l.code).join(", ") || "(none)"}`,
+  );
   if (DRY_RUN) console.log(`   Mode           : DRY RUN (no API calls)`);
   if (FORCE) console.log(`   Mode           : FORCE (ignoring cache)`);
   console.log("");
@@ -208,7 +225,9 @@ async function main() {
     if (p.missing.length === 0) {
       console.log(`   • ${p.lang.code}: up to date (0 new strings)`);
     } else {
-      console.log(`   • ${p.lang.code}: ${p.missing.length} new strings · ${p.cost} chars`);
+      console.log(
+        `   • ${p.lang.code}: ${p.missing.length} new strings · ${p.cost} chars`,
+      );
     }
   }
   console.log(`\n   Total billable this run: ${plannedChars} characters`);
@@ -246,7 +265,11 @@ async function main() {
       billed += src.length;
     });
     // Append-and-persist: merged with everything previously cached.
-    await writeFile(file, JSON.stringify(sortedByKey(cache), null, 2) + "\n", "utf8");
+    await writeFile(
+      file,
+      JSON.stringify(sortedByKey(cache), null, 2) + "\n",
+      "utf8",
+    );
     console.log(`     saved → src/i18n/locales/${lang.code}.json`);
   }
 

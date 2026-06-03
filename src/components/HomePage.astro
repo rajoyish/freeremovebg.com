@@ -27,6 +27,16 @@ const dict = getDictionary(lang);
 const t = dict.tool;
 const faqs = dict.faq.items;
 
+// FAQ answers carry inline HTML for on-page rendering. For the JSON-LD
+// structured data, flatten to clean plain text (strip tags, decode entities).
+const faqText = (html: string) =>
+  html
+    .replace(/<[^>]+>/g, '')
+    .replace(/&rarr;/g, '→')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+
 // Strings consumed by the client tool script (status labels, progress
 // messages, dynamic alerts). Serialized below as JSON for the browser.
 const toolStrings = {
@@ -212,7 +222,7 @@ const toolStrings = {
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
                   </svg>
                 </summary>
-                <div class="px-5 pb-4 pt-0 text-[14px] text-body leading-[1.7]"><p class="m-0">{faq.a}</p></div>
+                <div class="px-5 pb-4 pt-0 text-[14px] text-body leading-[1.7] [&_p]:m-0 [&_p+p]:mt-3" set:html={faq.a}></div>
               </details>
             ))}
           </div>
@@ -225,7 +235,7 @@ const toolStrings = {
         mainEntity: faqs.map((faq) => ({
           '@type': 'Question',
           name: faq.q,
-          acceptedAnswer: { '@type': 'Answer', text: faq.a },
+          acceptedAnswer: { '@type': 'Answer', text: faqText(faq.a) },
         })),
       })} />
 
