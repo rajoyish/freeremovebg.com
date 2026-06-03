@@ -158,3 +158,24 @@ body {
   background-color: var(--color-ink);
   color: var(--color-on-primary);
 }
+
+/* ── Complex-script line-height fix ──────────────────────────────────────────
+   Devanagari (Nepali, Hindi, Marathi), Bengali, Tamil, Telugu, Gujarati,
+   Punjabi (Gurmukhi), Thai, Arabic, Urdu, and Persian have tall
+   ascenders/descenders or stacking diacritics that get clipped by the tight
+   `leading-[1.1]` on hero headings. Bump line-height only for those languages
+   so English remains crisp and tight. */
+:lang(ne) h1, :lang(ne) h2, :lang(ne) h3,
+:lang(hi) h1, :lang(hi) h2, :lang(hi) h3,
+:lang(mr) h1, :lang(mr) h2, :lang(mr) h3,
+:lang(bn) h1, :lang(bn) h2, :lang(bn) h3,
+:lang(ta) h1, :lang(ta) h2, :lang(ta) h3,
+:lang(te) h1, :lang(te) h2, :lang(te) h3,
+:lang(gu) h1, :lang(gu) h2, :lang(gu) h3,
+:lang(pa) h1, :lang(pa) h2, :lang(pa) h3,
+:lang(th) h1, :lang(th) h2, :lang(th) h3,
+:lang(ar) h1, :lang(ar) h2, :lang(ar) h3,
+:lang(ur) h1, :lang(ur) h2, :lang(ur) h3,
+:lang(fa) h1, :lang(fa) h2, :lang(fa) h3 {
+  line-height: 1.4 !important;
+}
