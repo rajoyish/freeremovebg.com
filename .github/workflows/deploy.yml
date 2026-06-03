@@ -16,6 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    # Secrets cannot be referenced directly in step-level `if:` conditionals,
+    # so expose the key as a job-level env var and test that instead.
+    env:
+      GOOGLE_TRANSLATE_API_KEY: ${{ secrets.GOOGLE_TRANSLATE_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,9 +43,7 @@ jobs:
       # this step just fetches any new/edited English strings. Already-cached
       # strings bill zero characters.
       - name: Sync translations
-        if: ${{ secrets.GOOGLE_TRANSLATE_API_KEY != '' }}
-        env:
-          GOOGLE_TRANSLATE_API_KEY: ${{ secrets.GOOGLE_TRANSLATE_API_KEY }}
+        if: ${{ env.GOOGLE_TRANSLATE_API_KEY != '' }}
         run: pnpm run translate
 
       - name: Build
