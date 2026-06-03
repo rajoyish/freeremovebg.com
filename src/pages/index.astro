@@ -733,31 +733,45 @@ const faqs = [
   // ── Toast notifications ────────────────────────────────────────────────────
   const toastContainer = document.getElementById('toast-container')!;
 
-  function showToast(message: string, durationMs = 10000) {
+  function showToast(message: string, durationMs = 30000) {
     const toast = document.createElement('div');
-    toast.className = 'toast flex items-center gap-3 px-5 py-3 bg-ink text-on-primary text-sm font-medium rounded-lg shadow-lg';
+    toast.className = 'toast flex items-center gap-3 px-5 py-3 bg-ink text-on-primary text-sm font-medium rounded-lg shadow-lg max-w-[90vw]';
     toast.setAttribute('role', 'alert');
     toast.innerHTML = `
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="shrink-0 stroke-amber-400"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-      <span>${message}</span>
+      <span class="flex-1">${message}</span>
+      <button type="button" aria-label="Dismiss" class="toast-close shrink-0 -mr-1 flex items-center justify-center w-6 h-6 rounded-full text-on-primary/70 transition-colors cursor-pointer hover:bg-on-primary/15 hover:text-on-primary">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
     `;
     toastContainer.appendChild(toast);
     // Trigger reflow so the transition plays.
     void toast.offsetWidth;
     toast.classList.add('toast-visible');
 
-    setTimeout(() => {
+    let dismissed = false;
+    function dismiss() {
+      if (dismissed) return;
+      dismissed = true;
+      clearTimeout(timer);
       toast.classList.remove('toast-visible');
       toast.addEventListener('transitionend', () => toast.remove(), { once: true });
-      setTimeout(() => toast.remove(), 400); // fallback
-    }, durationMs);
+      setTimeout(() => toast.remove(), 400); // fallback if transitionend doesn't fire
+    }
+
+    toast.querySelector('.toast-close')?.addEventListener('click', dismiss);
+    const timer = setTimeout(dismiss, durationMs);
   }
 
   // ── Glitch detection ──────────────────────────────────────────────────────
-  // Scans the result PNG for the torn-band corruption signature: large
-  // contiguous blocks of fully-transparent rows sandwiched between opaque
-  // content. Returns true if the image looks glitched.
-  async function isGlitched(blob: Blob, threshold = 0.04): Promise<boolean> {
+  // The ONNX threading race corrupts results as blocky garbage: chunks of opaque
+  // pixels get displaced into a diagonal staircase, leaving islands that are
+  // disconnected from the real subject and a ragged left/right silhouette. We
+  // detect two independent signals and flag if either fires (a missed glitch is
+  // worse than an extra, dismissible warning):
+  //   A) Disconnected opaque "islands" away from the main subject blob.
+  //   B) A ragged outline whose left/right edge jumps abruptly between rows.
+  async function isGlitched(blob: Blob): Promise<boolean> {
     const url = URL.createObjectURL(blob);
     try {
       const img = new Image();
@@ -765,47 +779,87 @@ const faqs = [
       await img.decode();
       const w = img.naturalWidth;
       const h = img.naturalHeight;
-      if (!w || !h) return false;
+      if (w < 48 || h < 48) return false;
 
+      // Downscale to keep the analysis fast.
+      const scale = Math.min(1, 256 / w);
+      const gw = Math.max(1, Math.round(w * scale));
+      const gh = Math.max(1, Math.round(h * scale));
       const canvas = document.createElement('canvas');
-      canvas.width = w;
-      canvas.height = h;
-      const ctx = canvas.getContext('2d');
+      canvas.width = gw;
+      canvas.height = gh;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       if (!ctx) return false;
-      ctx.drawImage(img, 0, 0);
-      const { data } = ctx.getImageData(0, 0, w, h);
+      ctx.drawImage(img, 0, 0, gw, gh);
+      const { data } = ctx.getImageData(0, 0, gw, gh);
 
-      // Build per-row opacity: a row is "empty" if >95% of its pixels are fully
-      // transparent (alpha === 0).
-      const emptyThreshold = Math.floor(w * 0.95);
-      const rowEmpty: boolean[] = [];
-      for (let y = 0; y < h; y++) {
-        let transparentCount = 0;
-        const rowStart = y * w * 4;
-        for (let x = 0; x < w; x++) {
-          if (data[rowStart + x * 4 + 3] === 0) transparentCount++;
+      // Binary opaque mask (alpha above a small threshold ignores anti-aliasing).
+      const n = gw * gh;
+      const mask = new Uint8Array(n);
+      let totalOpaque = 0;
+      for (let i = 0; i < n; i++) {
+        if (data[i * 4 + 3] > 32) { mask[i] = 1; totalOpaque++; }
+      }
+      // Nothing meaningful to analyse if the image is almost empty or fully opaque.
+      const opaqueRatio = totalOpaque / n;
+      if (opaqueRatio < 0.02 || opaqueRatio > 0.98) return false;
+
+      // ── Signal A: connected components (8-connectivity, iterative flood fill) ──
+      const labels = new Int32Array(n).fill(-1);
+      const stack: number[] = [];
+      const areas: number[] = [];
+      for (let start = 0; start < n; start++) {
+        if (!mask[start] || labels[start] !== -1) continue;
+        const id = areas.length;
+        let area = 0;
+        stack.push(start);
+        labels[start] = id;
+        while (stack.length) {
+          const p = stack.pop()!;
+          area++;
+          const px = p % gw;
+          const py = (p / gw) | 0;
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              if (dx === 0 && dy === 0) continue;
+              const nx = px + dx;
+              const ny = py + dy;
+              if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue;
+              const q = ny * gw + nx;
+              if (mask[q] && labels[q] === -1) { labels[q] = id; stack.push(q); }
+            }
+          }
         }
-        rowEmpty.push(transparentCount >= emptyThreshold);
+        areas.push(area);
       }
 
-      // Find contiguous bands of empty rows that are at least `bandMin` rows
-      // tall. If total glitched rows exceed `threshold` of image height, flag.
-      const bandMin = Math.max(4, Math.floor(h * 0.02));
-      let glitchedRows = 0;
-      let run = 0;
-      let hadContent = false;
-      for (let y = 0; y < h; y++) {
-        if (rowEmpty[y]) {
-          run++;
-        } else {
-          if (hadContent && run >= bandMin) glitchedRows += run;
-          run = 0;
-          hadContent = true;
+      const maxArea = areas.length ? Math.max(...areas) : 0;
+      const strayArea = totalOpaque - maxArea;
+      // Significant islands are >= 0.3% of opaque area (filters specks/noise).
+      const minIsland = totalOpaque * 0.003;
+      const significant = areas.filter(a => a >= minIsland).length;
+      // Multiple significant blobs whose strays add up to a real chunk = glitch.
+      const glitchByIslands = significant >= 2 && strayArea >= totalOpaque * 0.03;
+
+      // ── Signal B: ragged silhouette boundary ──────────────────────────────
+      let prevL = -1, prevR = -1, jumps = 0;
+      const jumpThresh = gw * 0.12;
+      for (let y = 0; y < gh; y++) {
+        let l = -1, r = -1;
+        const rowStart = y * gw;
+        for (let x = 0; x < gw; x++) {
+          if (mask[rowStart + x]) { if (l === -1) l = x; r = x; }
         }
+        if (l !== -1 && prevL !== -1) {
+          if (Math.abs(l - prevL) > jumpThresh || Math.abs(r - prevR) > jumpThresh) jumps++;
+        }
+        prevL = l; prevR = r;
       }
-      // Don't count a trailing transparent band (normal for subjects that don't
-      // fill the frame vertically).
-      return glitchedRows / h >= threshold;
+      const glitchByBoundary = jumps >= 6;
+
+      return glitchByIslands || glitchByBoundary;
+    } catch {
+      return false;
     } finally {
       URL.revokeObjectURL(url);
     }
@@ -825,7 +879,7 @@ const faqs = [
       // Check for the torn-band glitch and warn the user if detected.
       const glitched = await isGlitched(blob);
       if (glitched) {
-        showToast('A result looks glitched. Try uploading the same image again to redo it.');
+        showToast(`"${item.file.name}" may have processed with a glitch. Remove it and upload the same image again to redo it.`);
       }
 
       const resultUrl = URL.createObjectURL(blob);
