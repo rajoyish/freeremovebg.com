@@ -640,8 +640,12 @@ const toolStrings = {
     `;
     toast.querySelector('span')!.textContent = message;
     toastContainer.appendChild(toast);
-    void toast.offsetWidth;
-    toast.classList.add('toast-visible');
+    // Use rAF to let the browser paint the initial (hidden) state before
+    // adding the visible class, triggering the CSS transition without a
+    // forced synchronous reflow (previously: void toast.offsetWidth).
+    requestAnimationFrame(() => {
+      toast.classList.add('toast-visible');
+    });
 
     let dismissed = false;
     function dismiss() {

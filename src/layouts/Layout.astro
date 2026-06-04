@@ -122,12 +122,31 @@ const jsonLd = {
 
 		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
-		<script async src="https://www.googletagmanager.com/gtag/js?id=G-7NSS890Q9C"></script>
+		<!-- Google Analytics: deferred until after first paint to avoid forced-
+		     reflow during the critical rendering window. The gtag.js library
+		     performs DOM reads (viewport measurements, scroll offsets) on init,
+		     which causes ~82 ms of layout thrashing when it races with the
+		     initial render. Loading it on `requestIdleCallback` (or a 3.5 s
+		     fallback) ensures it never fires before LCP completes. -->
 		<script is:inline>
 			window.dataLayer = window.dataLayer || [];
 			function gtag(){dataLayer.push(arguments);}
-			gtag('js', new Date());
-			gtag('config', 'G-7NSS890Q9C');
+
+			(function loadGA() {
+				function init() {
+					var s = document.createElement('script');
+					s.src = 'https://www.googletagmanager.com/gtag/js?id=G-7NSS890Q9C';
+					s.async = true;
+					document.head.appendChild(s);
+					gtag('js', new Date());
+					gtag('config', 'G-7NSS890Q9C');
+				}
+				if ('requestIdleCallback' in window) {
+					requestIdleCallback(init, { timeout: 3500 });
+				} else {
+					setTimeout(init, 3500);
+				}
+			})();
 		</script>
 
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
