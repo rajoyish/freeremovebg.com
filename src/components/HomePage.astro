@@ -919,6 +919,7 @@ const toolStrings = {
         await processImage(item);
       } catch (err) {
         console.error(`Skipping ${item.file.name}:`, err);
+        showToast('An error occurred. Please try again after some time.');
       }
       done++;
       setProgress(done, total, done === total ? I18N.allDone : I18N.processing);
