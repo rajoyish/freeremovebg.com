@@ -74,7 +74,11 @@
 #                         'unsafe-inline' when a hash/nonce is present, so we use
 #                         no hashes here — this keeps inline execution working.
 #   - https hosts       : jsDelivr (ORT backend), GTM/GA, Cloudflare Insights.
-# connect-src: model/WASM downloads (HF + jsDelivr), analytics beacons, blob/data.
+# connect-src: model/WASM downloads (HF for the portrait model + jsDelivr for the
+#   ORT backend + staticimgly.com for the @imgly/background-removal object model
+#   data, i.e. resources.json and the isnet .onnx weights), analytics beacons,
+#   blob/data. WITHOUT staticimgly.com the object/graphics ("general") engine is
+#   silently blocked by CSP and only person/portrait images get cut out.
 # worker-src / child-src: blob: for the ONNX web workers.
 # frame-ancestors 'none' + X-Frame-Options: clickjacking protection (header-only).
 #
@@ -93,4 +97,4 @@
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://huggingface.co https://*.hf.co https://cdn-lfs.huggingface.co https://*.huggingface.co https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://cloudflareinsights.com https://static.cloudflareinsights.com blob: data:; worker-src 'self' blob:; child-src 'self' blob:; form-action 'self' https://formsubmit.co; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://huggingface.co https://*.hf.co https://cdn-lfs.huggingface.co https://*.huggingface.co https://cdn.jsdelivr.net https://staticimgly.com https://www.googletagmanager.com https://www.google-analytics.com https://cloudflareinsights.com https://static.cloudflareinsights.com blob: data:; worker-src 'self' blob:; child-src 'self' blob:; form-action 'self' https://formsubmit.co; frame-ancestors 'none'
