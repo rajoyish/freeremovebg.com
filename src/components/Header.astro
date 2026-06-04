@@ -14,11 +14,16 @@ const { lang = DEFAULT_LANG, basePath = '/' } = Astro.props;
 const dict = getDictionary(lang);
 const t = dict.nav;
 
-// Prefix nav hrefs with the active language so navigation stays in-locale.
+// Only the home page (`/`) has localized variants (`/hi/`, `/es/`, …). The
+// static sub-pages (about, contact, privacy-policy, terms) are English-only —
+// no `/<lang>/about` route is ever built. So prefix ONLY the home link with the
+// active language; every other link points at its single English route. Without
+// this guard, every localized page emitted ~4 dead `/<lang>/<page>` links that
+// 404'd, wasting crawl budget and breaking navigation.
 const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
 const href = (p: string) => {
   if (p === '/') return prefix === '' ? '/' : `${prefix}/`;
-  return `${prefix}${p}`;
+  return p;
 };
 
 const currentPath = (basePath.replace(/\/$/, '') || '/');

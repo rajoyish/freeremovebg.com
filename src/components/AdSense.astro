@@ -1,0 +1,26 @@
+---
+/**
+ * AdSense loader — drop this once, in <head> (it lives in Layout.astro).
+ *
+ * Renders ABSOLUTELY NOTHING until `PUBLIC_ADSENSE_CLIENT` is set to a real
+ * "ca-pub-…" id, so the site ships ad-free and flips on with one env var. When
+ * enabled it emits the single official adsbygoogle.js loader tag, marked
+ * `async` + `crossorigin` exactly as Google specifies.
+ *
+ * Loading strategy: the tag is plain `async` (not deferred behind
+ * requestIdleCallback like gtag) because AdSense's auto-ads and slot fills key
+ * off this script being present early. It still won't block render, and since
+ * it only ships when an id exists it never affects today's Lighthouse scores.
+ */
+import { ADSENSE_ENABLED, ADSENSE_CLIENT, ADSENSE_LOADER_SRC } from '../lib/adsense';
+---
+{ADSENSE_ENABLED && (
+  <script
+    async
+    src={ADSENSE_LOADER_SRC}
+    crossorigin="anonymous"
+  ></script>
+)}
+{ADSENSE_ENABLED && (
+  <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+)}

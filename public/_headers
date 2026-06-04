@@ -92,17 +92,14 @@
 #
 # No Cache-Control is set here, so the cache rules above are untouched.
 #
-# ── AdSense (future) ─────────────────────────────────────────────────────────
-# When integrating AdSense, extend the directives below with Google's origins:
-#   script-src : add https://pagead2.googlesyndication.com
-#                    https://partner.googleadservices.com
-#                    https://tpc.googlesyndication.com https://adservice.google.com
-#   frame-src  : add https://googleads.g.doubleclick.net
-#                    https://tpc.googlesyndication.com https://www.google.com
-#   img-src    : add https://*.g.doubleclick.net https://*.googlesyndication.com
-#   connect-src: add https://pagead2.googlesyndication.com https://*.g.doubleclick.net
+# ── AdSense ──────────────────────────────────────────────────────────────────
+# Google's ad origins are ALREADY allow-listed in the CSP below (script-src,
+# frame-src, img-src, connect-src). Allow-listing is inert: it permits requests
+# to those hosts but causes none on its own. So ads stay fully off until you set
+# PUBLIC_ADSENSE_CLIENT (which is what actually injects the loader). This means
+# turning ads on is a single env-var change — no header edit required at launch.
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://huggingface.co https://*.hf.co https://cdn-lfs.huggingface.co https://*.huggingface.co https://cdn.jsdelivr.net https://staticimgly.com https://www.googletagmanager.com https://www.google-analytics.com https://cloudflareinsights.com https://static.cloudflareinsights.com blob: data:; worker-src 'self' blob:; child-src 'self' blob:; form-action 'self' https://formsubmit.co; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com https://*.g.doubleclick.net https://*.googlesyndication.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://huggingface.co https://*.hf.co https://cdn-lfs.huggingface.co https://*.huggingface.co https://cdn.jsdelivr.net https://staticimgly.com https://www.googletagmanager.com https://www.google-analytics.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://pagead2.googlesyndication.com https://*.g.doubleclick.net blob: data:; frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com; worker-src 'self' blob:; child-src 'self' blob:; form-action 'self' https://formsubmit.co; frame-ancestors 'none'

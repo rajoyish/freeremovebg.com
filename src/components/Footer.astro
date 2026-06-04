@@ -11,10 +11,14 @@ const dict = getDictionary(lang);
 const t = dict.footer;
 const nav = dict.nav;
 
+// Only the home page is localized; the about/contact/privacy/terms pages are
+// English-only single routes. Prefix just the home link with the active
+// language and leave the rest unprefixed so we never emit dead /<lang>/<page>
+// links from localized pages.
 const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
 const href = (p: string) => {
   if (p === '/') return prefix === '' ? '/' : `${prefix}/`;
-  return `${prefix}${p}`;
+  return p;
 };
 ---
 

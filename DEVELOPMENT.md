@@ -313,3 +313,34 @@ When contributing:
 - [Transformers.js](https://huggingface.co/docs/transformers.js)
 - [Xenova/modnet Model](https://huggingface.co/Xenova/modnet)
 - [Vercel Design](https://vercel.com/design)
+
+## Google AdSense (dormant until activated)
+
+The ad system is fully built but **off by default**. Nothing loads or renders
+until a publisher id is set, so the site ships ad-free and the background-removal
+engine is never affected.
+
+How it's wired:
+
+- `src/lib/adsense.ts` — reads `PUBLIC_ADSENSE_CLIENT`; exposes `ADSENSE_ENABLED`.
+- `src/components/AdSense.astro` — injects the official loader in `<head>`
+  (already included in `Layout.astro`). Emits nothing while disabled.
+- `src/components/AdSlot.astro` — a reusable ad unit. Renders nothing in
+  production while disabled; shows a labelled placeholder in `dev` so you can
+  position slots. Use `<AdSlot slot="1234567890" />`.
+- `public/_headers` — Google's ad origins are already allow-listed in the CSP.
+  Allow-listing is inert (permits requests but triggers none), so it's safe to
+  ship now.
+- `worker/index.js` — `mediapartners-google` / `adsbot-google` crawlers already
+  bypass geo-redirect so AdSense reviews the canonical English pages.
+
+To go live (once the site has a handful of users and is AdSense-approved):
+
+1. Set `PUBLIC_ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX` in `.env` **and** as a
+   Cloudflare build variable (so the production bundle picks it up).
+2. Fill in `public/ads.txt` — uncomment the `google.com, pub-…` line with the
+   matching id.
+3. Create ad units in the AdSense dashboard and drop `<AdSlot slot="…" />` where
+   you want them (e.g. in `HomePage.astro` between sections). The home page tool
+   UI and the AI `<script>` engine need no changes.
+4. Rebuild and deploy. No CSP or header edits are required.

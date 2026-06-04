@@ -1,0 +1,72 @@
+---
+/**
+ * A single reusable AdSense ad unit.
+ *
+ * Place one anywhere you want an ad (e.g. between content sections). Like the
+ * loader, it is INERT until `PUBLIC_ADSENSE_CLIENT` is set:
+ *   • Production + no id  → renders nothing at all (no layout impact).
+ *   • Dev + no id         → renders a labelled dashed placeholder so you can see
+ *                           and position slots without a live AdSense account.
+ *   • Enabled             → renders the real <ins class="adsbygoogle"> + the
+ *                           push() call that asks AdSense to fill it.
+ *
+ * Usage:
+ *   <AdSlot slot="1234567890" />                     // responsive (default)
+ *   <AdSlot slot="1234567890" format="rectangle" responsive={false} />
+ *
+ * Get the numeric `slot` id from AdSense → Ads → By ad unit after you create a
+ * unit. Until you have one, leave slots in place; they stay invisible.
+ */
+import { ADSENSE_ENABLED, ADSENSE_CLIENT } from '../lib/adsense';
+
+interface Props {
+  /** Ad unit id from the AdSense dashboard (the data-ad-slot value). */
+  slot?: string;
+  /** AdSense ad format. "auto" is the standard responsive unit. */
+  format?: string;
+  /** Whether the unit reflows to fill its container width. */
+  responsive?: boolean;
+  /** Extra classes for the wrapper (margins, max-width, etc.). */
+  class?: string;
+  /** Accessible label / dev-placeholder caption. */
+  label?: string;
+}
+
+const {
+  slot = '',
+  format = 'auto',
+  responsive = true,
+  class: className = '',
+  label = 'Advertisement',
+} = Astro.props;
+
+const isDev = import.meta.env.DEV;
+// Show a visible placeholder only while developing without a live id, so slots
+// are easy to position. In production with no id, render nothing.
+const showDevPlaceholder = isDev && !ADSENSE_ENABLED;
+---
+{ADSENSE_ENABLED && slot && (
+  <aside class:list={['ad-slot', className]} aria-label={label}>
+    <ins
+      class="adsbygoogle block"
+      style="display:block"
+      data-ad-client={ADSENSE_CLIENT}
+      data-ad-slot={slot}
+      data-ad-format={format}
+      data-full-width-responsive={responsive ? 'true' : 'false'}
+    ></ins>
+    <script is:inline>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </aside>
+)}
+
+{showDevPlaceholder && (
+  <aside
+    class:list={['ad-slot ad-slot--placeholder', className]}
+    aria-label={label}
+    style="display:flex;align-items:center;justify-content:center;min-height:90px;border:1px dashed var(--color-hairline-strong,#bbb);border-radius:8px;color:var(--color-mute,#888);font-size:12px;letter-spacing:.04em;text-transform:uppercase;"
+  >
+    {label} · slot {slot || '(unset)'}
+  </aside>
+)}

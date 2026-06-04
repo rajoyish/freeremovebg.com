@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { SITE, LANGUAGES, DEFAULT_LANG, LANG_BY_CODE, localizedUrl } from '../i18n/config';
+import AdSense from '../components/AdSense.astro';
 
 interface Props {
 	title?: string;
@@ -38,7 +39,10 @@ const activeLang = LANG_BY_CODE[lang] ?? LANG_BY_CODE[DEFAULT_LANG];
 const hreflangAlternates = localized
 	? LANGUAGES.map((l) => ({ hreflang: l.code, href: localizedUrl(l.code, basePath) }))
 	: [];
-const ogLocale = `${lang}${lang === 'en' ? '_US' : ''}`;
+// Open Graph requires locale as `language_TERRITORY` (e.g. en_US, hi_IN), not a
+// bare language code. Derive the territory from the active language's region
+// (the `flag` field is an ISO 3166-1 alpha-2 country code).
+const ogLocale = `${lang}_${activeLang.flag.toUpperCase()}`;
 
 const jsonLd = {
 	'@context': 'https://schema.org',
@@ -121,6 +125,11 @@ const jsonLd = {
 		<meta name="twitter:image" content={ogImage} />
 
 		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+		<!-- Google AdSense loader. Inert until PUBLIC_ADSENSE_CLIENT is set, so
+		     this ships dormant and activates with a single env var later. -->
+		<AdSense />
+
 
 		<!-- Google Analytics: deferred until after first paint to avoid forced-
 		     reflow during the critical rendering window. The gtag.js library
