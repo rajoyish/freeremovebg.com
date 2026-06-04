@@ -589,12 +589,51 @@ const toolStrings = {
     return { blob, usedModel: 'Smart · Objects & Graphics' };
   }
 
-  // Decode with a tolerant <img> element and re-encode to PNG so every engine
-  // receives a format it can reliably decode (some WebP files fail otherwise).
-  async function normalizeToPng(file: File): Promise<Blob> {
+  // Decode the source image and re-encode to PNG so every engine receives a
+  // format it can reliably decode.
+  //
+  // Two decode paths, tried in order:
+  //   1. createImageBitmap(file) — decodes the raw bytes directly. This is the
+  //      most tolerant path and is the SAME decoder @imgly/background-removal
+  //      uses internally, so anything the removal engine can handle decodes
+  //      here too. `imageOrientation: 'from-image'` honours EXIF rotation the
+  //      way an <img> would.
+  //   2. <img>.decode() fallback — only reached if createImageBitmap is
+  //      unavailable or throws. HTMLImageElement.decode() is comparatively
+  //      flaky: it rejects with EncodingError on some perfectly valid JPEGs
+  //      (certain chroma/ICC-profile encodings, or under memory pressure),
+  //      which is what caused valid photos to be wrongly "skipped".
+  async function decodeToCanvas(file: File): Promise<HTMLCanvasElement> {
+    // Path 1: createImageBitmap (preferred).
+    if (typeof createImageBitmap === 'function') {
+      let bitmap: ImageBitmap | null = null;
+      try {
+        bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      } catch {
+        // Some engines reject the options bag; retry without it before falling
+        // through to the <img> path.
+        try { bitmap = await createImageBitmap(file); } catch { bitmap = null; }
+      }
+      if (bitmap) {
+        try {
+          const { width, height } = bitmap;
+          if (!width || !height) throw new Error(`"${file.name}" has no readable image data.`);
+          const canvas = document.createElement('canvas');
+          canvas.width  = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) throw new Error('Canvas 2D context is unavailable in this browser.');
+          ctx.drawImage(bitmap, 0, 0);
+          return canvas;
+        } finally {
+          bitmap.close();
+        }
+      }
+    }
+
+    // Path 2: <img>.decode() fallback.
     const url = URL.createObjectURL(file);
     const img = new Image();
-    let canvas: HTMLCanvasElement | null = null;
     try {
       img.decoding = 'async';
       img.src = url;
@@ -606,25 +645,32 @@ const toolStrings = {
       const width  = img.naturalWidth;
       const height = img.naturalHeight;
       if (!width || !height) throw new Error(`"${file.name}" has no readable image data.`);
-
-      canvas = document.createElement('canvas');
+      const canvas = document.createElement('canvas');
       canvas.width  = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas 2D context is unavailable in this browser.');
       ctx.drawImage(img, 0, 0);
+      return canvas;
+    } finally {
+      URL.revokeObjectURL(url);
+      img.src = '';
+    }
+  }
 
+  async function normalizeToPng(file: File): Promise<Blob> {
+    let canvas: HTMLCanvasElement | null = null;
+    try {
+      canvas = await decodeToCanvas(file);
       const blob = await new Promise<Blob | null>((resolve) => canvas!.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('Failed to convert the image to PNG.');
       return blob;
     } finally {
-      URL.revokeObjectURL(url);
       // Free memory eagerly instead of waiting for GC. Browsers (notably
       // Safari/iOS) cap total canvas backing-store memory and kill the tab when
-      // it is exceeded; collapsing the canvas to 0x0 and dropping the decoded
-      // bitmap releases tens of MB per HD image immediately.
+      // it is exceeded; collapsing the canvas to 0x0 releases tens of MB per HD
+      // image immediately.
       if (canvas) { canvas.width = 0; canvas.height = 0; }
-      img.src = '';
     }
   }
 
