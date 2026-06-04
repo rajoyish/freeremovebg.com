@@ -16,7 +16,8 @@
   "switcher": {
     "label": "Choose language",
     "searchPlaceholder": "Search language or code…",
-    "noResults": "No languages found"
+    "noResults": "No languages found",
+    "suggested": "Suggested for your region"
   },
   "hero": {
     "titleLead": "Free Remove BG:",

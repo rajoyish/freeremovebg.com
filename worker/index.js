@@ -6,15 +6,20 @@
  *
  *   1. Crawler safety   — known search bots ALWAYS get the English root, never
  *                         a redirect, so they index the canonical pages cleanly.
- *   2. Cookie override  — an explicit `lang` cookie strictly wins over IP geo.
- *   3. Geo redirect     — first-time visitors on `/` whose `request.cf.country`
- *                         maps to a language are 302-redirected to `/<lang>/`.
- *   4. Fallback         — everything else is served straight from ASSETS.
+ *   2. Cookie override  — a `lang` cookie (set when the user picks a language in
+ *                         the switcher) routes returning visitors to `/<lang>/`.
+ *   3. Fallback         — everyone else is served the English root as-is.
+ *
+ * NOTE: there is deliberately NO IP/country auto-redirect. Every first-time
+ * visitor gets English regardless of location; the in-page language switcher
+ * merely *suggests* the language for their detected region. This avoids
+ * trapping users (e.g. an English speaker in Nepal) in a language they can't
+ * read. The user's explicit choice is what persists, via the `lang` cookie.
  *
  * The Google Translation API is never involved here; all localized HTML was
  * generated at build time.
  */
-import { regionMap, supportedCodes, defaultLang, langCookie } from "./region-map.js";
+import { supportedCodes, defaultLang, langCookie } from "./region-map.js";
 
 // Search-crawler user agents that must bypass redirection. Matching is
 // case-insensitive and substring-based.
@@ -45,7 +50,7 @@ const CRAWLER_UA = [
   "discordbot",
   "google-inspectiontool",
   "mediapartners-google", // AdSense crawler — must see canonical content, no geo-redirect
-  "adsbot-google",        // AdSense/Ads landing-page crawler
+  "adsbot-google", // AdSense/Ads landing-page crawler
   "petalbot",
   "bytespider",
   "gptbot",
@@ -71,11 +76,6 @@ function getCookie(request, name) {
   return null;
 }
 
-/** First path segment, e.g. "/hi/foo" -> "hi". */
-function firstSegment(pathname) {
-  return pathname.split("/").filter(Boolean)[0] ?? "";
-}
-
 export default {
   /**
    * @param {Request} request
@@ -93,21 +93,21 @@ export default {
       (request.method === "GET" || request.method === "HEAD") &&
       !/\.[a-z0-9]+$/i.test(pathname);
 
-    // ── 4 (early): non-navigation or sub-path requests → serve assets ─────────
-    // We only ever auto-redirect from the bare root "/". Any other path
-    // (including already-localized routes like /hi/) is served as-is.
+    // ── (early): non-navigation or sub-path requests → serve assets ──────────
+    // We only ever act on the bare root "/". Any other path (including
+    // already-localized routes like /hi/) is served as-is.
     if (!isNavigation || pathname !== "/") {
       return env.ASSETS.fetch(request);
     }
 
-    // ── 1: Crawler safety — bots skip all redirection logic ───────────────────
+    // ── 1: Crawler safety — bots always get the canonical English root ────────
     if (isCrawler(request.headers.get("User-Agent"))) {
       return env.ASSETS.fetch(request);
     }
 
-    // ── 2: Cookie override — explicit choice beats IP geolocation ─────────────
+    // ── 2: Cookie override — the user's saved language choice ─────────────────
     // Only a cookie holding a SUPPORTED code is honoured. A garbage/stale value
-    // is ignored so it can't trap a user; we fall through to geo detection.
+    // is ignored so it can't trap a user; we fall through to the English root.
     const cookieLang = getCookie(request, langCookie);
     if (cookieLang && supportedCodes.includes(cookieLang)) {
       if (cookieLang === defaultLang) {
@@ -117,14 +117,8 @@ export default {
       return redirectTo(url, cookieLang);
     }
 
-    // ── 3: Geo redirect — map request.cf.country to a language sub-route ──────
-    const country = request.cf?.country;
-    const mapped = country ? regionMap[country] : undefined;
-    if (mapped && mapped !== defaultLang) {
-      return redirectTo(url, mapped);
-    }
-
-    // ── 4: Fallback — serve the English root static assets ────────────────────
+    // ── 3: Fallback — serve the English root. No IP/country auto-redirect: the
+    // in-page switcher suggests the regional language instead of forcing it. ──
     return env.ASSETS.fetch(request);
   },
 };
@@ -137,8 +131,8 @@ function redirectTo(url, lang) {
     status: 302,
     headers: {
       Location: target.toString(),
-      // Vary on cookie + country so caches never serve one user's redirect to
-      // another region, and the English root stays separately cacheable.
+      // Redirects are driven solely by the `lang` cookie now, so vary on it and
+      // never cache, keeping the cookieless English root separately cacheable.
       Vary: "Cookie",
       "Cache-Control": "no-store",
     },

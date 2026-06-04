@@ -21,6 +21,7 @@ import {
   DEFAULT_LANG,
   LANG_BY_CODE,
   LANG_COOKIE,
+  REGION_MAP,
 } from "../i18n/config";
 
 interface Props {
@@ -29,11 +30,15 @@ interface Props {
   /** Path within the current page, used to preserve location on switch. */
   pathname?: string;
   /** Localized UI strings for the switcher. */
-  labels: { label: string; searchPlaceholder: string; noResults: string };
+  labels: { label: string; searchPlaceholder: string; noResults: string; suggested?: string };
 }
 
 const { lang, pathname = "/", labels } = Astro.props;
 const active = LANG_BY_CODE[lang] ?? LANG_BY_CODE[DEFAULT_LANG];
+
+// Label for the geo-suggested entry pinned to the top of the list. Falls back
+// to English if a locale hasn't translated it yet (handled by the dictionary).
+const suggestedLabel = labels.suggested ?? "Suggested for your region";
 
 // Strip any existing language prefix so we can re-prefix on switch.
 const knownPrefixes = LANGUAGES.map((l) => l.code).filter(
@@ -61,6 +66,9 @@ const catalogue = LANGUAGES.map((l) => ({
   data-default-lang={DEFAULT_LANG}
   data-cookie={LANG_COOKIE}
   data-base-path={basePath}
+  data-active-lang={lang}
+  data-suggested-label={suggestedLabel}
+  data-region-map={JSON.stringify(REGION_MAP)}
   data-catalogue={JSON.stringify(catalogue)}
 >
   <button
@@ -130,6 +138,51 @@ const catalogue = LANGUAGES.map((l) => ({
     const defaultLang = root.dataset.defaultLang || "en";
     const cookieName = root.dataset.cookie || "lang";
     const basePath = root.dataset.basePath || "/";
+    const activeLang = root.dataset.activeLang || defaultLang;
+    const suggestedLabel = root.dataset.suggestedLabel || "Suggested for your region";
+    const regionMap: Record<string, string> = JSON.parse(root.dataset.regionMap || "{}");
+
+    const byCode = (code: string): LangEntry | undefined =>
+      catalogue.find((l) => l.code === code);
+
+    // The language suggested for the visitor's detected region, resolved
+    // asynchronously from Cloudflare's edge trace. Null until detection
+    // completes (and stays null if it fails or maps to the language already
+    // shown). When set, it's pinned to the top of the empty-query list with a
+    // location marker so the visitor can opt in — we never auto-switch.
+    let suggestedLang: string | null = null;
+
+    /**
+     * Detect the visitor's country client-side via `/cdn-cgi/trace` — a
+     * same-origin endpoint Cloudflare serves on every zone (no CORS, no extra
+     * CSP origin needed). Map it to a supported language. We deliberately do
+     * this in the browser instead of redirecting at the edge, so the page the
+     * user lands on is always English and the regional language is only ever a
+     * suggestion they can accept or ignore.
+     */
+    async function detectRegionLang(): Promise<void> {
+      try {
+        const res = await fetch("/cdn-cgi/trace", { cache: "no-store" });
+        if (!res.ok) return;
+        const text = await res.text();
+        const m = text.match(/^loc=([A-Z]{2})/m);
+        const country = m?.[1];
+        if (!country) return;
+        const mapped = regionMap[country];
+        // Only surface a suggestion if it's a real, supported language that
+        // differs from what the user is already viewing.
+        if (mapped && mapped !== activeLang && byCode(mapped)) {
+          suggestedLang = mapped;
+          // If the panel is already open on an empty query, refresh so the
+          // suggestion appears without the user retyping.
+          if (!panel.classList.contains("hidden") && search.value.trim() === "") {
+            render("");
+          }
+        }
+      } catch {
+        /* offline or trace unavailable — no suggestion, English stays. */
+      }
+    }
 
     function routeFor(code: string): string {
       const clean = basePath === "/" ? "" : basePath.replace(/^\/+/, "");
@@ -139,9 +192,36 @@ const catalogue = LANGUAGES.map((l) => ({
     function choose(code: string) {
       // First-party cookie: SameSite=Lax is correct (no cross-site POST needs
       // it), and Secure is safe because the site is HTTPS-only. Both attributes
-      // satisfy the Lighthouse/best-practices cookie checks.
+      // satisfy the Lighthouse/best-practices cookie checks. This is what the
+      // Worker reads on the next visit to serve the chosen language directly.
       document.cookie = `${cookieName}=${code}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax; secure`;
       window.location.assign(routeFor(code));
+    }
+
+    /** Build one <li> for a language; `suggested` adds a location marker row. */
+    function makeOption(l: LangEntry, suggested = false): HTMLLIElement {
+      const li = document.createElement("li");
+      li.setAttribute("role", "option");
+      li.className =
+        "flex items-center gap-3 px-3 py-2 cursor-pointer text-sm text-ink hover:bg-canvas-soft-2 focus:bg-canvas-soft-2";
+      li.tabIndex = 0;
+      const marker = suggested
+        ? `<svg class="shrink-0 w-3.5 h-3.5 text-link" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>`
+        : `<span class="fi fi-${l.flag} rounded-[2px] shrink-0" aria-hidden="true"></span>`;
+      li.innerHTML =
+        `${marker}<span class="truncate">${l.endonym}</span>` +
+        (suggested
+          ? `<span class="ml-auto text-[10px] uppercase tracking-wide text-link font-medium">${suggestedLabel}</span>`
+          : `<span class="ml-auto text-xs text-mute uppercase">${l.code}</span>`);
+      const pick = () => choose(l.code);
+      li.addEventListener("click", pick);
+      li.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          pick();
+        }
+      });
+      return li;
     }
 
     function render(query: string) {
@@ -158,24 +238,26 @@ const catalogue = LANGUAGES.map((l) => ({
       ).slice(0, MAX_SUGGESTIONS);
 
       results.innerHTML = "";
-      empty.classList.toggle("hidden", matches.length > 0);
 
-      for (const l of matches) {
-        const li = document.createElement("li");
-        li.setAttribute("role", "option");
-        li.className =
-          "flex items-center gap-3 px-3 py-2 cursor-pointer text-sm text-ink hover:bg-canvas-soft-2 focus:bg-canvas-soft-2";
-        li.tabIndex = 0;
-        li.innerHTML = `<span class="fi fi-${l.flag} rounded-[2px] shrink-0" aria-hidden="true"></span><span class="truncate">${l.endonym}</span><span class="ml-auto text-xs text-mute uppercase">${l.code}</span>`;
-        const pick = () => choose(l.code);
-        li.addEventListener("click", pick);
-        li.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            pick();
-          }
-        });
-        results.appendChild(li);
+      // Pin the geo-suggested language to the very top when the user hasn't
+      // typed anything yet, so it's the first thing they see on open.
+      const suggestedEntry =
+        !q && suggestedLang ? byCode(suggestedLang) : undefined;
+      if (suggestedEntry) {
+        results.appendChild(makeOption(suggestedEntry, true));
+      }
+
+      const shown = suggestedEntry
+        ? matches.filter((l) => l.code !== suggestedEntry.code)
+        : matches;
+
+      empty.classList.toggle(
+        "hidden",
+        shown.length > 0 || suggestedEntry !== undefined,
+      );
+
+      for (const l of shown) {
+        results.appendChild(makeOption(l));
       }
     }
 
@@ -205,5 +287,9 @@ const catalogue = LANGUAGES.map((l) => ({
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") close();
     });
+
+    // Kick off region detection in the background as soon as the switcher is
+    // ready. It only ever populates a suggestion; it never navigates.
+    detectRegionLang();
   });
 </script>

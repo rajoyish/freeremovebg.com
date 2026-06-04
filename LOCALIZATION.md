@@ -1,8 +1,9 @@
 # Localization Architecture
 
 Zero-cost static localization: Google Cloud Translation runs **only at build
-time**, and Cloudflare's edge handles free, instant country routing. No
-translation API is ever called at runtime.
+time**. Every visitor is served English by default; the in-page language
+switcher _suggests_ the language for their detected region but never forces it.
+No translation API is ever called at runtime.
 
 ## How it fits together
 
@@ -25,7 +26,7 @@ Routes:
   src/components/HomePage.astro→ shared dictionary-driven markup for both
 
 Edge:
-  worker/index.js   → crawler bypass • cookie override • geo redirect • assets fallback
+  worker/index.js   → crawler bypass • cookie override • assets fallback (NO geo redirect)
   wrangler.toml     → main + ASSETS binding + run_worker_first = ["/"]
 ```
 
@@ -34,7 +35,7 @@ Edge:
 The 500,000-char/month Google free tier is protected by three independent
 mechanisms, so local development and hot-reloading can never spend it.
 
-### Tier 1 — Cache-first (the locale file *is* the cache)
+### Tier 1 — Cache-first (the locale file _is_ the cache)
 
 Each `src/i18n/locales/<code>.json` is a flat map of the English source string
 to its translation:
@@ -93,13 +94,23 @@ During `pnpm dev` you can skip step 2 — untranslated copy shows as
 
 Order of precedence on a request to `/`:
 
-1. **Crawler bypass** — Googlebot/Bingbot/etc. always get the English root (no
-   redirect), so canonical pages index cleanly.
-2. **Cookie override** — a supported `lang` cookie strictly wins over geo. An
-   unsupported value is ignored (falls through to geo).
-3. **Geo redirect** — `request.cf.country` mapped via `regionMap` → `302` to
-   `/<lang>/`.
-4. **Fallback** — `env.ASSETS.fetch(request)` serves static files.
+1. **Crawler bypass** — Googlebot/Bingbot/etc. always get the English root, so
+   canonical pages index cleanly.
+2. **Cookie override** — a supported `lang` cookie (set when the user picks a
+   language in the switcher) routes returning visitors to `/<lang>/`. An
+   unsupported value is ignored. `en` stays on the root.
+3. **Fallback** — everyone else gets the English root via
+   `env.ASSETS.fetch(request)`.
+
+There is **deliberately no IP/country auto-redirect**. A first-time visitor
+anywhere lands on English; this avoids trapping someone (e.g. an English speaker
+in Nepal) in a script they can't read. Region detection instead happens
+**client-side** in `LanguageSwitcher.astro`: it reads the visitor's country from
+Cloudflare's same-origin `/cdn-cgi/trace`, maps it through `regionMap`, and pins
+that language to the top of the switcher suggestions with a 📍 marker. If the
+user picks it, the `lang` cookie is written and the next visit is served that
+language directly (step 2 above). The `regionMap` is still generated and shipped
+to the client for exactly this purpose.
 
 Only `/` runs the Worker first (`run_worker_first = ["/"]`); every other request
 is served asset-first for lowest latency and zero Worker billing.

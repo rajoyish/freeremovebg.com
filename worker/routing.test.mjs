@@ -2,8 +2,12 @@
  * Lightweight routing assertions for worker/index.js.
  * Run with: node worker/routing.test.mjs
  *
- * Mocks the ASSETS binding and request.cf so we can verify redirect decisions
+ * Mocks the ASSETS binding and request.cf so we can verify routing decisions
  * without deploying. Not wired into CI — a quick local sanity check.
+ *
+ * NOTE: the Worker no longer auto-redirects by country. Region detection is a
+ * client-side suggestion in the language switcher; the Worker only acts on a
+ * saved `lang` cookie. These tests reflect that.
  */
 import worker from "./index.js";
 
@@ -18,7 +22,10 @@ function makeRequest(path, { country, cookie, ua, method = "GET" } = {}) {
   const headers = new Headers();
   if (cookie) headers.set("Cookie", cookie);
   if (ua) headers.set("User-Agent", ua);
-  const req = new Request(`https://freeremovebg.com${path}`, { method, headers });
+  const req = new Request(`https://freeremovebg.com${path}`, {
+    method,
+    headers,
+  });
   // request.cf isn't settable on a real Request; emulate via a proxy.
   return new Proxy(req, {
     get(target, prop) {
@@ -37,7 +44,9 @@ async function expect(label, req, check) {
     console.log(`  ✓ ${label}`);
   } else {
     fail++;
-    console.log(`  ✗ ${label} → status=${res.status} location=${res.headers.get("Location")}`);
+    console.log(
+      `  ✗ ${label} → status=${res.status} location=${res.headers.get("Location")}`,
+    );
   }
 }
 
@@ -47,28 +56,86 @@ const redirectsTo = (loc) => (r) =>
 
 console.log("\nWorker routing tests");
 
-// Geo redirect from root.
-await expect("IN visitor on / → /hi/", makeRequest("/", { country: "IN" }), redirectsTo("https://freeremovebg.com/hi/"));
-await expect("MX visitor on / → /es/", makeRequest("/", { country: "MX" }), redirectsTo("https://freeremovebg.com/es/"));
-await expect("NP visitor on / → /ne/", makeRequest("/", { country: "NP" }), redirectsTo("https://freeremovebg.com/ne/"));
-
-// Unmapped country stays on English root.
-await expect("US visitor on / → English asset", makeRequest("/", { country: "US" }), isAsset);
+// No geo auto-redirect: every first-time visitor gets the English root
+// regardless of country. The switcher suggests their regional language instead.
+await expect(
+  "IN visitor on / → English asset (no geo redirect)",
+  makeRequest("/", { country: "IN" }),
+  isAsset,
+);
+await expect(
+  "MX visitor on / → English asset (no geo redirect)",
+  makeRequest("/", { country: "MX" }),
+  isAsset,
+);
+await expect(
+  "NP visitor on / → English asset (no geo redirect)",
+  makeRequest("/", { country: "NP" }),
+  isAsset,
+);
+await expect(
+  "US visitor on / → English asset",
+  makeRequest("/", { country: "US" }),
+  isAsset,
+);
 await expect("No country on / → English asset", makeRequest("/", {}), isAsset);
 
-// Cookie override beats geo.
-await expect("Cookie lang=fr in IN → /fr/", makeRequest("/", { country: "IN", cookie: "lang=fr" }), redirectsTo("https://freeremovebg.com/fr/"));
-await expect("Cookie lang=en in IN → English asset (no redirect)", makeRequest("/", { country: "IN", cookie: "lang=en" }), isAsset);
-await expect("Unknown cookie lang=zz in IN → falls back to geo /hi/", makeRequest("/", { country: "IN", cookie: "lang=zz" }), redirectsTo("https://freeremovebg.com/hi/"));
+// Saved cookie (the user's explicit choice) routes returning visitors.
+await expect(
+  "Cookie lang=fr → /fr/",
+  makeRequest("/", { country: "IN", cookie: "lang=fr" }),
+  redirectsTo("https://freeremovebg.com/fr/"),
+);
+await expect(
+  "Cookie lang=ne → /ne/",
+  makeRequest("/", { country: "US", cookie: "lang=ne" }),
+  redirectsTo("https://freeremovebg.com/ne/"),
+);
+await expect(
+  "Cookie lang=en → English asset (no redirect)",
+  makeRequest("/", { country: "IN", cookie: "lang=en" }),
+  isAsset,
+);
+await expect(
+  "Unknown cookie lang=zz → English asset (ignored)",
+  makeRequest("/", { country: "IN", cookie: "lang=zz" }),
+  isAsset,
+);
 
 // Crawler bypass: never redirect bots.
-await expect("Googlebot in IN → English asset", makeRequest("/", { country: "IN", ua: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" }), isAsset);
-await expect("Bingbot in MX → English asset", makeRequest("/", { country: "MX", ua: "Mozilla/5.0 (compatible; bingbot/2.0)" }), isAsset);
+await expect(
+  "Googlebot in IN → English asset",
+  makeRequest("/", {
+    country: "IN",
+    ua: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+  }),
+  isAsset,
+);
+await expect(
+  "Bingbot in MX → English asset",
+  makeRequest("/", {
+    country: "MX",
+    ua: "Mozilla/5.0 (compatible; bingbot/2.0)",
+  }),
+  isAsset,
+);
 
 // Non-root and asset requests pass through untouched.
-await expect("Already on /hi/ → asset (no double redirect)", makeRequest("/hi/", { country: "IN" }), isAsset);
-await expect("Asset request /_astro/app.js in IN → asset", makeRequest("/_astro/app.js", { country: "IN" }), isAsset);
-await expect("/about in IN → asset", makeRequest("/about", { country: "IN" }), isAsset);
+await expect(
+  "Already on /hi/ → asset (no double redirect)",
+  makeRequest("/hi/", { country: "IN" }),
+  isAsset,
+);
+await expect(
+  "Asset request /_astro/app.js in IN → asset",
+  makeRequest("/_astro/app.js", { country: "IN" }),
+  isAsset,
+);
+await expect(
+  "/about in IN → asset",
+  makeRequest("/about", { country: "IN" }),
+  isAsset,
+);
 
 console.log(`\n${pass} passed, ${fail} failed\n`);
 process.exit(fail ? 1 : 0);
