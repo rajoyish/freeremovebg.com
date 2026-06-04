@@ -394,13 +394,13 @@ const toolStrings = {
   });
 
   const STATUS: Record<ThumbStatus, { bg: string; label: string }> = {
-    queued:     { bg: 'bg-black/45',     label: I18N.status?.queued     ?? 'Queued'      },
-    analysing:  { bg: 'bg-amber-500/90', label: I18N.status?.analysing  ?? 'Analysing…'  },
-    processing: { bg: 'bg-link/90',      label: I18N.status?.processing ?? 'Processing…' },
-    done:       { bg: 'bg-link/90',      label: I18N.status?.done       ?? '✓ Done'      },
-    error:      { bg: 'bg-error/85',     label: I18N.status?.error      ?? '✗ Error'     },
+    queued:     { bg: 'bg-black/45',        label: I18N.status?.queued     ?? 'Queued'      },
+    analysing:  { bg: 'bg-amber-500/90',    label: I18N.status?.analysing  ?? 'Analysing…'  },
+    processing: { bg: 'bg-link/90',         label: I18N.status?.processing ?? 'Processing…' },
+    done:       { bg: 'bg-emerald-500/85',  label: I18N.status?.done       ?? '✓ Done'      },
+    error:      { bg: 'bg-error/85',        label: I18N.status?.error      ?? '✗ Error'     },
   };
-  const ALL_STATUS_BG = ['bg-black/45', 'bg-amber-500/90', 'bg-link/90', 'bg-error/85'];
+  const ALL_STATUS_BG = ['bg-black/45', 'bg-amber-500/90', 'bg-link/90', 'bg-emerald-500/85', 'bg-error/85'];
 
   function isRemovable(status: ThumbStatus): boolean {
     return status === 'queued' || status === 'error';
@@ -459,8 +459,14 @@ const toolStrings = {
     const s = STATUS[status];
     overlay.classList.remove(...ALL_STATUS_BG, 'opacity-0');
     overlay.classList.add(s.bg);
-    badge.textContent = s.label;
-    if (status === 'done') setTimeout(() => { overlay.classList.add('opacity-0'); }, 800);
+
+    if (status === 'done') {
+      // Show a centered checkmark icon on a green overlay — stays visible so
+      // the user can see at a glance which images are finished.
+      badge.innerHTML = '<svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" class="drop-shadow-sm"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+    } else {
+      badge.textContent = s.label;
+    }
   }
 
   function removeItem(id: string) {
