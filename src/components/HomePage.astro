@@ -276,7 +276,6 @@ const toolStrings = {
   import { pipeline, env } from '@huggingface/transformers';
   import { removeBackground } from '@imgly/background-removal';
   import * as ort from 'onnxruntime-web';
-  import JSZip from 'jszip';
 
   // ── Localized strings ──────────────────────────────────────────────────────
   // Read the build-time-translated copy injected by HomePage.astro. Falls back
@@ -856,6 +855,7 @@ const toolStrings = {
   async function downloadZip() {
     const ready = queue.filter(q => q.blob && q.outName);
     if (!ready.length) return;
+    const { default: JSZip } = await import('jszip');
     const zip = new JSZip();
     ready.forEach(({ outName, blob }) => zip.file(outName!, blob!));
     const zipBlob = await zip.generateAsync({ type: 'blob' });

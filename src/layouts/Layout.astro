@@ -151,15 +151,17 @@ const jsonLd = {
 
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<!-- Load the Google Fonts stylesheet off the critical path: fetch it as a
-		     non-render-blocking "print" sheet, then flip it to "all" once loaded.
-		     `display=swap` means body text paints immediately in the fallback and
-		     swaps to DM Sans when ready, so the font never blocks LCP. -->
+		<!-- Preload the Google Fonts CSS as a non-render-blocking resource. Unlike
+		     media="print" (which defers the fetch entirely and makes preconnects
+		     appear unused to Lighthouse), preload fetches immediately — using the
+		     preconnect — but does not block rendering until the onload handler
+		     promotes it to a stylesheet. The font files themselves are then fetched
+		     from gstatic.com (benefiting from the preconnect above). -->
 		<link
-			rel="stylesheet"
+			rel="preload"
+			as="style"
 			href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
-			media="print"
-			onload="this.media='all'"
+			onload="this.rel='stylesheet'"
 		/>
 		<noscript>
 			<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />

@@ -29,6 +29,21 @@ export default defineConfig({
         "onnxruntime-web",
       ],
     },
+    build: {
+      rollupOptions: {
+        output: {
+          // Split the monolithic HomePage script (~1.1 MB / ~306 KiB transfer)
+          // into parallel-loadable chunks. The browser fetches them concurrently
+          // instead of waiting for one giant file, reducing main-thread blocking.
+          manualChunks(id) {
+            if (id.includes("onnxruntime-web")) return "ort";
+            if (id.includes("@huggingface/transformers")) return "hf-transformers";
+            if (id.includes("@imgly/background-removal")) return "bg-removal";
+            if (id.includes("jszip")) return "jszip";
+          },
+        },
+      },
+    },
     worker: {
       format: "es",
     },
