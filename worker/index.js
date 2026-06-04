@@ -44,6 +44,8 @@ const CRAWLER_UA = [
   "telegrambot",
   "discordbot",
   "google-inspectiontool",
+  "mediapartners-google", // AdSense crawler — must see canonical content, no geo-redirect
+  "adsbot-google",        // AdSense/Ads landing-page crawler
   "petalbot",
   "bytespider",
   "gptbot",

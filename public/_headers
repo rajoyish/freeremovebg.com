@@ -60,6 +60,11 @@
 #   - X-Frame-Options / frame-ancestors: clickjacking protection.
 #   - X-Content-Type-Options: stop MIME sniffing.
 # No Cache-Control is set here, so the cache rules above are untouched.
+#
+# AdSense note: the X-Frame-Options / frame-ancestors rules below restrict who
+# can frame THIS site; they do NOT affect AdSense, which frames ad units INTO
+# the page. They are safe to keep when AdSense is added. (The ad-iframe
+# allowance lives in the CSP frame-src directive in astro.config.mjs.)
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
