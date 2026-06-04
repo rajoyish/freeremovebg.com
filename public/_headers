@@ -53,20 +53,44 @@
 # to the /* rule below: a duplicate Cache-Control would be comma-joined onto the
 # immutable rule above, corrupting the long-cache behavior for /_astro/* assets.
 
-# Security headers applied to every response. These complement the per-page CSP
-# <meta> tag Astro injects (which covers script-src/style-src with hashes). Two
-# protections can ONLY be enforced as real HTTP headers, never via <meta>, so
-# they live here:
-#   - X-Frame-Options / frame-ancestors: clickjacking protection.
-#   - X-Content-Type-Options: stop MIME sniffing.
+# Security headers applied to every response.
+#
+# Content-Security-Policy is delivered HERE as an HTTP header (not via Astro's
+# <meta> tag) on purpose: Cloudflare rewrites the HTML body at the edge (Web
+# Analytics beacon, optionally Rocket Loader / email obfuscation), which injects
+# inline scripts AFTER the build — so a hash/nonce CSP can never match them. A
+# header CSP is applied by the edge regardless of body rewriting, and is also
+# Lighthouse's preferred delivery method.
+#
+# script-src rationale (the app is a client-side WASM AI tool):
+#   - 'self'            : Astro's bundled module scripts.
+#   - blob:             : onnxruntime-web loads its backend from a runtime
+#                         blob: script URL — REQUIRED or every cutout fails with
+#                         "no available backend found".
+#   - 'wasm-unsafe-eval': compile the ONNX/imgly WebAssembly modules.
+#   - 'unsafe-inline'   : the theme/GTM/font inline bootstraps AND Cloudflare's
+#                         edge-injected inline scripts (whose content rotates and
+#                         cannot be hashed ahead of time). Modern browsers ignore
+#                         'unsafe-inline' when a hash/nonce is present, so we use
+#                         no hashes here — this keeps inline execution working.
+#   - https hosts       : jsDelivr (ORT backend), GTM/GA, Cloudflare Insights.
+# connect-src: model/WASM downloads (HF + jsDelivr), analytics beacons, blob/data.
+# worker-src / child-src: blob: for the ONNX web workers.
+# frame-ancestors 'none' + X-Frame-Options: clickjacking protection (header-only).
+#
 # No Cache-Control is set here, so the cache rules above are untouched.
 #
-# AdSense note: the X-Frame-Options / frame-ancestors rules below restrict who
-# can frame THIS site; they do NOT affect AdSense, which frames ad units INTO
-# the page. They are safe to keep when AdSense is added. (The ad-iframe
-# allowance lives in the CSP frame-src directive in astro.config.mjs.)
+# ── AdSense (future) ─────────────────────────────────────────────────────────
+# When integrating AdSense, extend the directives below with Google's origins:
+#   script-src : add https://pagead2.googlesyndication.com
+#                    https://partner.googleadservices.com
+#                    https://tpc.googlesyndication.com https://adservice.google.com
+#   frame-src  : add https://googleads.g.doubleclick.net
+#                    https://tpc.googlesyndication.com https://www.google.com
+#   img-src    : add https://*.g.doubleclick.net https://*.googlesyndication.com
+#   connect-src: add https://pagead2.googlesyndication.com https://*.g.doubleclick.net
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://huggingface.co https://*.hf.co https://cdn-lfs.huggingface.co https://*.huggingface.co https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://cloudflareinsights.com https://static.cloudflareinsights.com blob: data:; worker-src 'self' blob:; child-src 'self' blob:; form-action 'self' https://formsubmit.co; frame-ancestors 'none'
