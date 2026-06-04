@@ -10,7 +10,7 @@
   --color-ink: #171717;
   --color-on-primary: #ffffff;
   --color-body: #4d4d4d;
-  --color-mute: #888888;
+  --color-mute: #636363;
   --color-hairline: #ebebeb;
   --color-hairline-strong: #a1a1a1;
   --color-canvas: #ffffff;
@@ -126,7 +126,7 @@ html.dark {
   --color-ink: #ededed;          /* primary foreground / inverted button bg */
   --color-on-primary: #0a0a0a;   /* text/icons on the light primary surface */
   --color-body: #a3a3a3;
-  --color-mute: #737373;
+  --color-mute: #8a8a8a;
   --color-hairline: #2a2a2a;
   --color-hairline-strong: #525252;
   --color-canvas: #0a0a0a;
