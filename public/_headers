@@ -68,6 +68,14 @@
 #                         blob: script URL — REQUIRED or every cutout fails with
 #                         "no available backend found".
 #   - 'wasm-unsafe-eval': compile the ONNX/imgly WebAssembly modules.
+#   - 'unsafe-eval'     : onnxruntime-web's wasm backend builds its JS glue with
+#                         `new Function(...)` while creating the isnet inference
+#                         session. 'wasm-unsafe-eval' permits WASM compilation
+#                         but NOT new Function, so without this the object/
+#                         graphics ("general") engine dies with
+#                         "EvalError: ... 'unsafe-eval' is not an allowed source"
+#                         and only the portrait engine (transformers.js, no
+#                         new Function) works.
 #   - 'unsafe-inline'   : the theme/GTM/font inline bootstraps AND Cloudflare's
 #                         edge-injected inline scripts (whose content rotates and
 #                         cannot be hashed ahead of time). Modern browsers ignore
@@ -97,4 +105,4 @@
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://huggingface.co https://*.hf.co https://cdn-lfs.huggingface.co https://*.huggingface.co https://cdn.jsdelivr.net https://staticimgly.com https://www.googletagmanager.com https://www.google-analytics.com https://cloudflareinsights.com https://static.cloudflareinsights.com blob: data:; worker-src 'self' blob:; child-src 'self' blob:; form-action 'self' https://formsubmit.co; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://static.cloudflareinsights.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://huggingface.co https://*.hf.co https://cdn-lfs.huggingface.co https://*.huggingface.co https://cdn.jsdelivr.net https://staticimgly.com https://www.googletagmanager.com https://www.google-analytics.com https://cloudflareinsights.com https://static.cloudflareinsights.com blob: data:; worker-src 'self' blob:; child-src 'self' blob:; form-action 'self' https://formsubmit.co; frame-ancestors 'none'
