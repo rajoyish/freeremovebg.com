@@ -137,7 +137,10 @@ const catalogue = LANGUAGES.map((l) => ({
     }
 
     function choose(code: string) {
-      document.cookie = `${cookieName}=${code}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
+      // First-party cookie: SameSite=Lax is correct (no cross-site POST needs
+      // it), and Secure is safe because the site is HTTPS-only. Both attributes
+      // satisfy the Lighthouse/best-practices cookie checks.
+      document.cookie = `${cookieName}=${code}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax; secure`;
       window.location.assign(routeFor(code));
     }
 

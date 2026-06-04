@@ -49,6 +49,19 @@
 #
 # HTML pages and /sitemap.xml are deliberately left on the Workers default of
 # "Cache-Control: public, max-age=0, must-revalidate", which keeps content
-# fresh by revalidating (via ETag) on every request. Do NOT add a /* rule here:
-# a second matching rule would be comma-joined onto the immutable rule above,
-# corrupting the long-cache behavior for /_astro/* assets.
+# fresh by revalidating (via ETag) on every request. Do NOT add a Cache-Control
+# to the /* rule below: a duplicate Cache-Control would be comma-joined onto the
+# immutable rule above, corrupting the long-cache behavior for /_astro/* assets.
+
+# Security headers applied to every response. These complement the per-page CSP
+# <meta> tag Astro injects (which covers script-src/style-src with hashes). Two
+# protections can ONLY be enforced as real HTTP headers, never via <meta>, so
+# they live here:
+#   - X-Frame-Options / frame-ancestors: clickjacking protection.
+#   - X-Content-Type-Options: stop MIME sniffing.
+# No Cache-Control is set here, so the cache rules above are untouched.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: frame-ancestors 'none'

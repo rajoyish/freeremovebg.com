@@ -151,18 +151,24 @@ const jsonLd = {
 
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<!-- Preload the Google Fonts CSS as a non-render-blocking resource. Unlike
-		     media="print" (which defers the fetch entirely and makes preconnects
-		     appear unused to Lighthouse), preload fetches immediately — using the
-		     preconnect — but does not block rendering until the onload handler
-		     promotes it to a stylesheet. The font files themselves are then fetched
-		     from gstatic.com (benefiting from the preconnect above). -->
+		<!-- Preload the Google Fonts CSS as a non-render-blocking resource, then
+		     promote it to a stylesheet once loaded. The promotion is done from an
+		     inline script (below) rather than an inline `onload=` attribute so the
+		     Content Security Policy can stay free of `unsafe-inline`/`unsafe-hashes`
+		     in script-src — inline event-handler attributes would otherwise require
+		     loosening the policy. -->
 		<link
+			id="gf-stylesheet"
 			rel="preload"
 			as="style"
 			href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
-			onload="this.rel='stylesheet'"
 		/>
+		<script is:inline>
+			(() => {
+				const l = document.getElementById('gf-stylesheet');
+				if (l) l.addEventListener('load', () => { l.rel = 'stylesheet'; }, { once: true });
+			})();
+		</script>
 		<noscript>
 			<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />
 		</noscript>

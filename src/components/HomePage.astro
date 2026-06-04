@@ -503,6 +503,17 @@ const toolStrings = {
   }
 
   function resetZone() {
+    // Revoke every object URL and drop blob references still held by the queue.
+    // Without this, "start over" (which just clears innerHTML) would orphan two
+    // object URLs per processed image — each pinning a full-size blob in memory
+    // until page reload, the main driver of the out-of-memory crash on batches.
+    for (const item of queue) {
+      if (item.originalUrl) URL.revokeObjectURL(item.originalUrl);
+      if (item.resultUrl)   URL.revokeObjectURL(item.resultUrl);
+    }
+    queue.length = 0;
+    usedNames.clear();
+
     thumbGrid.innerHTML = '';
     imagesContainer.innerHTML = '';
     zoneFilled.classList.add('hidden');
@@ -582,8 +593,9 @@ const toolStrings = {
   // receives a format it can reliably decode (some WebP files fail otherwise).
   async function normalizeToPng(file: File): Promise<Blob> {
     const url = URL.createObjectURL(file);
+    const img = new Image();
+    let canvas: HTMLCanvasElement | null = null;
     try {
-      const img = new Image();
       img.decoding = 'async';
       img.src = url;
       try {
@@ -595,18 +607,24 @@ const toolStrings = {
       const height = img.naturalHeight;
       if (!width || !height) throw new Error(`"${file.name}" has no readable image data.`);
 
-      const canvas = document.createElement('canvas');
+      canvas = document.createElement('canvas');
       canvas.width  = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas 2D context is unavailable in this browser.');
       ctx.drawImage(img, 0, 0);
 
-      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+      const blob = await new Promise<Blob | null>((resolve) => canvas!.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('Failed to convert the image to PNG.');
       return blob;
     } finally {
       URL.revokeObjectURL(url);
+      // Free memory eagerly instead of waiting for GC. Browsers (notably
+      // Safari/iOS) cap total canvas backing-store memory and kill the tab when
+      // it is exceeded; collapsing the canvas to 0x0 and dropping the decoded
+      // bitmap releases tens of MB per HD image immediately.
+      if (canvas) { canvas.width = 0; canvas.height = 0; }
+      img.src = '';
     }
   }
 
@@ -664,8 +682,9 @@ const toolStrings = {
   //   B) a ragged outline whose left/right edge jumps abruptly between rows.
   async function isGlitched(blob: Blob): Promise<boolean> {
     const url = URL.createObjectURL(blob);
+    const img = new Image();
+    let canvas: HTMLCanvasElement | null = null;
     try {
-      const img = new Image();
       img.src = url;
       await img.decode();
       const w = img.naturalWidth;
@@ -675,7 +694,7 @@ const toolStrings = {
       const scale = Math.min(1, 256 / w);
       const gw = Math.max(1, Math.round(w * scale));
       const gh = Math.max(1, Math.round(h * scale));
-      const canvas = document.createElement('canvas');
+      canvas = document.createElement('canvas');
       canvas.width = gw;
       canvas.height = gh;
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -748,6 +767,10 @@ const toolStrings = {
       return false;
     } finally {
       URL.revokeObjectURL(url);
+      // Release the analysis canvas and decoded bitmap immediately (see
+      // normalizeToPng) so the glitch check doesn't pile onto canvas memory.
+      if (canvas) { canvas.width = 0; canvas.height = 0; }
+      img.src = '';
     }
   }
 
