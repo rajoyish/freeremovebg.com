@@ -106,7 +106,7 @@ const toolStrings = {
             {dict.hero.privacyBadge}
           </div>
           
-          <div id="global-counter-wrapper" class="mt-8 flex flex-col items-center justify-center transition-opacity duration-300">
+          <div id="global-counter-wrapper" class="mt-8 flex flex-col items-center justify-center transition-opacity duration-300 opacity-0">
             <div class="inline-flex flex-col items-center gap-1.5 px-6 py-3.5 bg-canvas border border-hairline rounded-2xl shadow-sm relative overflow-hidden">
               <span class="text-xs font-medium text-mute uppercase tracking-widest flex items-center gap-2">
                 <span class="relative flex h-2 w-2">
@@ -291,10 +291,38 @@ const toolStrings = {
   import { pipeline, env } from '@huggingface/transformers';
   import { removeBackground } from '@imgly/background-removal';
   import * as ort from 'onnxruntime-web';
-  import { recordCutoutSuccess, initCounter } from '../lib/counter';
+  import { recordCutoutSuccess } from '../lib/counter';
 
-  // Initialize global counter
-  initCounter('global-counter');
+  // ── Global Counter UI ──────────────────────────────────────────────────────
+  async function fetchGlobalCount() {
+    const counterEl = document.getElementById('global-counter');
+    const wrapperEl = document.getElementById('global-counter-wrapper');
+    if (!counterEl || !wrapperEl) return;
+
+    try {
+      const response = await fetch('/api/count');
+      if (!response.ok) throw new Error('Failed to load count');
+      
+      const data = await response.json();
+      
+      if (typeof data.count === 'number') {
+        counterEl.innerText = data.count.toLocaleString();
+        wrapperEl.classList.remove('opacity-0');
+        wrapperEl.classList.add('opacity-100');
+      }
+    } catch (error) {
+      console.warn('Stats API unavailable:', error);
+      counterEl.innerText = "--";
+    }
+  }
+
+  // Execute on initial paint
+  document.addEventListener('DOMContentLoaded', fetchGlobalCount);
+  
+  // Refresh when the user successfully processes new images locally
+  window.addEventListener('global-counter-updated', () => {
+    setTimeout(fetchGlobalCount, 500); 
+  });
 
   // ── Localized strings ──────────────────────────────────────────────────────
   // Read the build-time-translated copy injected by HomePage.astro. Falls back
