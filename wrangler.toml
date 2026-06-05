@@ -31,10 +31,4 @@ not_found_handling = "404-page"
 # Only invoke the Worker first on the bare root, where geo-redirect decisions
 # happen. Every other request (localized routes, JS/WASM/model assets, images)
 # is served asset-first for lowest latency and zero Worker billing.
-run_worker_first = ["/", "/api/count"]
-
-# D1 Database binding for the global processing counter
-[[d1_databases]]
-binding = "DB"
-database_name = "freeremovebg_stats"
-database_id = "c87ac39c-e41a-4232-b166-d5639c62442a"
+run_worker_first = ["/"]

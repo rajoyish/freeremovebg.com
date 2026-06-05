@@ -105,21 +105,6 @@ const toolStrings = {
             <svg width="14" height="14" fill="none" class="stroke-link" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             {dict.hero.privacyBadge}
           </div>
-          
-          <div id="global-counter-wrapper" class="mt-8 flex flex-col items-center justify-center transition-opacity duration-300 opacity-0">
-            <div class="inline-flex flex-col items-center gap-1.5 px-6 py-3.5 bg-canvas border border-hairline rounded-2xl shadow-sm relative overflow-hidden">
-              <span class="text-xs font-medium text-mute uppercase tracking-widest flex items-center gap-2">
-                <span class="relative flex h-2 w-2">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                Processed Globally
-              </span>
-              <span id="global-counter" class="text-3xl font-bold text-ink tabular-nums tracking-tight">
-                --
-              </span>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -291,38 +276,6 @@ const toolStrings = {
   import { pipeline, env } from '@huggingface/transformers';
   import { removeBackground } from '@imgly/background-removal';
   import * as ort from 'onnxruntime-web';
-  import { recordCutoutSuccess } from '../lib/counter';
-
-  // ── Global Counter UI ──────────────────────────────────────────────────────
-  async function fetchGlobalCount() {
-    const counterEl = document.getElementById('global-counter');
-    const wrapperEl = document.getElementById('global-counter-wrapper');
-    if (!counterEl || !wrapperEl) return;
-
-    try {
-      const response = await fetch('/api/count');
-      if (!response.ok) throw new Error('Failed to load count');
-      
-      const data = await response.json();
-      
-      if (typeof data.count === 'number') {
-        counterEl.innerText = data.count.toLocaleString();
-        wrapperEl.classList.remove('opacity-0');
-        wrapperEl.classList.add('opacity-100');
-      }
-    } catch (error) {
-      console.warn('Stats API unavailable:', error);
-      counterEl.innerText = "--";
-    }
-  }
-
-  // Execute immediately — Astro defers scripts so the DOM is already ready
-  fetchGlobalCount();
-  
-  // Refresh when the user successfully processes new images locally
-  window.addEventListener('global-counter-updated', () => {
-    setTimeout(fetchGlobalCount, 500); 
-  });
 
   // ── Localized strings ──────────────────────────────────────────────────────
   // Read the build-time-translated copy injected by HomePage.astro. Falls back
@@ -894,9 +847,6 @@ const toolStrings = {
       item.blob = blob;
       item.cardEl = addCard(name, originalUrl, resultUrl, usedModel);
       setThumbStatus(item.id, 'done');
-      
-      // Update the debounced global counter
-      recordCutoutSuccess();
     } catch (err) {
       setThumbStatus(item.id, 'error');
       throw err;

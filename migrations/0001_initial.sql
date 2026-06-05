@@ -1,6 +1,0 @@
-CREATE TABLE IF NOT EXISTS stats (
-  id INTEGER PRIMARY KEY,
-  total_cutouts INTEGER NOT NULL DEFAULT 0
-);
-
-INSERT OR IGNORE INTO stats (id, total_cutouts) VALUES (1, 0);

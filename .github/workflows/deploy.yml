@@ -18,25 +18,18 @@ jobs:
       contents: read
     # Secrets cannot be referenced directly in step-level `if:` conditionals,
     # so expose the key as a job-level env var and test that instead.
-    # Expose the Turnstile public site key as a variable for the Astro build step.
     env:
       GOOGLE_TRANSLATE_API_KEY: ${{ secrets.GOOGLE_TRANSLATE_API_KEY }}
-      PUBLIC_TURNSTILE_SITEKEY: ${{ vars.PUBLIC_TURNSTILE_SITEKEY }}
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node (Install)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
       - name: Setup pnpm
         # Version is read from the "packageManager" field in package.json.
+        # Do not set it here too, or pnpm errors with ERR_PNPM_BAD_PM_VERSION.
         uses: pnpm/action-setup@v4
 
-      - name: Setup Node (Cache)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -55,13 +48,6 @@ jobs:
 
       - name: Build
         run: pnpm build
-
-      - name: Apply D1 Migrations
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: d1 migrations apply DB --remote
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
