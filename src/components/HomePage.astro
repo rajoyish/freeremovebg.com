@@ -316,8 +316,8 @@ const toolStrings = {
     }
   }
 
-  // Execute on initial paint
-  document.addEventListener('DOMContentLoaded', fetchGlobalCount);
+  // Execute immediately — Astro defers scripts so the DOM is already ready
+  fetchGlobalCount();
   
   // Refresh when the user successfully processes new images locally
   window.addEventListener('global-counter-updated', () => {

@@ -99,16 +99,9 @@ export default {
         return new Response(null, { headers: corsHeaders });
       }
 
-      const referer = request.headers.get("Referer");
-      const origin = request.headers.get("Origin");
-      const isValidOrigin =
-        (referer && referer.startsWith("https://freeremovebg.com")) ||
-        (origin && origin === "https://freeremovebg.com");
-
-      if (!isValidOrigin) {
-        return new Response("Forbidden", { status: 403 });
-      }
-
+      // GET: public read-only — no auth required.
+      // Same-origin browser requests don't send an Origin header, so we
+      // must not gate GETs on origin checks or they return 403.
       if (request.method === "GET") {
         try {
           const result = await env.DB.prepare("SELECT total_cutouts FROM stats WHERE id = 1").first();
@@ -124,6 +117,17 @@ export default {
       }
 
       if (request.method === "POST") {
+        // POST mutates state — enforce origin check here.
+        const referer = request.headers.get("Referer");
+        const origin = request.headers.get("Origin");
+        const isValidOrigin =
+          (referer && referer.startsWith("https://freeremovebg.com")) ||
+          (origin && origin === "https://freeremovebg.com");
+
+        if (!isValidOrigin) {
+          return new Response("Forbidden", { status: 403 });
+        }
+
         try {
           const body = await request.json();
           const turnstileToken = body["cf-turnstile-token"];
