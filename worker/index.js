@@ -1,25 +1,29 @@
 /**
- * Cloudflare Worker — edge geo-routing for the static localized site.
+ * Cloudflare Worker — edge routing for the static localized site (SEO-safe).
  * ───────────────────────────────────────────────────────────────────────────
  * Static assets (the pre-translated Astro build in ./dist) are served by the
  * ASSETS binding. This Worker only adds a thin routing layer on top:
  *
  *   1. Crawler safety   — known search bots ALWAYS get the English root, never
  *                         a redirect, so they index the canonical pages cleanly.
- *   2. Cookie override  — a `lang` cookie (set when the user picks a language in
- *                         the switcher) routes returning visitors to `/<lang>/`.
- *   3. Fallback         — everyone else is served the English root as-is.
+ *   2. Cookie override  — a `preferred_lang` cookie (set on explicit selection
+ *                         in the LanguageSwitcher) routes returning visitors to
+ *                         `/<lang>/`.
+ *   3. Fallback         — everyone else (no cookie, preferred_lang=en, or bots)
+ *                         is served the English root as-is.
  *
- * NOTE: there is deliberately NO IP/country auto-redirect. Every first-time
- * visitor gets English regardless of location; the in-page language switcher
- * merely *suggests* the language for their detected region. This avoids
- * trapping users (e.g. an English speaker in Nepal) in a language they can't
- * read. The user's explicit choice is what persists, via the `lang` cookie.
+ * NOTE: there is deliberately NO IP/country auto-redirect at the edge.
+ * Every first-time visitor (and all bots) gets English at `/` regardless of
+ * location. The in-page language switcher merely *suggests* a regional language
+ * (client-side via /cdn-cgi/trace). The user's explicit choice is persisted via
+ * the `preferred_lang` cookie and honored here on root visits only.
+ * This preserves the "suggest, don't force" UX and prevents trapping users or
+ * bots in non-English content.
  *
  * The Google Translation API is never involved here; all localized HTML was
  * generated at build time.
  */
-import { supportedCodes, defaultLang, langCookie } from "./region-map.js";
+import { supportedCodes, defaultLang } from "./region-map.js";
 
 // Search-crawler user agents that must bypass redirection. Matching is
 // case-insensitive and substring-based.
@@ -76,6 +80,30 @@ function getCookie(request, name) {
   return null;
 }
 
+/**
+ * If running in staging (env.ENVIRONMENT === 'staging'), clone the response
+ * and append X-Robots-Tag: noindex, nofollow.
+ * This protects the entire staging site (all HTML pages) from being indexed
+ * by search engines. We only do this for text/html responses.
+ * Cloning is required because Response headers are immutable.
+ */
+function addStagingNoindex(response, env) {
+  if (!env || env.ENVIRONMENT !== 'staging') {
+    return response;
+  }
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('text/html')) {
+    return response;
+  }
+  const headers = new Headers(response.headers);
+  headers.set('X-Robots-Tag', 'noindex, nofollow');
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export default {
   /**
    * @param {Request} request
@@ -94,32 +122,42 @@ export default {
       !/\.[a-z0-9]+$/i.test(pathname);
 
     // ── (early): non-navigation or sub-path requests → serve assets ──────────
-    // We only ever act on the bare root "/". Any other path (including
-    // already-localized routes like /hi/) is served as-is.
+    // In staging we still want to run the worker (see wrangler.toml [env.staging])
+    // so we can inject the noindex header on *all* HTML responses.
+    // For non-root paths we just pass through to ASSETS (with header wrapper).
     if (!isNavigation || pathname !== "/") {
-      return env.ASSETS.fetch(request);
+      const assetResponse = await env.ASSETS.fetch(request);
+      return addStagingNoindex(assetResponse, env);
     }
 
     // ── 1: Crawler safety — bots always get the canonical English root ────────
     if (isCrawler(request.headers.get("User-Agent"))) {
-      return env.ASSETS.fetch(request);
+      const assetResponse = await env.ASSETS.fetch(request);
+      return addStagingNoindex(assetResponse, env);
     }
 
-    // ── 2: Cookie override — the user's saved language choice ─────────────────
-    // Only a cookie holding a SUPPORTED code is honoured. A garbage/stale value
-    // is ignored so it can't trap a user; we fall through to the English root.
-    const cookieLang = getCookie(request, langCookie);
+    // ── 2: Cookie override — the user's saved language preference ─────────────
+    // Parse `preferred_lang` (set by the client-side LanguageSwitcher on explicit
+    // choice). If present, valid, and not "en", issue a 302 to the chosen locale.
+    // If the cookie does not exist (new visitors, Googlebot, etc.) OR is "en",
+    // fall through and serve the default English root. This is the core of the
+    // SEO-safe "default to English + preference redirect" strategy.
+    const cookieLang = getCookie(request, 'preferred_lang');
     if (cookieLang && supportedCodes.includes(cookieLang)) {
       if (cookieLang === defaultLang) {
-        // User explicitly chose English: stay on the root, no redirect.
-        return env.ASSETS.fetch(request);
+        // User explicitly chose English (or default): stay on the root.
+        const assetResponse = await env.ASSETS.fetch(request);
+        return addStagingNoindex(assetResponse, env);
       }
-      return redirectTo(url, cookieLang);
+      const redirectResponse = redirectTo(url, cookieLang);
+      return addStagingNoindex(redirectResponse, env);
     }
 
-    // ── 3: Fallback — serve the English root. No IP/country auto-redirect: the
-    // in-page switcher suggests the regional language instead of forcing it. ──
-    return env.ASSETS.fetch(request);
+    // ── 3: Fallback — serve the English root (no valid non-English preference). ──
+    // New users, bots without cookies, and users who selected English always
+    // land here. The in-page language switcher can still suggest based on client geo.
+    const assetResponse = await env.ASSETS.fetch(request);
+    return addStagingNoindex(assetResponse, env);
   },
 };
 

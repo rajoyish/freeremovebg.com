@@ -32,3 +32,16 @@ not_found_handling = "404-page"
 # happen. Every other request (localized routes, JS/WASM/model assets, images)
 # is served asset-first for lowest latency and zero Worker billing.
 run_worker_first = ["/"]
+
+# --- Staging environment (separate worker for preview/testing) ---
+# Deploy with: npx wrangler deploy --env staging
+# This creates freeremovebg-staging.<sub>.workers.dev (protected from indexing)
+[env.staging]
+name = "freeremovebg-staging"
+workers_dev = true
+# Run the Worker for *all* requests in staging so we can inject noindex headers
+# on every HTML response (prod optimizes by only running on root).
+run_worker_first = true
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
