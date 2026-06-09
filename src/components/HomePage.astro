@@ -293,6 +293,15 @@ const toolStrings = {
   //  exported by their modules for internal composition and testability but are
   //  not directly referenced from the controller after Phase 1 extraction.)
 
+  // Phase 2: State (QueueManager) + View modules. The <script> is now a thin
+  // bootstrap/controller only: parse I18N, grab root elements, instantiate
+  // manager + views, wire events, delegate everything else.
+  import { QueueManager } from '../lib/core/QueueManager';
+  import { ThumbsView } from '../lib/ui/thumbs';
+  import { CardsView } from '../lib/ui/cards';
+  import { ProgressView } from '../lib/ui/progress';
+  import { showToast } from '../lib/ui/toast';
+
   // ── Localized strings ──────────────────────────────────────────────────────
   // Read the build-time-translated copy injected by HomePage.astro. Falls back
   // to English defaults so the tool never breaks if a string is missing.
@@ -343,29 +352,6 @@ const toolStrings = {
     env.backends.onnx.wasm.numThreads = 1;
   }
 
-  type ThumbStatus = 'queued' | 'analysing' | 'processing' | 'done' | 'error';
-
-  let currentMode: ModelMode = 'auto';
-
-  interface QueueItem {
-    id: string;
-    file: File;
-    status: ThumbStatus;
-    originalUrl?: string;
-    resultUrl?: string;
-    outName?: string;
-    blob?: Blob;
-    cardEl?: HTMLElement;
-  }
-  let queue: QueueItem[] = [];
-  let idCounter = 0;
-  const nextId = () => `img-${++idCounter}`;
-  const usedNames = new Set<string>();
-
-  function countLabel(n: number): string {
-    return `${n} ${n !== 1 ? I18N.imagesSelected : I18N.imageSelected}`;
-  }
-
   const uploadZone    = document.getElementById('upload-zone')!;
   const fileInput     = document.getElementById('file-input') as HTMLInputElement;
   const browseBtn     = document.getElementById('browse-btn')!;
@@ -393,11 +379,76 @@ const toolStrings = {
   const ACTIVE_BTN   = ['bg-ink', 'text-on-primary'];
   const INACTIVE_BTN = ['bg-transparent', 'text-body'];
 
+  // ── Thin controller (Phase 2) ──────────────────────────────────────────────
+  // The script now only:
+  // - Parses I18N from the build-time <script type="application/json" id="tool-i18n">
+  // - Grabs root DOM elements by ID
+  // - Instantiates QueueManager (state + URL ownership + processing loop) + View modules
+  // - Wires event listeners (delegating to manager)
+  // - Keeps the tiny model-selector visual sync (also notifies manager)
+  //
+  // All DOM builders (addThumb/addCard/showToast/progress/zone), queue state,
+  // revocations, and orchestration live in src/lib/core/QueueManager.ts and src/lib/ui/*.
+  // Views receive data + I18N and render with Tailwind v4 utilities only.
+
+  const toastContainer = document.getElementById('toast-container')!;
+
+  const thumbsView = new ThumbsView(
+    { thumbGrid, zoneCount, zoneEmpty, zoneFilled, uploadZone },
+    I18N
+  );
+
+  const cardsView = new CardsView(
+    { imagesContainer, imageGrid },
+    I18N
+  );
+
+  const progressView = new ProgressView({
+    progressState,
+    progressTrack,
+    progressBar,
+    progressText,
+    loadingText,
+  });
+
+  const showToastFn = (message: string) => showToast(toastContainer, message);
+
+  const queueManager = new QueueManager(
+    {
+      thumbs: {
+        addThumb: (item) => thumbsView.addThumb(item),
+        setStatus: (id, status) => thumbsView.setStatus(id, status),
+        removeThumb: (id, done) => thumbsView.removeThumb(id, done),
+        showInZone: (items, total) => thumbsView.showInZone(items, total),
+        updateCount: (n) => thumbsView.updateCount(n),
+        reset: () => thumbsView.reset(),
+      },
+      cards: {
+        addCard: (name, orig, proc, label, onDl) => cardsView.addCard(name, orig, proc, label, onDl),
+        removeCard: (el) => cardsView.removeCard(el),
+        reset: () => cardsView.reset(),
+      },
+      progress: {
+        show: () => progressView.show(),
+        hide: () => progressView.hide(),
+        set: (d, t, m) => progressView.set(d, t, m),
+        scheduleHide: (ms) => progressView.scheduleHide(ms),
+      },
+      showToast: showToastFn,
+    },
+    I18N as any
+  );
+
+  // Wire the only callback from view DOM back to manager (remove buttons).
+  thumbsView.setOnRemove((id) => queueManager.remove(id));
+
+  // Model selector: update visuals (HINTS/ACTIVE kept for zero visual change)
+  // and tell the manager so the *next* added batch uses the chosen routing.
   document.getElementById('model-selector')!.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest('button[data-model]') as HTMLButtonElement | null;
     if (!btn) return;
     const mode = btn.dataset.model as ModelMode;
-    currentMode = mode;
+    queueManager.setMode(mode);
     document.querySelectorAll<HTMLButtonElement>('#model-selector button').forEach(b => {
       const active = b.dataset.model === mode;
       b.classList.remove(...(active ? INACTIVE_BTN : ACTIVE_BTN));
@@ -406,341 +457,7 @@ const toolStrings = {
     modelHint.textContent = HINTS[mode];
   });
 
-  const STATUS: Record<ThumbStatus, { bg: string; label: string }> = {
-    queued:     { bg: 'bg-black/45',        label: I18N.status?.queued     ?? 'Queued'      },
-    analysing:  { bg: 'bg-amber-500/90',    label: I18N.status?.analysing  ?? 'Analysing…'  },
-    processing: { bg: 'bg-link/90',         label: I18N.status?.processing ?? 'Processing…' },
-    done:       { bg: 'bg-emerald-500/85',  label: I18N.status?.done       ?? '✓ Done'      },
-    error:      { bg: 'bg-error/85',        label: I18N.status?.error      ?? '✗ Error'     },
-  };
-  const ALL_STATUS_BG = ['bg-black/45', 'bg-amber-500/90', 'bg-link/90', 'bg-emerald-500/85', 'bg-error/85'];
-
-  function isRemovable(status: ThumbStatus): boolean {
-    return status === 'queued' || status === 'error';
-  }
-
-  function addThumb(item: QueueItem) {
-    const wrap = document.createElement('div');
-    wrap.id = `thumb-${item.id}`;
-    wrap.className = 'relative aspect-square rounded-md overflow-hidden bg-canvas-soft-2';
-
-    const img = document.createElement('img');
-    const objUrl = URL.createObjectURL(item.file);
-    img.src = objUrl;
-    img.alt = item.file.name;
-    img.className = 'w-full h-full object-cover block';
-    const revokeThumb = () => URL.revokeObjectURL(objUrl);
-    img.onload = revokeThumb;
-    img.onerror = revokeThumb;
-
-    const overlay = document.createElement('div');
-    overlay.id = `thumb-overlay-${item.id}`;
-    overlay.className = 'absolute inset-0 flex items-center justify-center bg-black/45 transition-all duration-300';
-
-    const badge = document.createElement('span');
-    badge.id = `thumb-badge-${item.id}`;
-    badge.className = 'text-[10px] font-semibold text-white tracking-wide uppercase';
-    badge.textContent = STATUS[item.status].label;
-
-    const removeBtn = document.createElement('button');
-    removeBtn.id = `thumb-remove-${item.id}`;
-    removeBtn.type = 'button';
-    removeBtn.setAttribute('aria-label', `${I18N.removeImage}: ${item.file.name}`);
-    removeBtn.title = I18N.removeImage;
-    removeBtn.className = 'absolute top-1 right-1 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-error text-white shadow-sm transition-opacity duration-150 cursor-pointer hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white';
-    removeBtn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>';
-    removeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      removeItem(item.id);
-    });
-    if (!isRemovable(item.status)) removeBtn.classList.add('hidden');
-
-    overlay.appendChild(badge);
-    wrap.appendChild(img);
-    wrap.appendChild(overlay);
-    wrap.appendChild(removeBtn);
-    thumbGrid.appendChild(wrap);
-  }
-
-  function setThumbStatus(id: string, status: ThumbStatus) {
-    const item = queue.find(q => q.id === id);
-    if (item) item.status = status;
-    const overlay = document.getElementById(`thumb-overlay-${id}`);
-    const badge   = document.getElementById(`thumb-badge-${id}`);
-    document.getElementById(`thumb-remove-${id}`)?.classList.toggle('hidden', !isRemovable(status));
-    if (!overlay || !badge) return;
-    const s = STATUS[status];
-    overlay.classList.remove(...ALL_STATUS_BG, 'opacity-0');
-    overlay.classList.add(s.bg);
-
-    if (status === 'done') {
-      // Show a centered checkmark icon on a green overlay — stays visible so
-      // the user can see at a glance which images are finished.
-      badge.innerHTML = '<svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" class="drop-shadow-sm"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
-    } else {
-      badge.textContent = s.label;
-    }
-  }
-
-  function removeItem(id: string) {
-    const idx = queue.findIndex(q => q.id === id);
-    if (idx === -1) return;
-    const item = queue[idx];
-    if (!isRemovable(item.status)) return; // guard: never remove while processing or done
-
-    if (item.originalUrl) URL.revokeObjectURL(item.originalUrl);
-    if (item.resultUrl)   URL.revokeObjectURL(item.resultUrl);
-    if (item.outName)     usedNames.delete(item.outName);
-    item.cardEl?.remove();
-    queue.splice(idx, 1);
-
-    if (queue.length === 0) {
-      animateThumbOut(id, resetZone);
-    } else {
-      zoneCount.textContent = countLabel(queue.length);
-      if (!queue.some(q => q.resultUrl)) imageGrid.classList.add('hidden');
-      animateThumbOut(id);
-    }
-  }
-
-  function animateThumbOut(id: string, done?: () => void) {
-    const el = document.getElementById(`thumb-${id}`);
-    if (!el) { done?.(); return; }
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) { el.remove(); done?.(); return; }
-
-    el.classList.add('thumb-removing');
-    let finished = false;
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-      el.remove();
-      done?.();
-    };
-    el.addEventListener('transitionend', finish, { once: true });
-    setTimeout(finish, 260);
-  }
-
-  function resetZone() {
-    // Revoke every object URL and drop blob references still held by the queue.
-    // Without this, "start over" (which just clears innerHTML) would orphan two
-    // object URLs per processed image — each pinning a full-size blob in memory
-    // until page reload, the main driver of the out-of-memory crash on batches.
-    for (const item of queue) {
-      if (item.originalUrl) URL.revokeObjectURL(item.originalUrl);
-      if (item.resultUrl)   URL.revokeObjectURL(item.resultUrl);
-    }
-    queue.length = 0;
-    usedNames.clear();
-
-    thumbGrid.innerHTML = '';
-    imagesContainer.innerHTML = '';
-    zoneFilled.classList.add('hidden');
-    zoneEmpty.classList.remove('hidden');
-    imageGrid.classList.add('hidden');
-    progressState.classList.add('hidden');
-    uploadZone.classList.remove('has-files', 'cursor-default');
-    uploadZone.classList.add('cursor-pointer');
-    zoneCount.textContent = '';
-  }
-
-  function showFilesInZone(items: QueueItem[]) {
-    zoneEmpty.classList.add('hidden');
-    zoneFilled.classList.remove('hidden');
-    uploadZone.classList.add('has-files', 'cursor-default');
-    uploadZone.classList.remove('cursor-pointer');
-    items.forEach(addThumb);
-    zoneCount.textContent = countLabel(queue.length);
-  }
-
-  function setProgress(done: number, total: number, msg: string) {
-    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-    progressBar.style.setProperty('--progress', `${pct}%`);
-    progressTrack.setAttribute('aria-valuenow', String(pct));
-    progressText.textContent = `${done} / ${total}`;
-    loadingText.textContent  = msg;
-  }
-
-  // NOTE: decodeToCanvas, normalizeToPng, isGlitched, buildOutName, and the
-  // model loading/routing (ensure*, containsPerson, runRemoval) have been
-  // extracted to src/lib/core/* (Phase 1). The functions below are thin
-  // orchestrators that supply I18N strings and perform UI status updates
-  // while delegating the pure work + heavy library calls to the core modules.
-
-  const toastContainer = document.getElementById('toast-container')!;
-  function showToast(message: string, durationMs = 30000) {
-    const toast = document.createElement('div');
-    toast.className = 'toast flex items-center gap-3 px-5 py-3 bg-ink text-on-primary text-sm font-medium rounded-lg shadow-lg max-w-[90vw]';
-    toast.setAttribute('role', 'alert');
-    toast.innerHTML = `
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" class="shrink-0 stroke-amber-400"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
-      <span class="flex-1"></span>
-      <button type="button" aria-label="Dismiss" class="toast-close shrink-0 -mr-1 flex items-center justify-center w-6 h-6 rounded-full text-on-primary/70 transition-colors cursor-pointer hover:bg-on-primary/15 hover:text-on-primary">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
-    `;
-    toast.querySelector('span')!.textContent = message;
-    toastContainer.appendChild(toast);
-    // Use rAF to let the browser paint the initial (hidden) state before
-    // adding the visible class, triggering the CSS transition without a
-    // forced synchronous reflow (previously: void toast.offsetWidth).
-    requestAnimationFrame(() => {
-      toast.classList.add('toast-visible');
-    });
-
-    let dismissed = false;
-    function dismiss() {
-      if (dismissed) return;
-      dismissed = true;
-      clearTimeout(timer);
-      toast.classList.remove('toast-visible');
-      toast.addEventListener('transitionend', () => toast.remove(), { once: true });
-      setTimeout(() => toast.remove(), 400); // fallback if transitionend doesn't fire
-    }
-    toast.querySelector('.toast-close')?.addEventListener('click', dismiss);
-    const timer = setTimeout(dismiss, durationMs);
-  }
-
-  async function processImage(item: QueueItem): Promise<void> {
-    const originalUrl = URL.createObjectURL(item.file);
-    item.originalUrl = originalUrl;
-    let workingUrl: string | null = null;
-    try {
-      const pngBlob = await normalizeToPng(item.file);
-      workingUrl = URL.createObjectURL(pngBlob);
-
-      // UI status + I18N-driven messages are set here (controller/orchestrator).
-      // The core runRemoval + contains/ensure never reference I18N, DOM, or
-      // loadingText. This preserves the exact translated strings from the
-      // build-time #tool-i18n script tag.
-      if (currentMode === 'portrait') {
-        setThumbStatus(item.id, 'processing');
-        loadingText.textContent = I18N.loadingPortrait;
-      } else if (currentMode === 'general') {
-        setThumbStatus(item.id, 'processing');
-        loadingText.textContent = I18N.removingBackground;
-      } else {
-        setThumbStatus(item.id, 'analysing');
-        loadingText.textContent = I18N.analysingImage;
-        // Pre-declare the detector load message so the first-time path inside
-        // runRemoval (via containsPerson) shows the translated label.
-        loadingText.textContent = I18N.preparingDetection;
-      }
-
-      const { blob, usedModel } = await runRemoval(currentMode, pngBlob, workingUrl);
-
-      // Ensure the removal phase message is shown for the actual inference work
-      // (especially relevant for the general / smart-general path).
-      loadingText.textContent = I18N.removingBackground;
-
-      const glitched = await isGlitched(blob);
-      if (glitched) {
-        showToast(`"${item.file.name}" ${I18N.glitchWarning}`);
-      }
-
-      const resultUrl = URL.createObjectURL(blob);
-      const name = buildOutName(item.file.name, usedNames);
-      item.resultUrl = resultUrl;
-      item.outName = name;
-      item.blob = blob;
-      item.cardEl = addCard(name, originalUrl, resultUrl, usedModel);
-      setThumbStatus(item.id, 'done');
-    } catch (err) {
-      setThumbStatus(item.id, 'error');
-      throw err;
-    } finally {
-      if (workingUrl) URL.revokeObjectURL(workingUrl);
-    }
-  }
-
-  function addCard(name: string, originalUrl: string, processedUrl: string, modelLabel: string): HTMLElement {
-    const card = document.createElement('div');
-    card.className = 'bg-canvas border border-hairline rounded-[10px] overflow-hidden shadow-sm';
-    card.innerHTML = `
-      <div class="relative aspect-[4/3] grid grid-cols-2">
-        <div class="relative overflow-hidden border-r border-hairline">
-          <img src="${originalUrl}" alt="${I18N.original}" class="w-full h-full object-cover block" />
-          <span class="absolute top-2 left-2 px-2 py-[3px] bg-ink text-on-primary text-[11px] font-medium rounded-[4px]">${I18N.original}</span>
-        </div>
-        <div class="relative overflow-hidden bg-checkerboard">
-          <img src="${processedUrl}" alt="${I18N.removed}" class="w-full h-full object-cover block" />
-          <span class="absolute top-2 right-2 px-2 py-[3px] bg-link text-white text-[11px] font-medium rounded-[4px]">${I18N.removed}</span>
-        </div>
-      </div>
-      <div class="px-4 pt-3 pb-3.5 border-t border-canvas-soft-2">
-        <div class="flex items-center justify-between gap-3 mb-2">
-          <p class="text-[13px] font-medium text-ink m-0 overflow-hidden text-ellipsis whitespace-nowrap flex-1">${name}</p>
-          <button class="dl-btn shrink-0 px-4 py-[7px] bg-ink text-on-primary border-none rounded-pill text-[13px] font-medium cursor-pointer transition-opacity hover:opacity-80">
-            ${I18N.downloadPng}
-          </button>
-        </div>
-        <p class="m-0 text-[11px] text-mute font-mono">
-          <span class="inline-block w-[7px] h-[7px] rounded-full bg-link mr-[5px] align-middle"></span>
-          ${modelLabel}
-        </p>
-      </div>
-    `;
-    imagesContainer.appendChild(card);
-    imageGrid.classList.remove('hidden');
-    (card.querySelector('.dl-btn') as HTMLButtonElement).addEventListener('click', () => {
-      const a = document.createElement('a');
-      a.href = processedUrl;
-      a.download = name;
-      a.click();
-    });
-    return card;
-  }
-
-  const IMAGE_EXT = /\.(jpe?g|png|webp|gif|bmp|avif|svg|ico|tiff?)$/i;
-  function isImageFile(f: File): boolean {
-    return f.type.startsWith('image/') || IMAGE_EXT.test(f.name);
-  }
-
-  async function handleFiles(newFiles: File[]) {
-    const imgs = newFiles.filter(isImageFile);
-    if (!imgs.length) { alert(I18N.selectImages); return; }
-
-    const newItems: QueueItem[] = imgs.map(file => ({ id: nextId(), file, status: 'queued' as ThumbStatus }));
-    queue.push(...newItems);
-    showFilesInZone(newItems);
-
-    progressState.classList.remove('hidden');
-    const total = newItems.length;
-    let done = 0;
-    setProgress(done, total, I18N.starting);
-
-    for (const item of newItems) {
-      // The item may have been removed from the zone before we reached it.
-      if (!queue.includes(item)) { done++; setProgress(done, total, I18N.processing); continue; }
-      setProgress(done, total, `${I18N.processing}`);
-      try {
-        await processImage(item);
-      } catch (err) {
-        console.error(`Skipping ${item.file.name}:`, err);
-        showToast('An error occurred. Please try again after some time.');
-      }
-      done++;
-      setProgress(done, total, done === total ? I18N.allDone : I18N.processing);
-    }
-
-    if (done === total) setTimeout(() => { progressState.classList.add('hidden'); }, 2000);
-  }
-
-  async function downloadZip() {
-    const ready = queue.filter(q => q.blob && q.outName);
-    if (!ready.length) return;
-    const { default: JSZip } = await import('jszip');
-    const zip = new JSZip();
-    ready.forEach(({ outName, blob }) => zip.file(outName!, blob!));
-    const zipBlob = await zip.generateAsync({ type: 'blob' });
-    const url = URL.createObjectURL(zipBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'freeremovebg.zip';
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 0);
-  }
-
+  // Event wiring — thin delegation to the manager (or file input).
   const DRAG_ON  = ['border-ink', 'bg-canvas-soft'];
   const DRAG_OFF = ['border-hairline-strong', 'bg-canvas'];
 
@@ -755,7 +472,7 @@ const toolStrings = {
   browseBtn.addEventListener('click',  (e) => { e.stopPropagation(); fileInput.click(); });
   addMoreBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
   fileInput.addEventListener('change', () => {
-    if (fileInput.files?.length) handleFiles(Array.from(fileInput.files));
+    if (fileInput.files?.length) queueManager.addFiles(Array.from(fileInput.files));
     fileInput.value = '';
   });
   uploadZone.addEventListener('dragover', (e) => {
@@ -768,9 +485,9 @@ const toolStrings = {
   uploadZone.addEventListener('drop', (e) => {
     e.preventDefault();
     if (!uploadZone.classList.contains('has-files')) setDragState(false);
-    if (e.dataTransfer?.files.length) handleFiles(Array.from(e.dataTransfer.files));
+    if (e.dataTransfer?.files.length) queueManager.addFiles(Array.from(e.dataTransfer.files));
   });
-  downloadAllBtn.addEventListener('click', downloadZip);
+  downloadAllBtn.addEventListener('click', () => { queueManager.downloadAll(); });
 
   const revealEls = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
