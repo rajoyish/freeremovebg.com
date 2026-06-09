@@ -4,6 +4,8 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://freeremovebg.com',
+
   // Content Security Policy is intentionally NOT configured here.
   //
   // Astro's built-in `security.csp` emits a hash-based <meta> CSP. That approach

@@ -32,12 +32,18 @@ const {
 
 const activeLang = LANG_BY_CODE[lang] ?? LANG_BY_CODE[DEFAULT_LANG];
 
-// hreflang alternates: one per supported language for THIS page, plus the
-// mandatory x-default pointing at the English root so search engines know what
-// to serve users who match no explicit geolocation rule. Only emitted for pages
-// that actually have localized variants (the home page).
+// hreflang alternates use Astro.site (configured in astro.config.mjs) to
+// guarantee fully absolute URLs (e.g. https://freeremovebg.com/ne/).
+// Google requires absolute URLs for hreflang tags.
+// Language codes come from src/i18n/config.ts (LANGUAGES).
 const hreflangAlternates = localized
-	? LANGUAGES.map((l) => ({ hreflang: l.code, href: localizedUrl(l.code, basePath) }))
+	? LANGUAGES.map((l) => {
+			const path = l.code === DEFAULT_LANG ? '/' : `/${l.code}/`;
+			return {
+				hreflang: l.code,
+				href: new URL(path, Astro.site).href,
+			};
+		})
 	: [];
 // Open Graph requires locale as `language_TERRITORY` (e.g. en_US, hi_IN), not a
 // bare language code. Derive the territory from the active language's region
@@ -99,7 +105,7 @@ const jsonLd = {
 			<link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
 		))}
 		{localized && (
-			<link rel="alternate" hreflang="x-default" href={localizedUrl(DEFAULT_LANG, basePath)} />
+			<link rel="alternate" hreflang="x-default" href={new URL(basePath === '/' ? '/' : `/${DEFAULT_LANG}${basePath}`, Astro.site).href} />
 		)}
 
 		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
