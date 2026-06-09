@@ -25,10 +25,27 @@ const {
 	lang = DEFAULT_LANG,
 	basePath = '/',
 	localized = true,
-	canonical = localizedUrl(lang, basePath),
+	canonical: providedCanonical,
 	ogImage = `${SITE}/images/og-frbg.png`,
 	noindex = false,
 } = Astro.props;
+
+// Standardize canonical to always be absolute using Astro.site (same pattern as hreflang).
+// This ensures fully qualified URL even if providedCanonical is relative or omitted.
+const getPagePath = () => {
+  const langPrefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
+  let p = basePath || '/';
+  if (p === '/') {
+    return langPrefix || '/';
+  }
+  if (!p.startsWith('/')) p = `/${p}`;
+  if (!p.endsWith('/')) p = `${p}/`;
+  return `${langPrefix}${p}`;
+};
+
+const canonicalHref = providedCanonical
+  ? new URL(providedCanonical, Astro.site).href
+  : new URL(getPagePath(), Astro.site).href;
 
 const activeLang = LANG_BY_CODE[lang] ?? LANG_BY_CODE[DEFAULT_LANG];
 
@@ -97,7 +114,7 @@ const jsonLd = {
 		<meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large'} />
 		<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
 		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
-		<link rel="canonical" href={canonical} />
+		<link rel="canonical" href={canonicalHref} />
 
 		<!-- Localization alternates: every supported language for this page, plus
 		     x-default pointing at the English root for users who match no rule. -->
@@ -119,7 +136,7 @@ const jsonLd = {
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content={canonical} />
+		<meta property="og:url" content={canonicalHref} />
 		<meta property="og:site_name" content="Free Remove BG" />
 		<meta property="og:locale" content={ogLocale} />
 		<meta property="og:image" content={ogImage} />

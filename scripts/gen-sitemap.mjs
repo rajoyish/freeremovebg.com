@@ -50,7 +50,7 @@ const staticPages = [
 ]
   .map(
     (p) => `  <url>
-    <loc>${SITE}${p.path}</loc>
+    <loc>${SITE}${p.path}/</loc>
     <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>
   </url>`,

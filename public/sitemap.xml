@@ -2802,22 +2802,22 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://freeremovebg.com/about</loc>
+    <loc>https://freeremovebg.com/about/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://freeremovebg.com/contact</loc>
+    <loc>https://freeremovebg.com/contact/</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://freeremovebg.com/privacy-policy</loc>
+    <loc>https://freeremovebg.com/privacy-policy/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://freeremovebg.com/terms</loc>
+    <loc>https://freeremovebg.com/terms/</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

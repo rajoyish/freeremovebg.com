@@ -5,6 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 // https://astro.build/config
 export default defineConfig({
   site: 'https://freeremovebg.com',
+  trailingSlash: 'always',
 
   // Content Security Policy is intentionally NOT configured here.
   //
