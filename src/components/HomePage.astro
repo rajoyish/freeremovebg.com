@@ -273,9 +273,25 @@ const toolStrings = {
 </Layout>
 
 <script>
-  import { pipeline, env } from '@huggingface/transformers';
-  import { removeBackground } from '@imgly/background-removal';
+  // Heavy ML engine imports are retained here solely for the top-level
+  // environment / threading configuration that must run at module eval time.
+  // The actual pipeline() and removeBackground() calls now live in the extracted
+  // core model module (the manualChunks rules still match the package ids).
+  import { env } from '@huggingface/transformers';
   import * as ort from 'onnxruntime-web';
+
+  // Pure logic extracted in Phase 1 (Option A). These modules contain zero
+  // references to application UI DOM (no getElementById, no zone/thumb queries,
+  // no event wiring, no direct mutation of app elements). They only use
+  // low-level browser graphics APIs (canvas, ImageBitmap, Image) for the
+  // algorithmic work and manage their own temporary object URLs.
+  import { normalizeToPng } from '../lib/core/image';
+  import { isGlitched } from '../lib/core/glitch';
+  import { buildOutName } from '../lib/core/naming';
+  import { type ModelMode, runRemoval } from '../lib/core/model';
+  // (ensureDetector / ensurePortraitPipe / containsPerson / decodeToCanvas are
+  //  exported by their modules for internal composition and testability but are
+  //  not directly referenced from the controller after Phase 1 extraction.)
 
   // ── Localized strings ──────────────────────────────────────────────────────
   // Read the build-time-translated copy injected by HomePage.astro. Falls back
@@ -327,12 +343,9 @@ const toolStrings = {
     env.backends.onnx.wasm.numThreads = 1;
   }
 
-  type ModelMode = 'auto' | 'portrait' | 'general';
   type ThumbStatus = 'queued' | 'analysing' | 'processing' | 'done' | 'error';
 
   let currentMode: ModelMode = 'auto';
-  let detector: any     = null;
-  let portraitPipe: any = null;
 
   interface QueueItem {
     id: string;
@@ -548,152 +561,11 @@ const toolStrings = {
     loadingText.textContent  = msg;
   }
 
-  async function ensureDetector() {
-    if (detector) return;
-    loadingText.textContent = I18N.preparingDetection;
-    detector = await pipeline('object-detection', 'Xenova/detr-resnet-50', { dtype: 'fp32' });
-  }
-
-  async function ensurePortraitPipe() {
-    if (portraitPipe) return;
-    loadingText.textContent = I18N.loadingPortrait;
-    portraitPipe = await pipeline('background-removal', 'Xenova/modnet', { dtype: 'fp32' });
-  }
-
-  async function containsPerson(objectUrl: string): Promise<boolean> {
-    await ensureDetector();
-    const dets = await detector(objectUrl, { threshold: 0.5 }) as Array<{ label: string }>;
-    return dets.some(d => d.label.toLowerCase() === 'person');
-  }
-
-  async function removeBg(file: Blob, objectUrl: string, id: string): Promise<{ blob: Blob; usedModel: string }> {
-    if (currentMode === 'portrait') {
-      await ensurePortraitPipe();
-      setThumbStatus(id, 'processing');
-      loadingText.textContent = I18N.removingBackground;
-      const output = await portraitPipe(objectUrl);
-      return { blob: await output.toBlob('image/png'), usedModel: 'People & Portraits' };
-    }
-    if (currentMode === 'general') {
-      setThumbStatus(id, 'processing');
-      loadingText.textContent = I18N.removingBackground;
-      const blob = await removeBackground(file, { model: 'isnet_fp16', output: { format: 'image/png', quality: 1 } });
-      return { blob, usedModel: 'Objects & Graphics' };
-    }
-    // Auto
-    setThumbStatus(id, 'analysing');
-    loadingText.textContent = I18N.analysingImage;
-    const hasPerson = await containsPerson(objectUrl);
-    setThumbStatus(id, 'processing');
-    loadingText.textContent = I18N.removingBackground;
-    if (hasPerson) {
-      await ensurePortraitPipe();
-      const output = await portraitPipe(objectUrl);
-      return { blob: await output.toBlob('image/png'), usedModel: 'Smart · People & Portraits' };
-    }
-    const blob = await removeBackground(file, { model: 'isnet_fp16', output: { format: 'image/png', quality: 1 } });
-    return { blob, usedModel: 'Smart · Objects & Graphics' };
-  }
-
-  // Decode the source image and re-encode to PNG so every engine receives a
-  // format it can reliably decode.
-  //
-  // Two decode paths, tried in order:
-  //   1. createImageBitmap(file) — decodes the raw bytes directly. This is the
-  //      most tolerant path and is the SAME decoder @imgly/background-removal
-  //      uses internally, so anything the removal engine can handle decodes
-  //      here too. `imageOrientation: 'from-image'` honours EXIF rotation the
-  //      way an <img> would.
-  //   2. <img>.decode() fallback — only reached if createImageBitmap is
-  //      unavailable or throws. HTMLImageElement.decode() is comparatively
-  //      flaky: it rejects with EncodingError on some perfectly valid JPEGs
-  //      (certain chroma/ICC-profile encodings, or under memory pressure),
-  //      which is what caused valid photos to be wrongly "skipped".
-  async function decodeToCanvas(file: File): Promise<HTMLCanvasElement> {
-    // Path 1: createImageBitmap (preferred).
-    if (typeof createImageBitmap === 'function') {
-      let bitmap: ImageBitmap | null = null;
-      try {
-        bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
-      } catch {
-        // Some engines reject the options bag; retry without it before falling
-        // through to the <img> path.
-        try { bitmap = await createImageBitmap(file); } catch { bitmap = null; }
-      }
-      if (bitmap) {
-        try {
-          const { width, height } = bitmap;
-          if (!width || !height) throw new Error(`"${file.name}" has no readable image data.`);
-          const canvas = document.createElement('canvas');
-          canvas.width  = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) throw new Error('Canvas 2D context is unavailable in this browser.');
-          ctx.drawImage(bitmap, 0, 0);
-          return canvas;
-        } finally {
-          bitmap.close();
-        }
-      }
-    }
-
-    // Path 2: <img>.decode() fallback.
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    try {
-      img.decoding = 'async';
-      img.src = url;
-      try {
-        await img.decode();
-      } catch {
-        throw new Error(`Could not decode "${file.name}". The file may be corrupt or an unsupported format.`);
-      }
-      const width  = img.naturalWidth;
-      const height = img.naturalHeight;
-      if (!width || !height) throw new Error(`"${file.name}" has no readable image data.`);
-      const canvas = document.createElement('canvas');
-      canvas.width  = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Canvas 2D context is unavailable in this browser.');
-      ctx.drawImage(img, 0, 0);
-      return canvas;
-    } finally {
-      URL.revokeObjectURL(url);
-      img.src = '';
-    }
-  }
-
-  async function normalizeToPng(file: File): Promise<Blob> {
-    let canvas: HTMLCanvasElement | null = null;
-    try {
-      canvas = await decodeToCanvas(file);
-      const blob = await new Promise<Blob | null>((resolve) => canvas!.toBlob(resolve, 'image/png'));
-      if (!blob) throw new Error('Failed to convert the image to PNG.');
-      return blob;
-    } finally {
-      // Free memory eagerly instead of waiting for GC. Browsers (notably
-      // Safari/iOS) cap total canvas backing-store memory and kill the tab when
-      // it is exceeded; collapsing the canvas to 0x0 releases tens of MB per HD
-      // image immediately.
-      if (canvas) { canvas.width = 0; canvas.height = 0; }
-    }
-  }
-
-  // "image.jpg" -> "image_freeremovebg.png", sanitised and de-duplicated.
-  function buildOutName(originalName: string): string {
-    const base = originalName.replace(/\.[^/.]+$/, '');
-    let stub = base.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toLowerCase();
-    if (!stub) stub = 'image';
-    let candidate = `${stub}_freeremovebg.png`;
-    let n = 2;
-    while (usedNames.has(candidate)) {
-      candidate = `${stub}-${n}_freeremovebg.png`;
-      n++;
-    }
-    usedNames.add(candidate);
-    return candidate;
-  }
+  // NOTE: decodeToCanvas, normalizeToPng, isGlitched, buildOutName, and the
+  // model loading/routing (ensure*, containsPerson, runRemoval) have been
+  // extracted to src/lib/core/* (Phase 1). The functions below are thin
+  // orchestrators that supply I18N strings and perform UI status updates
+  // while delegating the pure work + heavy library calls to the core modules.
 
   const toastContainer = document.getElementById('toast-container')!;
   function showToast(message: string, durationMs = 30000) {
@@ -729,103 +601,6 @@ const toolStrings = {
     const timer = setTimeout(dismiss, durationMs);
   }
 
-  // Flags corrupted output (from the ONNX threading race) via two signals:
-  //   A) disconnected opaque "islands" away from the main subject blob, or
-  //   B) a ragged outline whose left/right edge jumps abruptly between rows.
-  async function isGlitched(blob: Blob): Promise<boolean> {
-    const url = URL.createObjectURL(blob);
-    const img = new Image();
-    let canvas: HTMLCanvasElement | null = null;
-    try {
-      img.src = url;
-      await img.decode();
-      const w = img.naturalWidth;
-      const h = img.naturalHeight;
-      if (w < 48 || h < 48) return false;
-
-      const scale = Math.min(1, 256 / w);
-      const gw = Math.max(1, Math.round(w * scale));
-      const gh = Math.max(1, Math.round(h * scale));
-      canvas = document.createElement('canvas');
-      canvas.width = gw;
-      canvas.height = gh;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (!ctx) return false;
-      ctx.drawImage(img, 0, 0, gw, gh);
-      const { data } = ctx.getImageData(0, 0, gw, gh);
-
-      const n = gw * gh;
-      const mask = new Uint8Array(n);
-      let totalOpaque = 0;
-      for (let i = 0; i < n; i++) {
-        if (data[i * 4 + 3] > 32) { mask[i] = 1; totalOpaque++; }
-      }
-      const opaqueRatio = totalOpaque / n;
-      if (opaqueRatio < 0.02 || opaqueRatio > 0.98) return false;
-
-      // Signal A: connected components (8-connectivity, iterative flood fill).
-      const labels = new Int32Array(n).fill(-1);
-      const stack: number[] = [];
-      const areas: number[] = [];
-      for (let start = 0; start < n; start++) {
-        if (!mask[start] || labels[start] !== -1) continue;
-        const id = areas.length;
-        let area = 0;
-        stack.push(start);
-        labels[start] = id;
-        while (stack.length) {
-          const p = stack.pop()!;
-          area++;
-          const px = p % gw;
-          const py = (p / gw) | 0;
-          for (let dy = -1; dy <= 1; dy++) {
-            for (let dx = -1; dx <= 1; dx++) {
-              if (dx === 0 && dy === 0) continue;
-              const nx = px + dx;
-              const ny = py + dy;
-              if (nx < 0 || ny < 0 || nx >= gw || ny >= gh) continue;
-              const q = ny * gw + nx;
-              if (mask[q] && labels[q] === -1) { labels[q] = id; stack.push(q); }
-            }
-          }
-        }
-        areas.push(area);
-      }
-
-      const maxArea = areas.length ? areas.reduce((m, a) => (a > m ? a : m), 0) : 0;
-      const strayArea = totalOpaque - maxArea;
-      const minIsland = totalOpaque * 0.003;
-      const significant = areas.filter(a => a >= minIsland).length;
-      const glitchByIslands = significant >= 2 && strayArea >= totalOpaque * 0.03;
-
-      // Signal B: ragged silhouette boundary.
-      let prevL = -1, prevR = -1, jumps = 0;
-      const jumpThresh = gw * 0.12;
-      for (let y = 0; y < gh; y++) {
-        let l = -1, r = -1;
-        const rowStart = y * gw;
-        for (let x = 0; x < gw; x++) {
-          if (mask[rowStart + x]) { if (l === -1) l = x; r = x; }
-        }
-        if (l !== -1 && prevL !== -1) {
-          if (Math.abs(l - prevL) > jumpThresh || Math.abs(r - prevR) > jumpThresh) jumps++;
-        }
-        prevL = l; prevR = r;
-      }
-      const glitchByBoundary = jumps >= 6;
-
-      return glitchByIslands || glitchByBoundary;
-    } catch {
-      return false;
-    } finally {
-      URL.revokeObjectURL(url);
-      // Release the analysis canvas and decoded bitmap immediately (see
-      // normalizeToPng) so the glitch check doesn't pile onto canvas memory.
-      if (canvas) { canvas.width = 0; canvas.height = 0; }
-      img.src = '';
-    }
-  }
-
   async function processImage(item: QueueItem): Promise<void> {
     const originalUrl = URL.createObjectURL(item.file);
     item.originalUrl = originalUrl;
@@ -833,7 +608,30 @@ const toolStrings = {
     try {
       const pngBlob = await normalizeToPng(item.file);
       workingUrl = URL.createObjectURL(pngBlob);
-      const { blob, usedModel } = await removeBg(pngBlob, workingUrl, item.id);
+
+      // UI status + I18N-driven messages are set here (controller/orchestrator).
+      // The core runRemoval + contains/ensure never reference I18N, DOM, or
+      // loadingText. This preserves the exact translated strings from the
+      // build-time #tool-i18n script tag.
+      if (currentMode === 'portrait') {
+        setThumbStatus(item.id, 'processing');
+        loadingText.textContent = I18N.loadingPortrait;
+      } else if (currentMode === 'general') {
+        setThumbStatus(item.id, 'processing');
+        loadingText.textContent = I18N.removingBackground;
+      } else {
+        setThumbStatus(item.id, 'analysing');
+        loadingText.textContent = I18N.analysingImage;
+        // Pre-declare the detector load message so the first-time path inside
+        // runRemoval (via containsPerson) shows the translated label.
+        loadingText.textContent = I18N.preparingDetection;
+      }
+
+      const { blob, usedModel } = await runRemoval(currentMode, pngBlob, workingUrl);
+
+      // Ensure the removal phase message is shown for the actual inference work
+      // (especially relevant for the general / smart-general path).
+      loadingText.textContent = I18N.removingBackground;
 
       const glitched = await isGlitched(blob);
       if (glitched) {
@@ -841,7 +639,7 @@ const toolStrings = {
       }
 
       const resultUrl = URL.createObjectURL(blob);
-      const name = buildOutName(item.file.name);
+      const name = buildOutName(item.file.name, usedNames);
       item.resultUrl = resultUrl;
       item.outName = name;
       item.blob = blob;
