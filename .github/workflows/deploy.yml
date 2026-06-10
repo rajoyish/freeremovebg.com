@@ -1,12 +1,10 @@
 name: Deploy to Cloudflare Workers
 
-# Build and deploy on every push to main. Manual runs are also allowed.
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   workflow_dispatch:
 
-# Prevent overlapping deploys; a newer push cancels an in-flight one.
 concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: true
@@ -16,8 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    # Secrets cannot be referenced directly in step-level `if:` conditionals,
-    # so expose the key as a job-level env var and test that instead.
     env:
       GOOGLE_TRANSLATE_API_KEY: ${{ secrets.GOOGLE_TRANSLATE_API_KEY }}
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -31,11 +27,8 @@ jobs:
           node-version: 24
 
       - name: Setup pnpm
-        # Version is read from the "packageManager" field in package.json.
-        # Do not set it here too, or pnpm errors with ERR_PNPM_BAD_PM_VERSION.
         uses: pnpm/action-setup@v4
 
-      # Now that pnpm is installed, configure node to cache its store
       - name: Configure Node cache
         uses: actions/setup-node@v4
         with:
@@ -45,10 +38,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Refresh translations only when an API key is configured. Locale files
-      # are committed and act as the cache, so builds still work without it;
-      # this step just fetches any new/edited English strings. Already-cached
-      # strings bill zero characters.
       - name: Sync translations
         if: ${{ env.GOOGLE_TRANSLATE_API_KEY != '' }}
         run: pnpm run translate
@@ -61,5 +50,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # dist is built in the previous step; just deploy it.
-          command: deploy
+          command: ${{ github.ref == 'refs/heads/staging' && 'deploy --env staging' || 'deploy' }}
