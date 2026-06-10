@@ -1,25 +1,9 @@
-/**
- * Image decoding & normalization (pure algorithmic layer).
- *
- * Dual-path decoder with explicit fallback so every downstream engine
- * (transformers, @imgly/background-removal) receives a reliable PNG.
- *
- * IMPORTANT:
- * - ZERO references to application UI DOM (no getElementById, querySelector,
- *   thumbGrid, etc.). Only offscreen canvas / ImageBitmap / Image for compute.
- * - Temporary object URLs created here are ALWAYS revoked in finally.
- * - Canvas backing stores are eagerly zeroed to release memory (esp. Safari).
- */
-
 export async function decodeToCanvas(file: File): Promise<HTMLCanvasElement> {
-  // Path 1: createImageBitmap (preferred).
-  // Most tolerant; matches what @imgly uses internally. Honours EXIF orientation.
   if (typeof createImageBitmap === 'function') {
     let bitmap: ImageBitmap | null = null;
     try {
       bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
     } catch {
-      // Some engines reject the options bag; retry plain before falling back.
       try { bitmap = await createImageBitmap(file); } catch { bitmap = null; }
     }
     if (bitmap) {
@@ -39,9 +23,6 @@ export async function decodeToCanvas(file: File): Promise<HTMLCanvasElement> {
     }
   }
 
-  // Path 2: <img>.decode() fallback.
-  // Only reached if createImageBitmap unavailable or rejected the input.
-  // We still revoke the temp URL and clear src to avoid leaks.
   const url = URL.createObjectURL(file);
   const img = new Image();
   try {
@@ -76,8 +57,6 @@ export async function normalizeToPng(file: File): Promise<Blob> {
     if (!blob) throw new Error('Failed to convert the image to PNG.');
     return blob;
   } finally {
-    // Free memory eagerly. Browsers (notably Safari/iOS) cap canvas backing-store
-    // memory and will kill the tab when the cap is hit.
     if (canvas) { canvas.width = 0; canvas.height = 0; }
   }
 }

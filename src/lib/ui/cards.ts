@@ -1,12 +1,3 @@
-/**
- * CardsView - View module for the processed results grid (before/after cards).
- *
- * Creates cards using Tailwind v4 utilities + project tokens (bg-canvas, border-hairline,
- * bg-checkerboard custom utility, rounded-[10px], etc.).
- * Wires the per-card download button.
- * The QueueManager calls addCard after a successful process and reset() on full clear.
- */
-
 export interface ToolI18n {
   original: string;
   removed: string;

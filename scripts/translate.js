@@ -1,40 +1,4 @@
 #!/usr/bin/env node
-/**
- * Manual translation CLI — quota protection tiers 1 & 3.
- * ═══════════════════════════════════════════════════════════════════════════
- * This is the ONLY place in the entire project that talks to the Google Cloud
- * Translation API. It is intentionally DECOUPLED from `astro dev` and
- * `astro build`: nothing runs it automatically. You invoke it by hand, once,
- * after you have finished writing new English copy and are ready to sync:
- *
- *     pnpm run translate                 # sync every language
- *     pnpm run translate -- --langs es   # one or more specific languages
- *     pnpm run translate -- --dry-run    # report cost, call nothing
- *     pnpm run translate -- --force      # ignore cache, re-translate all
- *
- * ── Secret handling ──────────────────────────────────────────────────────────
- * GOOGLE_TRANSLATE_API_KEY is read from the gitignored root `.env` (loaded via
- * Node's built-in process.loadEnvFile) or from a pre-set environment variable
- * (e.g. a CI secret, which takes precedence). The key is server-side only: it
- * is never imported by Astro, never bundled to the client, and never logged.
- *
- * ── Tier 1: Cache-First ──────────────────────────────────────────────────────
- * Each `src/i18n/locales/<code>.json` is a FLAT map of the English source
- * string to its translation:
- *
- *     { "Home": "Inicio", "Choose language": "Elegir idioma", ... }
- *
- * On every run we LOAD that file first. We only build an API request for the
- * English strings that are NOT already keys in it (new or edited copy). Fetched
- * results are appended back into the same file, so a string is paid for exactly
- * once and never fetched again. The locale file doubles as the runtime lookup
- * table read by `src/i18n/dictionaries.ts`.
- *
- * ── Tier 3 safety: refuse to run inside dev/build ────────────────────────────
- * If this script is ever invoked from within a dev server or build lifecycle
- * (npm_lifecycle_event of dev/build/prebuild, or astro in the ancestry), it
- * aborts. The quota can only be spent by a deliberate `pnpm run translate`.
- */
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -45,28 +9,19 @@ const ROOT = resolve(__dirname, "..");
 const I18N_DIR = resolve(ROOT, "src/i18n");
 const LOCALES_DIR = resolve(I18N_DIR, "locales");
 
-// ── Load secrets from the root .env (server-side only, gitignored) ───────────
-// Uses Node's built-in loader (stable since Node 22) so there is no dotenv
-// dependency. Pre-set environment variables (e.g. CI secrets) always win, since
-// loadEnvFile does not overwrite values already present in process.env.
 const ENV_FILE = resolve(ROOT, ".env");
 if (existsSync(ENV_FILE) && typeof process.loadEnvFile === "function") {
   try {
     process.loadEnvFile(ENV_FILE);
-  } catch {
-    /* malformed .env — fall back to whatever is already in process.env */
-  }
+  } catch {}
 }
 
 const API_KEY =
   process.env.GOOGLE_TRANSLATE_API_KEY || process.env.GOOGLE_API_KEY;
 const ENDPOINT = "https://translation.googleapis.com/language/translate/v2";
 
-// Free-tier guardrail: a single manual run should never approach 500k chars.
-// If a run would bill more than this, we stop and ask for --force to confirm.
 const SAFETY_CHAR_LIMIT = 200_000;
 
-// ── CLI args ─────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes("--dry-run");
 const FORCE = args.includes("--force");
@@ -80,7 +35,6 @@ const langsArg = (() => {
     : null;
 })();
 
-// ── Tier 3 gate: never run automatically from dev/build ──────────────────────
 function assertManualInvocation() {
   const lifecycle = process.env.npm_lifecycle_event || "";
   const blocked = ["dev", "start", "build", "prebuild", "postinstall"];
@@ -93,7 +47,6 @@ function assertManualInvocation() {
   }
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
 async function readJson(path, fallback = null) {
   if (!existsSync(path)) return fallback;
   try {
@@ -103,7 +56,6 @@ async function readJson(path, fallback = null) {
   }
 }
 
-/** Collect every unique, translatable English string from the en.json tree. */
 function collectStrings(value, out) {
   if (typeof value === "string") {
     if (/\p{L}/u.test(value)) out.add(value);
@@ -118,15 +70,6 @@ function collectStrings(value, out) {
   }
 }
 
-/**
- * Translate strings via Google Cloud Translation v2 (REST).
- * Up to 128 `q` segments are allowed per request; we chunk to 100 to stay safe.
- * Order in === order out, per the API contract.
- *
- * We use format=html so the API preserves HTML tags (<strong>, <p>, etc.) and
- * only translates the visible text content. The API may entity-encode quotes
- * and apostrophes in the result; we decode those back to plain characters.
- */
 function decodeHtmlEntities(str) {
   return str
     .replace(/&#39;/g, "'")
@@ -162,7 +105,6 @@ async function translateBatch(texts, target) {
   return out;
 }
 
-/** Sort an object's keys so locale files stay diff-friendly between runs. */
 function sortedByKey(obj) {
   return Object.fromEntries(
     Object.keys(obj)
@@ -171,7 +113,6 @@ function sortedByKey(obj) {
   );
 }
 
-// ── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   assertManualInvocation();
 
@@ -203,7 +144,6 @@ async function main() {
   if (FORCE) console.log(`   Mode           : FORCE (ignoring cache)`);
   console.log("");
 
-  // Tier 1: figure out the real cost across all targets BEFORE any API call.
   await mkdir(LOCALES_DIR, { recursive: true });
   const plan = [];
   let plannedChars = 0;
@@ -211,7 +151,6 @@ async function main() {
   for (const lang of targets) {
     const file = resolve(LOCALES_DIR, `${lang.code}.json`);
     const cache = (await readJson(file, {})) ?? {};
-    // Cache-first: only strings absent from the locale file need fetching.
     const missing = sourceStrings.filter(
       (s) => FORCE || cache[s] === undefined || cache[s] === "",
     );
@@ -264,7 +203,6 @@ async function main() {
       cache[src] = translated[i];
       billed += src.length;
     });
-    // Append-and-persist: merged with everything previously cached.
     await writeFile(
       file,
       JSON.stringify(sortedByKey(cache), null, 2) + "\n",

@@ -1,14 +1,3 @@
-/**
- * Lightweight routing assertions for worker/index.js.
- * Run with: node worker/routing.test.mjs
- *
- * Mocks the ASSETS binding and request.cf so we can verify routing decisions
- * without deploying. Not wired into CI — a quick local sanity check.
- *
- * NOTE: the Worker no longer auto-redirects by country. Region detection is a
- * client-side suggestion in the language switcher; the Worker only acts on a
- * saved `lang` cookie. These tests reflect that.
- */
 import worker from "./index.js";
 
 let pass = 0;
@@ -26,7 +15,6 @@ function makeRequest(path, { country, cookie, ua, method = "GET" } = {}) {
     method,
     headers,
   });
-  // request.cf isn't settable on a real Request; emulate via a proxy.
   return new Proxy(req, {
     get(target, prop) {
       if (prop === "cf") return country ? { country } : undefined;
@@ -56,8 +44,6 @@ const redirectsTo = (loc) => (r) =>
 
 console.log("\nWorker routing tests");
 
-// No geo auto-redirect: every first-time visitor gets the English root
-// regardless of country. The switcher suggests their regional language instead.
 await expect(
   "IN visitor on / → English asset (no geo redirect)",
   makeRequest("/", { country: "IN" }),
@@ -80,7 +66,6 @@ await expect(
 );
 await expect("No country on / → English asset", makeRequest("/", {}), isAsset);
 
-// Saved cookie (the user's explicit choice) routes returning visitors.
 await expect(
   "Cookie lang=fr → /fr/",
   makeRequest("/", { country: "IN", cookie: "lang=fr" }),
@@ -102,7 +87,6 @@ await expect(
   isAsset,
 );
 
-// Crawler bypass: never redirect bots.
 await expect(
   "Googlebot in IN → English asset",
   makeRequest("/", {
@@ -120,7 +104,6 @@ await expect(
   isAsset,
 );
 
-// Non-root and asset requests pass through untouched.
 await expect(
   "Already on /hi/ → asset (no double redirect)",
   makeRequest("/hi/", { country: "IN" }),

@@ -1,13 +1,4 @@
 #!/usr/bin/env node
-/**
- * Generates public/sitemap.xml from src/i18n/languages.json.
- *
- * The home page is emitted once per language with full xhtml:link hreflang
- * alternates (plus x-default), which is the SEO-correct way to declare a set of
- * localized equivalents. Static English-only pages are listed plainly.
- *
- * Run via `pnpm i18n:sitemap` (also part of prebuild).
- */
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
@@ -23,7 +14,6 @@ const languages = JSON.parse(
 
 const homeUrl = (code) => (code === DEFAULT_LANG ? `${SITE}/` : `${SITE}/${code}/`);
 
-// Shared alternate block for the localized home-page set.
 const alternates = [
   ...languages.map(
     (l) => `      <xhtml:link rel="alternate" hreflang="${l.code}" href="${homeUrl(l.code)}" />`,

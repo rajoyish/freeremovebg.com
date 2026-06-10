@@ -1,12 +1,8 @@
 @import "tailwindcss";
 
-/* Class-based dark mode: the `dark:` variant responds to `.dark` on <html>
-   (set by the no-flash script in Layout.astro), instead of the OS-only
-   prefers-color-scheme default. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Vercel Design System Colors (light, default) */
   --color-ink: #171717;
   --color-on-primary: #ffffff;
   --color-body: #4d4d4d;
@@ -21,7 +17,6 @@
   --color-success: #0070f3;
   --color-error: #ee0000;
 
-  /* Spacing */
   --spacing-xxs: 4px;
   --spacing-xs: 8px;
   --spacing-sm: 12px;
@@ -33,28 +28,20 @@
   --spacing-4xl: 64px;
   --spacing-5xl: 96px;
 
-  /* Border Radius */
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-pill: 100px;
   --radius-full: 9999px;
 
-  /* Typography */
   --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
 }
 
-/* Transparency checkerboard shown behind background-removed images.
-   Not expressible as a stock utility, so exposed as a Tailwind class. */
 @utility bg-checkerboard {
   background: repeating-conic-gradient(#e5e5e5 0% 25%, #fff 0% 50%) 0 0 / 16px 16px;
 }
 
-/* ── Scroll-reveal for the SEO article ───────────────────────────────────────
-   Each [data-reveal] block starts shifted down and transparent, then animates
-   into place when it enters the viewport (the `.is-visible` class is added by
-   an IntersectionObserver in index.astro). */
 .reveal {
   opacity: 0;
   transform: translateY(28px);
@@ -76,9 +63,6 @@
   }
 }
 
-/* ── Thumbnail removal animation ─────────────────────────────────────────────
-   When a queued image is removed, the thumbnail quickly scales down and fades
-   out for a snappy, instant-feeling collapse before it leaves the DOM. */
 .thumb-removing {
   transition: opacity 0.2s ease, transform 0.2s ease;
   opacity: 0;
@@ -92,8 +76,6 @@
   }
 }
 
-/* ── Toast notifications ─────────────────────────────────────────────────────
-   Slide up and fade in from below, then reverse when dismissed. */
 .toast {
   opacity: 0;
   transform: translateY(12px);
@@ -112,10 +94,6 @@
   }
 }
 
-/* ── Dark mode ──────────────────────────────────────────────────────────────
-   Overriding the design-system variables here means every `var(--color-*)`
-   consumer (Header, Footer, and the inline styles on the home page) adapts
-   automatically when the `.dark` class is present on <html>. */
 :root {
   color-scheme: light;
 }
@@ -123,8 +101,8 @@
 html.dark {
   color-scheme: dark;
 
-  --color-ink: #ededed;          /* primary foreground / inverted button bg */
-  --color-on-primary: #0a0a0a;   /* text/icons on the light primary surface */
+  --color-ink: #ededed;
+  --color-on-primary: #0a0a0a;
   --color-body: #a3a3a3;
   --color-mute: #8a8a8a;
   --color-hairline: #2a2a2a;
@@ -153,18 +131,11 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Selection */
 ::selection {
   background-color: var(--color-ink);
   color: var(--color-on-primary);
 }
 
-/* ── Complex-script line-height fix ──────────────────────────────────────────
-   Devanagari (Nepali, Hindi, Marathi), Bengali, Tamil, Telugu, Gujarati,
-   Punjabi (Gurmukhi), Thai, Arabic, Urdu, and Persian have tall
-   ascenders/descenders or stacking diacritics that get clipped by the tight
-   `leading-[1.1]` on hero headings. Bump line-height only for those languages
-   so English remains crisp and tight. */
 :lang(ne) h1, :lang(ne) h2, :lang(ne) h3,
 :lang(hi) h1, :lang(hi) h2, :lang(hi) h3,
 :lang(mr) h1, :lang(mr) h2, :lang(mr) h3,

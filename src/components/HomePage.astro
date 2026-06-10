@@ -1,17 +1,4 @@
 ---
-/**
- * Dictionary-driven home page.
- *
- * Rendered by BOTH the English root (`/`) and every localized route
- * (`/<lang>/`). All visible copy comes from the resolved dictionary, so a
- * single source of markup produces fully static, pre-translated pages — the
- * Google Translation API is only ever touched at build time by the script that
- * generates `src/i18n/locales/*.json`.
- *
- * Strings the browser-side tool needs at runtime are serialized into a
- * <script type="application/json"> block and read by the client script, so the
- * interactive UI is localized without re-fetching anything.
- */
 import Layout from '../layouts/Layout.astro';
 import Header from './Header.astro';
 import Footer from './Footer.astro';
@@ -27,30 +14,17 @@ const dict = getDictionary(lang);
 const t = dict.tool;
 const faqs = dict.faq.items;
 
-// Per-feature icons (Lucide outline paths), index-aligned with
-// dict.features.items. Rendered inside the shared icon chip below so each
-// feature gets a distinct, relevant glyph instead of one repeated icon.
 const featureIcons = [
-  // 100% Free & Completely Private → shield-check
   '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
-  // Smart Model Selection → sparkles
   '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .962 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.962 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>',
-  // HD Downloads → download
   '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
-  // Batch Processing → layers
   '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12.18a1 1 0 0 0 .6.91l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 .6-.92"/><path d="M2 16.18a1 1 0 0 0 .6.91l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 .6-.92"/>',
-  // No Sign-Up, No Limits → infinity
   '<path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/>',
-  // Works Offline → cloud-off
   '<path d="m2 2 20 20"/><path d="M5.782 5.782A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.307-.193"/><path d="M21.532 16.5A4.5 4.5 0 0 0 17.5 10h-1.79A7.008 7.008 0 0 0 10 5.07"/>',
-  // Crisp Edge Detail → scissors
   '<circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>',
-  // Any Device, Any Format → monitor-smartphone
   '<path d="M18 8V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8"/><path d="M7 19h5"/><path d="M10 15v4"/><rect width="6" height="10" x="16" y="12" rx="2"/>',
 ];
 
-// FAQ answers carry inline HTML for on-page rendering. For the JSON-LD
-// structured data, flatten to clean plain text (strip tags, decode entities).
 const faqText = (html: string) =>
   html
     .replace(/<[^>]+>/g, '')
@@ -59,8 +33,6 @@ const faqText = (html: string) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-// Strings consumed by the client tool script (status labels, progress
-// messages, dynamic alerts). Serialized below as JSON for the browser.
 const toolStrings = {
   preparingDetection: t.preparingDetection,
   loadingPortrait: t.loadingPortrait,
@@ -98,7 +70,7 @@ const toolStrings = {
           <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-semibold tracking-[-2px] leading-[1.1] mt-0 mb-5 text-ink">
             {dict.hero.titleLead} <br> {dict.hero.titleAccent}
           </h1>
-          <p class="text-lg text-body leading-[1.7] mt-0 mb-8 max-w-[700px] mx-auto">
+          <p class="text-lg text-body leading-[1.7] mt-0 mb-8 max-w-175 mx-auto">
             {dict.hero.subtitle}
           </p>
           <div class="inline-flex items-center gap-2 px-4 py-2 bg-canvas-soft-2 border border-hairline rounded-pill text-[13px] text-body font-medium">
@@ -109,11 +81,11 @@ const toolStrings = {
       </section>
 
       <section class="px-6 pb-16">
-        <div class="max-w-[960px] mx-auto">
+        <div class="max-w-240 mx-auto">
 
           <div class="mb-5 flex items-center gap-3 flex-wrap">
             <span class="text-[13px] font-medium text-body">{t.qualityLabel}</span>
-            <div id="model-selector" class="inline-flex bg-canvas-soft-2 border border-hairline rounded-md p-[3px] gap-0.5">
+            <div id="model-selector" class="inline-flex bg-canvas-soft-2 border border-hairline rounded-md p-0.75 gap-0.5">
               <button data-model="auto"
                 class="px-3.5 py-1.5 border-none rounded-sm text-[13px] font-medium cursor-pointer transition-colors bg-ink text-on-primary">
                 {t.modelSmart}
@@ -194,10 +166,10 @@ const toolStrings = {
       </section>
 
       <section class="px-6 py-16 bg-canvas-soft-2 border-t border-hairline">
-        <div class="max-w-[1000px] mx-auto">
+        <div class="max-w-250 mx-auto">
           <div class="text-center mb-12">
             <h2 class="text-[clamp(1.5rem,4vw,2.25rem)] font-semibold tracking-[-1px] text-ink mt-0 mb-3">{dict.features.heading}</h2>
-            <p class="text-base text-body leading-relaxed max-w-[600px] mx-auto m-0">{dict.features.subheading}</p>
+            <p class="text-base text-body leading-relaxed max-w-150 mx-auto m-0">{dict.features.subheading}</p>
           </div>
           <div class="grid gap-x-10 gap-y-12 grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
             {dict.features.items.map((item, i) => (
@@ -214,7 +186,7 @@ const toolStrings = {
       </section>
 
       <section class="px-6 py-20 border-t border-hairline">
-        <article id="seo-article" class="max-w-[760px] mx-auto">
+        <article id="seo-article" class="max-w-190 mx-auto">
           {dict.article.blocks.map((block, i) => (
             <div class:list={['reveal', i > 0 && 'mt-12']} data-reveal>
               {i === 0 ? (
@@ -229,10 +201,10 @@ const toolStrings = {
       </section>
 
       <section class="px-6 py-20 bg-canvas-soft-2 border-t border-hairline">
-        <div class="max-w-[760px] mx-auto">
+        <div class="max-w-190 mx-auto">
           <div class="reveal text-center mb-10" data-reveal>
             <h2 class="text-[clamp(1.6rem,4vw,2.4rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-3">{dict.faq.heading}</h2>
-            <p class="text-base text-body leading-relaxed m-0 max-w-[560px] mx-auto">{dict.faq.subheading}</p>
+            <p class="text-base text-body leading-relaxed m-0 max-w-140 mx-auto">{dict.faq.subheading}</p>
           </div>
 
           <div class="reveal flex flex-col gap-3" data-reveal>
@@ -273,38 +245,20 @@ const toolStrings = {
 </Layout>
 
 <script>
-  // Heavy ML engine imports are retained here solely for the top-level
-  // environment / threading configuration that must run at module eval time.
-  // The actual pipeline() and removeBackground() calls now live in the extracted
-  // core model module (the manualChunks rules still match the package ids).
   import { env } from '@huggingface/transformers';
   import * as ort from 'onnxruntime-web';
 
-  // Pure logic extracted in Phase 1 (Option A). These modules contain zero
-  // references to application UI DOM (no getElementById, no zone/thumb queries,
-  // no event wiring, no direct mutation of app elements). They only use
-  // low-level browser graphics APIs (canvas, ImageBitmap, Image) for the
-  // algorithmic work and manage their own temporary object URLs.
   import { normalizeToPng } from '../lib/core/image';
   import { isGlitched } from '../lib/core/glitch';
   import { buildOutName } from '../lib/core/naming';
   import { type ModelMode, runRemoval } from '../lib/core/model';
-  // (ensureDetector / ensurePortraitPipe / containsPerson / decodeToCanvas are
-  //  exported by their modules for internal composition and testability but are
-  //  not directly referenced from the controller after Phase 1 extraction.)
 
-  // Phase 2: State (QueueManager) + View modules. The <script> is now a thin
-  // bootstrap/controller only: parse I18N, grab root elements, instantiate
-  // manager + views, wire events, delegate everything else.
   import { QueueManager } from '../lib/core/QueueManager';
   import { ThumbsView } from '../lib/ui/thumbs';
   import { CardsView } from '../lib/ui/cards';
   import { ProgressView } from '../lib/ui/progress';
   import { showToast } from '../lib/ui/toast';
 
-  // ── Localized strings ──────────────────────────────────────────────────────
-  // Read the build-time-translated copy injected by HomePage.astro. Falls back
-  // to English defaults so the tool never breaks if a string is missing.
   interface ToolI18n {
     preparingDetection: string; loadingPortrait: string; analysingImage: string;
     removingBackground: string; starting: string; allDone: string; processing: string;
@@ -327,15 +281,11 @@ const toolStrings = {
       }
       localStorage.setItem('frbg-cache-epoch', CACHE_EPOCH);
     }
-  } catch { /* storage disabled — nothing to purge */ }
+  } catch {}
 
   env.allowLocalModels  = false;
   env.allowRemoteModels = true;
 
-  // Pin ONNX Runtime to a single thread. Multi-threaded WASM needs
-  // SharedArrayBuffer (cross-origin isolation), which this site does not have;
-  // the threaded path races and produces corrupted output. imgly re-assigns
-  // numThreads at session creation, so lock the property to force it back to 1.
   try {
     let threads = 1;
     Object.defineProperty(ort.env.wasm, 'numThreads', {
@@ -378,18 +328,6 @@ const toolStrings = {
 
   const ACTIVE_BTN   = ['bg-ink', 'text-on-primary'];
   const INACTIVE_BTN = ['bg-transparent', 'text-body'];
-
-  // ── Thin controller (Phase 2) ──────────────────────────────────────────────
-  // The script now only:
-  // - Parses I18N from the build-time <script type="application/json" id="tool-i18n">
-  // - Grabs root DOM elements by ID
-  // - Instantiates QueueManager (state + URL ownership + processing loop) + View modules
-  // - Wires event listeners (delegating to manager)
-  // - Keeps the tiny model-selector visual sync (also notifies manager)
-  //
-  // All DOM builders (addThumb/addCard/showToast/progress/zone), queue state,
-  // revocations, and orchestration live in src/lib/core/QueueManager.ts and src/lib/ui/*.
-  // Views receive data + I18N and render with Tailwind v4 utilities only.
 
   const toastContainer = document.getElementById('toast-container')!;
 
@@ -439,17 +377,16 @@ const toolStrings = {
     I18N as any
   );
 
-  // Wire the only callback from view DOM back to manager (remove buttons).
   thumbsView.setOnRemove((id) => queueManager.remove(id));
 
-  // Model selector: update visuals (HINTS/ACTIVE kept for zero visual change)
-  // and tell the manager so the *next* added batch uses the chosen routing.
-  document.getElementById('model-selector')!.addEventListener('click', (e) => {
+  const modelSelector = document.getElementById('model-selector')!;
+  const modelButtons = Array.from(modelSelector.querySelectorAll<HTMLButtonElement>('button[data-model]'));
+  modelSelector.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest('button[data-model]') as HTMLButtonElement | null;
     if (!btn) return;
     const mode = btn.dataset.model as ModelMode;
     queueManager.setMode(mode);
-    document.querySelectorAll<HTMLButtonElement>('#model-selector button').forEach(b => {
+    modelButtons.forEach(b => {
       const active = b.dataset.model === mode;
       b.classList.remove(...(active ? INACTIVE_BTN : ACTIVE_BTN));
       b.classList.add(...(active ? ACTIVE_BTN : INACTIVE_BTN));
@@ -457,7 +394,6 @@ const toolStrings = {
     modelHint.textContent = HINTS[mode];
   });
 
-  // Event wiring — thin delegation to the manager (or file input).
   const DRAG_ON  = ['border-ink', 'bg-canvas-soft'];
   const DRAG_OFF = ['border-hairline-strong', 'bg-canvas'];
 
@@ -505,5 +441,6 @@ const toolStrings = {
     }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
 
     revealEls.forEach(el => revealObserver.observe(el));
+    window.addEventListener('pagehide', () => revealObserver.disconnect(), { once: true });
   }
 </script>

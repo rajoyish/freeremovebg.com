@@ -4,9 +4,7 @@ import { getDictionary } from '../i18n/dictionaries';
 import { DEFAULT_LANG, localizedUrl } from '../i18n/config';
 
 interface Props {
-  /** Active language code. */
   lang?: string;
-  /** Page path WITHOUT a language prefix, e.g. "/about". */
   basePath?: string;
 }
 
@@ -14,12 +12,6 @@ const { lang = DEFAULT_LANG, basePath = '/' } = Astro.props;
 const dict = getDictionary(lang);
 const t = dict.nav;
 
-// Only the home page (`/`) has localized variants (`/hi/`, `/es/`, …). The
-// static sub-pages (about, contact, privacy-policy, terms) are English-only —
-// no `/<lang>/about` route is ever built. So prefix ONLY the home link with the
-// active language; every other link points at its single English route. Without
-// this guard, every localized page emitted ~4 dead `/<lang>/<page>` links that
-// 404'd, wasting crawl budget and breaking navigation.
 const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
 const href = (p: string) => {
   if (p === '/') return prefix === '' ? '/' : `${prefix}/`;
@@ -41,7 +33,6 @@ function isActive(path: string) {
   return currentPath === path || currentPath === path + '/';
 }
 
-// Full pathname (with prefix) for the switcher so it can preserve location.
 const switcherPath = href(currentPath);
 ---
 

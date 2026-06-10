@@ -1,19 +1,3 @@
-/**
- * ThumbsView - View module for the upload zone thumbnails + count + zone state.
- *
- * Responsibilities (vanilla, unidirectional):
- * - Creates and mutates the thumb DOM nodes using only Tailwind v4 utility classes
- *   (plus the existing 'thumb-removing' animation trigger from global.css).
- * - Owns the short-lived preview object URLs for the <img> tags (revoked on load/error).
- * - Handles status badge updates, remove button visibility, and the remove animation.
- * - Toggles the zone empty/filled + has-files classes on the upload zone.
- *
- * Accepts data (QueueItem snapshots + I18n) and an onRemove callback.
- * The QueueManager drives updates by calling these methods after mutating its state.
- */
-
-// ThumbStatus is the same union used by QueueManager. Duplicated here for view layer
-// independence (avoids import cycles at type level). Keep in sync with core.
 export type ThumbStatus = 'queued' | 'analysing' | 'processing' | 'done' | 'error';
 
 export interface ToolI18n {
@@ -56,6 +40,11 @@ export class ThumbsView {
   }
 
   addThumb(item: { id: string; file: File; status: ThumbStatus }) {
+    const el = this._createThumbNode(item);
+    this.els.thumbGrid.appendChild(el);
+  }
+
+  private _createThumbNode(item: { id: string; file: File; status: ThumbStatus }): HTMLDivElement {
     const wrap = document.createElement('div');
     wrap.id = `thumb-${item.id}`;
     wrap.className = 'relative aspect-square rounded-md overflow-hidden bg-canvas-soft-2';
@@ -96,7 +85,7 @@ export class ThumbsView {
     wrap.appendChild(img);
     wrap.appendChild(overlay);
     wrap.appendChild(removeBtn);
-    this.els.thumbGrid.appendChild(wrap);
+    return wrap;
   }
 
   setStatus(id: string, status: ThumbStatus) {
@@ -145,7 +134,11 @@ export class ThumbsView {
     this.els.uploadZone.classList.add('has-files', 'cursor-default');
     this.els.uploadZone.classList.remove('cursor-pointer');
 
-    newItems.forEach(item => this.addThumb(item));
+    const frag = document.createDocumentFragment();
+    for (const item of newItems) {
+      frag.appendChild(this._createThumbNode(item));
+    }
+    this.els.thumbGrid.appendChild(frag);
     this.updateCount(totalCount);
   }
 

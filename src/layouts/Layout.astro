@@ -10,11 +10,8 @@ interface Props {
 	canonical?: string;
 	ogImage?: string;
 	noindex?: boolean;
-	/** Active ISO 639-1 language for this page. Drives <html lang/dir> + hreflang. */
 	lang?: string;
-	/** Path of the page WITHOUT any language prefix, e.g. "/about" or "/". */
 	basePath?: string;
-	/** Whether localized variants of THIS page exist (emit hreflang alternates). */
 	localized?: boolean;
 }
 
@@ -30,8 +27,6 @@ const {
 	noindex = false,
 } = Astro.props;
 
-// Standardize canonical to always be absolute using Astro.site (same pattern as hreflang).
-// This ensures fully qualified URL even if providedCanonical is relative or omitted.
 const getPagePath = () => {
   const langPrefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
   let p = basePath || '/';
@@ -49,10 +44,6 @@ const canonicalHref = providedCanonical
 
 const activeLang = LANG_BY_CODE[lang] ?? LANG_BY_CODE[DEFAULT_LANG];
 
-// hreflang alternates use Astro.site (configured in astro.config.mjs) to
-// guarantee fully absolute URLs (e.g. https://freeremovebg.com/ne/).
-// Google requires absolute URLs for hreflang tags.
-// Language codes come from src/i18n/config.ts (LANGUAGES).
 const hreflangAlternates = localized
 	? LANGUAGES.map((l) => {
 			const path = l.code === DEFAULT_LANG ? '/' : `/${l.code}/`;
@@ -62,9 +53,6 @@ const hreflangAlternates = localized
 			};
 		})
 	: [];
-// Open Graph requires locale as `language_TERRITORY` (e.g. en_US, hi_IN), not a
-// bare language code. Derive the territory from the active language's region
-// (the `flag` field is an ISO 3166-1 alpha-2 country code).
 const ogLocale = `${lang}_${activeLang.flag.toUpperCase()}`;
 
 const jsonLd = {
@@ -96,7 +84,6 @@ const jsonLd = {
 <html lang={lang} dir={activeLang.dir}>
 	<head>
 		<meta charset="UTF-8" />
-		<!-- Set theme before first paint to avoid a flash of the wrong theme -->
 		<script is:inline>
 			(() => {
 				const stored = localStorage.getItem('theme');
@@ -116,8 +103,6 @@ const jsonLd = {
 		<meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
 		<link rel="canonical" href={canonicalHref} />
 
-		<!-- Localization alternates: every supported language for this page, plus
-		     x-default pointing at the English root for users who match no rule. -->
 		{hreflangAlternates.map((alt) => (
 			<link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
 		))}
@@ -149,17 +134,8 @@ const jsonLd = {
 
 		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
-		<!-- Google AdSense loader. Inert until PUBLIC_ADSENSE_CLIENT is set, so
-		     this ships dormant and activates with a single env var later. -->
 		<AdSense />
 
-
-		<!-- Google Analytics: deferred until after first paint to avoid forced-
-		     reflow during the critical rendering window. The gtag.js library
-		     performs DOM reads (viewport measurements, scroll offsets) on init,
-		     which causes ~82 ms of layout thrashing when it races with the
-		     initial render. Loading it on `requestIdleCallback` (or a 3.5 s
-		     fallback) ensures it never fires before LCP completes. -->
 		<script is:inline>
 			window.dataLayer = window.dataLayer || [];
 			function gtag(){dataLayer.push(arguments);}
@@ -183,12 +159,6 @@ const jsonLd = {
 
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<!-- Preload the Google Fonts CSS as a non-render-blocking resource, then
-		     promote it to a stylesheet once loaded. The promotion is done from an
-		     inline script (below) rather than an inline `onload=` attribute so the
-		     Content Security Policy can stay free of `unsafe-inline`/`unsafe-hashes`
-		     in script-src — inline event-handler attributes would otherwise require
-		     loosening the policy. -->
 		<link
 			id="gf-stylesheet"
 			rel="preload"

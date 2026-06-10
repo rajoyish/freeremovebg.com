@@ -1,12 +1,3 @@
-/**
- * Toast helper (view concern).
- *
- * Creates a toast using Tailwind utilities + the existing .toast / .toast-visible
- * classes (for the slide/fade animation defined in global.css).
- * The container is provided by the caller (fixed in the page).
- * Fully i18n-string free here — the message is already resolved by the caller.
- */
-
 export function showToast(container: HTMLElement, message: string, durationMs = 30000) {
   const toast = document.createElement('div');
   toast.className = 'toast flex items-center gap-3 px-5 py-3 bg-ink text-on-primary text-sm font-medium rounded-lg shadow-lg max-w-[90vw]';
@@ -21,7 +12,6 @@ export function showToast(container: HTMLElement, message: string, durationMs = 
   toast.querySelector('span')!.textContent = message;
   container.appendChild(toast);
 
-  // rAF to trigger transition (same technique as original)
   requestAnimationFrame(() => {
     toast.classList.add('toast-visible');
   });

@@ -1,17 +1,3 @@
-/**
- * Glitch / corruption heuristic (canvas analysis + flood fill).
- *
- * Detects obviously broken output from the ONNX threading race (disconnected
- * islands or ragged left/right silhouette edges). Used as a post-process check
- * so we can warn the user instead of serving garbage cutouts.
- *
- * IMPORTANT:
- * - ZERO references to application UI DOM (no getElement*, no app elements).
- * - Only temporary canvas + Image for pixel analysis.
- * - Creates a short-lived object URL that is revoked in finally.
- * - Analysis canvas is zeroed on exit.
- */
-
 export async function isGlitched(blob: Blob): Promise<boolean> {
   const url = URL.createObjectURL(blob);
   const img = new Image();
@@ -43,7 +29,6 @@ export async function isGlitched(blob: Blob): Promise<boolean> {
     const opaqueRatio = totalOpaque / n;
     if (opaqueRatio < 0.02 || opaqueRatio > 0.98) return false;
 
-    // Signal A: connected components via 8-connectivity iterative flood fill.
     const labels = new Int32Array(n).fill(-1);
     const stack: number[] = [];
     const areas: number[] = [];
@@ -78,7 +63,6 @@ export async function isGlitched(blob: Blob): Promise<boolean> {
     const significant = areas.filter(a => a >= minIsland).length;
     const glitchByIslands = significant >= 2 && strayArea >= totalOpaque * 0.03;
 
-    // Signal B: ragged silhouette boundary (left/right edge jumps).
     let prevL = -1, prevR = -1, jumps = 0;
     const jumpThresh = gw * 0.12;
     for (let y = 0; y < gh; y++) {

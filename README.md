@@ -1,6 +1,6 @@
 # Free Remove BG
 
-A free AI background remover that runs entirely in your browser. Your images never leave your device.
+A free AI background remover, the [FreeRemoveBG](https://https://freeremovebg.com) that runs entirely in your browser. Your images never leave your device.
 
 ## Features
 
