@@ -1,3 +1,7 @@
+// Register img-comparison-slider web component and its minimal styles for client-side use.
+import 'img-comparison-slider';
+import 'img-comparison-slider/dist/styles.css';
+
 export interface ToolI18n {
   original: string;
   removed: string;
@@ -25,15 +29,22 @@ export class CardsView {
     const card = document.createElement('div');
     card.className = 'bg-canvas border border-hairline rounded-[10px] overflow-hidden shadow-sm';
     card.innerHTML = `
-      <div class="relative aspect-[4/3] grid grid-cols-2">
-        <div class="relative overflow-hidden border-r border-hairline">
-          <img src="${originalUrl}" alt="${this.i18n.original}" class="w-full h-full object-cover block" />
-          <span class="absolute top-2 left-2 px-2 py-[3px] bg-ink text-on-primary text-[11px] font-medium rounded-[4px]">${this.i18n.original}</span>
-        </div>
-        <div class="relative overflow-hidden bg-checkerboard">
-          <img src="${processedUrl}" alt="${this.i18n.removed}" class="w-full h-full object-cover block" />
-          <span class="absolute top-2 right-2 px-2 py-[3px] bg-link text-white text-[11px] font-medium rounded-[4px]">${this.i18n.removed}</span>
-        </div>
+      <div class="relative aspect-[4/3] bg-checkerboard overflow-hidden">
+        <img-comparison-slider
+          class="w-full h-full block"
+          style="--divider-width: 2px; --divider-color: var(--color-hairline-strong);"
+        >
+          <img slot="first" src="${originalUrl}" alt="${this.i18n.original}" class="w-full h-full object-cover block" />
+          <img slot="second" src="${processedUrl}" alt="${this.i18n.removed}" class="w-full h-full object-cover block" />
+          <div slot="handle" class="w-6 h-6 bg-canvas border border-hairline rounded-full flex items-center justify-center shadow-sm">
+            <div class="flex gap-[2px]">
+              <div class="w-[1.5px] h-2.5 bg-ink rounded-full"></div>
+              <div class="w-[1.5px] h-2.5 bg-ink rounded-full"></div>
+            </div>
+          </div>
+        </img-comparison-slider>
+        <span class="absolute top-2 left-2 px-2 py-[3px] bg-ink text-on-primary text-[11px] font-medium rounded-[4px] pointer-events-none z-10">${this.i18n.original}</span>
+        <span class="absolute top-2 right-2 px-2 py-[3px] bg-link text-white text-[11px] font-medium rounded-[4px] pointer-events-none z-10">${this.i18n.removed}</span>
       </div>
       <div class="px-4 pt-3 pb-3.5 border-t border-canvas-soft-2">
         <div class="flex items-center justify-between gap-3 mb-2">
