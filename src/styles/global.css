@@ -150,3 +150,8 @@ body {
 :lang(fa) h1, :lang(fa) h2, :lang(fa) h3 {
   line-height: 1.4 !important;
 }
+
+/* GLightbox: hide the filename caption */
+.gslide-description {
+  display: none !important;
+}
