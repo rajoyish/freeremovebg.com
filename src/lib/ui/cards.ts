@@ -105,6 +105,16 @@ export class CardsView {
       });
     }
 
+    // Hide labels while slider is being dragged
+    const slider = card.querySelector<HTMLElement>('img-comparison-slider');
+    const labels = card.querySelectorAll<HTMLElement>('.aspect-\\[4\\/3\\] > span');
+    if (slider && labels.length) {
+      const hideLabels = () => labels.forEach((l) => l.classList.add('opacity-0'));
+      const showLabels = () => labels.forEach((l) => l.classList.remove('opacity-0'));
+      slider.addEventListener('pointerdown', hideLabels);
+      window.addEventListener('pointerup', showLabels);
+    }
+
     return card;
   }
 
