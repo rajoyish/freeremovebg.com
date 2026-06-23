@@ -22,6 +22,15 @@ const ENDPOINT = "https://translation.googleapis.com/language/translate/v2";
 
 const SAFETY_CHAR_LIMIT = 200_000;
 
+// Rate-limit safety: throttle API calls and retry on quota errors.
+const CHUNK_DELAY_MS = 500; // wait between API calls (free-tier burst limit)
+const MAX_RETRIES = 3; // retries for 403/429 rate-limit errors
+const BASE_RETRY_DELAY_MS = 2000; // starting backoff (doubles each retry)
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes("--dry-run");
 const FORCE = args.includes("--force");
@@ -89,18 +98,40 @@ async function translateBatch(texts, target) {
     body.set("target", target);
     body.set("format", "html");
 
-    const res = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: body.toString(),
-    });
-    if (!res.ok) {
+    let lastError;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      const res = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        for (const t of json.data.translations)
+          out.push(decodeHtmlEntities(t.translatedText));
+        lastError = null;
+        break;
+      }
+
       const detail = await res.text();
-      throw new Error(`Google Translate API ${res.status}: ${detail}`);
+      lastError = new Error(`Google Translate API ${res.status}: ${detail}`);
+
+      // Retry only on rate-limit errors (403/429)
+      if ((res.status === 403 || res.status === 429) && attempt < MAX_RETRIES) {
+        const wait = BASE_RETRY_DELAY_MS * 2 ** attempt;
+        console.error(
+          `     ⚠ rate limited (${res.status}). Retrying in ${wait}ms… (${attempt + 1}/${MAX_RETRIES})`,
+        );
+        await sleep(wait);
+        continue;
+      }
+      throw lastError;
     }
-    const json = await res.json();
-    for (const t of json.data.translations)
-      out.push(decodeHtmlEntities(t.translatedText));
+    if (lastError) throw lastError;
+
+    // Rate-limit pacing between API calls
+    await sleep(CHUNK_DELAY_MS);
   }
   return out;
 }

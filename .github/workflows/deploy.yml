@@ -40,7 +40,7 @@ jobs:
 
       - name: Sync translations
         if: ${{ env.GOOGLE_TRANSLATE_API_KEY != '' }}
-        run: pnpm run translate
+        run: pnpm run translate || echo "⚠️ Translation sync skipped (rate limit or API error)"
 
       - name: Build
         run: pnpm build
