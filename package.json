@@ -24,6 +24,7 @@
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.4.2",
     "flag-icons": "^7.5.0",
+    "glightbox": "^3.3.1",
     "img-comparison-slider": "^8.0.7",
     "jszip": "^3.10.1",
     "onnxruntime-web": "1.21.0",

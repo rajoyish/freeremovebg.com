@@ -29,5 +29,10 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
+# Playwright
+.playwright/
+playwright-report/
+test-results/
+
 # jetbrains setting folder
 .idea/

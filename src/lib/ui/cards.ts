@@ -1,11 +1,14 @@
 // Register img-comparison-slider web component and its minimal styles for client-side use.
 import 'img-comparison-slider';
 import 'img-comparison-slider/dist/styles.css';
+import GLightbox from 'glightbox';
+import 'glightbox/dist/css/glightbox.min.css';
 
 export interface ToolI18n {
   original: string;
   removed: string;
   downloadPng: string;
+  viewFullImage: string;
 }
 
 interface CardsViewElements {
@@ -14,10 +17,36 @@ interface CardsViewElements {
 }
 
 export class CardsView {
+  private lightbox: any = null;
+
   constructor(
     private els: CardsViewElements,
     private i18n: ToolI18n
   ) {}
+
+  private openLightbox(url: string, title: string) {
+    if (!this.lightbox) {
+      this.lightbox = GLightbox({
+        closeButton: true,
+        closeOnOutsideClick: true,
+        keyboardNavigation: true,
+        zoomable: true,
+        draggable: true,
+        loop: false,
+        touchNavigation: true,
+      });
+    }
+
+    this.lightbox.setElements([
+      {
+        href: url,
+        type: 'image',
+        title: title,
+        alt: title,
+      },
+    ]);
+    this.lightbox.open();
+  }
 
   addCard(
     name: string,
@@ -65,6 +94,16 @@ export class CardsView {
     (card.querySelector('.dl-btn') as HTMLButtonElement).addEventListener('click', () => {
       onDownload(name, processedUrl);
     });
+
+    const imageArea = card.querySelector<HTMLElement>('.aspect-\\[4\\/3\\]');
+    if (imageArea) {
+      imageArea.style.cursor = 'zoom-in';
+      imageArea.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        if (target.closest('[slot="handle"]')) return;
+        this.openLightbox(processedUrl, name);
+      });
+    }
 
     return card;
   }
