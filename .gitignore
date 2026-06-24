@@ -36,3 +36,6 @@ test-results/
 
 # jetbrains setting folder
 .idea/
+
+# Playwright MCP artifacts (snapshots, console logs)
+.playwright-mcp/
