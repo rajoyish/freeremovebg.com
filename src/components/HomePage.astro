@@ -250,13 +250,7 @@ const toolStrings = {
 </Layout>
 
 <script>
-  import { env } from '@huggingface/transformers';
-  import * as ort from 'onnxruntime-web';
-
-  import { normalizeToPng } from '../lib/core/image';
-  import { isGlitched } from '../lib/core/glitch';
-  import { buildOutName } from '../lib/core/naming';
-  import { type ModelMode, runRemoval } from '../lib/core/model';
+  import type { ModelMode } from '../lib/core/model';
 
   import { QueueManager } from '../lib/core/QueueManager';
   import { ThumbsView } from '../lib/ui/thumbs';
@@ -287,25 +281,6 @@ const toolStrings = {
       localStorage.setItem('frbg-cache-epoch', CACHE_EPOCH);
     }
   } catch {}
-
-  env.allowLocalModels  = false;
-  env.allowRemoteModels = true;
-
-  try {
-    let threads = 1;
-    Object.defineProperty(ort.env.wasm, 'numThreads', {
-      configurable: true,
-      enumerable: true,
-      get: () => threads,
-      set: (v: number) => { threads = (typeof v === 'number' && v > 0) ? Math.min(v, 1) : 1; },
-    });
-  } catch {
-    ort.env.wasm.numThreads = 1;
-  }
-  ort.env.wasm.proxy = false;
-  if (env.backends?.onnx?.wasm) {
-    env.backends.onnx.wasm.numThreads = 1;
-  }
 
   const uploadZone    = document.getElementById('upload-zone')!;
   const fileInput     = document.getElementById('file-input') as HTMLInputElement;

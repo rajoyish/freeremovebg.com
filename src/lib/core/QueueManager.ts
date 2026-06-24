@@ -1,7 +1,8 @@
 import { normalizeToPng } from './image';
 import { isGlitched } from './glitch';
 import { buildOutName } from './naming';
-import { runRemoval, type ModelMode } from './model';
+import type { ModelMode } from './model';
+import { runRemovalInWorker } from './removalClient';
 import { recordSuccessfulCutout } from '../counter';
 
 type ReceivedI18n = {
@@ -187,11 +188,9 @@ export class QueueManager {
   private async processItem(item: QueueItem): Promise<void> {
     const originalUrl = URL.createObjectURL(item.file);
     item.originalUrl = originalUrl;
-    let workingUrl: string | null = null;
 
     try {
       const pngBlob = await normalizeToPng(item.file);
-      workingUrl = URL.createObjectURL(pngBlob);
 
       if (this.currentMode === 'portrait') {
         this.views.thumbs.setStatus(item.id, 'processing');
@@ -201,7 +200,7 @@ export class QueueManager {
         this.views.thumbs.setStatus(item.id, 'analysing');
       }
 
-      const { blob, usedModel } = await runRemoval(this.currentMode, pngBlob, workingUrl);
+      const { blob, usedModel } = await runRemovalInWorker(this.currentMode, pngBlob);
 
       const glitched = await isGlitched(blob);
       if (glitched) {
@@ -232,8 +231,6 @@ export class QueueManager {
     } catch (err) {
       this.views.thumbs.setStatus(item.id, 'error');
       throw err;
-    } finally {
-      if (workingUrl) URL.revokeObjectURL(workingUrl);
     }
   }
 }
