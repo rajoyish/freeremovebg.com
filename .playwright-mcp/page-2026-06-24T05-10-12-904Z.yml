@@ -1,0 +1,211 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e5]:
+      - link "FreeRemoveBG logo FreeRemoveBG" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img "FreeRemoveBG logo" [ref=e7]
+        - generic [ref=e8]: FreeRemoveBG
+      - navigation "Main" [ref=e9]:
+        - link "Home" [ref=e10] [cursor=pointer]:
+          - /url: /
+        - link "About" [ref=e11] [cursor=pointer]:
+          - /url: /about
+        - link "Privacy Policy" [ref=e12] [cursor=pointer]:
+          - /url: /privacy-policy
+        - link "Terms" [ref=e13] [cursor=pointer]:
+          - /url: /terms
+        - link "Contact" [ref=e14] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=e15]:
+        - button "Choose language" [ref=e17] [cursor=pointer]:
+          - generic [ref=e19]: us
+          - img [ref=e20]
+        - switch "Toggle dark mode" [ref=e22] [cursor=pointer]:
+          - img [ref=e24]
+  - main [ref=e26]:
+    - generic [ref=e28]:
+      - 'heading "Free Remove BG: AI Background Remover" [level=1] [ref=e29]':
+        - text: "Free Remove BG:"
+        - text: AI Background Remover
+      - paragraph [ref=e30]: Free Remove BG is a free AI bg remove tool that erases backgrounds from any image, GIF or batch in HD. Everything runs on your device, so your images never leave your browser. No sign-up, and unlimited HD downloads.
+      - generic [ref=e31]:
+        - img [ref=e32]
+        - text: 100% Private. Processed Locally in Your Browser
+      - paragraph [ref=e34]: — images processed worldwide
+    - generic [ref=e36]:
+      - generic [ref=e37]:
+        - generic [ref=e38]: "Quality:"
+        - generic [ref=e39]:
+          - button "✦ Smart" [ref=e40] [cursor=pointer]
+          - button "People & Portraits" [ref=e41] [cursor=pointer]
+          - button "Objects & Graphics" [ref=e42] [cursor=pointer]
+        - generic [ref=e43]: Analyses your image and automatically selects the best engine for the result
+      - generic [ref=e45] [cursor=pointer]:
+        - img [ref=e46]
+        - paragraph [ref=e48]: Drop images here or click to upload
+        - paragraph [ref=e49]: Supports JPG, PNG, WebP, GIF, BMP, AVIF and more · Multiple files supported
+        - button "Browse Files" [ref=e50]
+    - generic [ref=e52]:
+      - generic [ref=e53]:
+        - heading "Everything you need to cut out backgrounds" [level=2] [ref=e54]
+        - paragraph [ref=e55]: A complete background removal toolkit that runs entirely on your device. It's fast, free, and built for real work.
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - img [ref=e59]
+          - heading "100% Free & Completely Private" [level=3] [ref=e62]
+          - paragraph [ref=e63]: Every cutout is completely free and happens directly in your browser. There are no uploads and no servers, so your images never leave your device.
+        - generic [ref=e64]:
+          - img [ref=e66]
+          - heading "Smart Model Selection" [level=3] [ref=e68]
+          - paragraph [ref=e69]: Auto mode detects people and picks the best AI model for each image, so every cutout looks its sharpest.
+        - generic [ref=e70]:
+          - img [ref=e72]
+          - heading "HD Downloads" [level=3] [ref=e75]
+          - paragraph [ref=e76]: Export transparent PNGs at their original full resolution every time. There's no quality loss and no upscaling tricks.
+        - generic [ref=e77]:
+          - img [ref=e79]
+          - heading "Batch Processing" [level=3] [ref=e83]
+          - paragraph [ref=e84]: Drop in dozens of images at once and download the whole set as a single ZIP when they're done.
+        - generic [ref=e85]:
+          - img [ref=e87]
+          - heading "No Sign-Up, No Limits" [level=3] [ref=e89]
+          - paragraph [ref=e90]: No account, no watermarks, no credit system. Open the page and start removing backgrounds instantly.
+        - generic [ref=e91]:
+          - img [ref=e93]
+          - heading "Works Offline" [level=3] [ref=e97]
+          - paragraph [ref=e98]: After the first load the AI runs locally, so you can keep cutting out backgrounds even without a connection.
+        - generic [ref=e99]:
+          - img [ref=e101]
+          - heading "Crisp Edge Detail" [level=3] [ref=e107]
+          - paragraph [ref=e108]: A dedicated portrait engine preserves fine strands of hair, fur, and soft edges that simple cutout tools miss.
+        - generic [ref=e109]:
+          - img [ref=e111]
+          - heading "Any Device, Any Format" [level=3] [ref=e114]
+          - paragraph [ref=e115]: Upload JPG, PNG, or WebP from desktop, tablet, or phone. The interface adapts to whatever screen you're on.
+        - generic [ref=e116]:
+          - img [ref=e118]
+          - heading "Instant Side-by-Side" [level=3] [ref=e121]
+          - paragraph [ref=e122]: Compare the original and the cutout the moment processing finishes, on a transparency checkerboard preview.
+    - article [ref=e124]:
+      - generic [ref=e125]:
+        - 'heading "Free Remove BG: The Free AI Background Remover" [level=2] [ref=e126]'
+        - paragraph [ref=e127]: Free Remove BG is a free online background remover that erases the background from any picture in seconds. Powered by AI, it lets you remove bg from image files of every kind, no sign-up, no watermark, and no cost. Whether you need a transparent cutout for a product listing, a profile picture, a logo, or a design mockup, just drop in a photo and let the AI bg remove the background for you. Because the tool is free, unlimited, and works right in your browser, it is a faster, more private alternative to the usual remove bg online services.
+      - generic [ref=e128]:
+        - heading "Remove BG From Image, GIF and More" [level=3] [ref=e129]
+        - paragraph [ref=e130]: This is more than a single-format tool. You can remove bg from image formats including JPG, PNG, WebP and AVIF, and you can even remove bg from GIF frames to create clean, transparent graphics. The AI bg remove engine handles people, products, logos, animals and flat artwork, so the background remove bg result stays sharp around hair, edges and fine detail. Every export is a remove bg HD, full-resolution transparent PNG, giving you high quality cutouts that drop straight into your next project.
+      - generic [ref=e131]:
+        - heading "Batch and Multiple Image BG Remove" [level=3] [ref=e132]
+        - paragraph [ref=e133]: Need to clear backgrounds from a whole folder? The batch bg remove mode lets you drop dozens of files at once for a true multiple image bg remove workflow. The bg remove AI processes each one, shows a live before-and-after preview, and bundles every cutout into a single ZIP download. There is no queue, no credit system, and no limit, so a remove bg free batch of catalogue photos is just as easy as a single quick edit.
+      - generic [ref=e134]:
+        - heading "Your Images Never Leave Your Device" [level=3] [ref=e135]
+        - paragraph [ref=e136]: Most remove bg online tools upload your photos to a cloud server. Free Remove BG does the opposite, running the entire cutout locally inside your browser. Your images are never uploaded, stored, or seen by anyone, which makes this remove bg web app ideal for sensitive product shots, client work, and personal photos. Once the page has loaded you can even remove bg offline, since the AI keeps working without a connection.
+      - generic [ref=e137]:
+        - heading "How to Remove a Background for Free" [level=3] [ref=e138]
+        - paragraph [ref=e139]: Using this free remove bg tool takes three steps. First, drag your image onto the upload zone or click to browse, adding one or many files. Second, the AI detects the subject and erases everything behind it, with Smart mode picking the best engine automatically. Third, download your remove bg high quality PNG, or grab the whole batch as a ZIP. The transparent cutouts you create are perfect to remove bg for Canva designs, drop a clean subject into a remove bg PPT slide, or place a cutout in a remove bg MS Word document.
+      - generic [ref=e140]:
+        - heading "Free, Unlimited and Watermark-Free" [level=3] [ref=e141]
+        - paragraph [ref=e142]: There is no paywall hiding the good output and no stamp across your downloads. Every cutout comes out at the original resolution, free to use for personal and commercial projects alike. Online sellers, designers, photographers, students and everyday creators all rely on a dependable remove bg free workflow, and Free Remove BG delivers it without an account or install. Install nothing, sign up for nothing, and open the page whenever you need a fast, private, free AI bg remove that just works.
+    - generic [ref=e144]:
+      - generic [ref=e145]:
+        - heading "Frequently Asked Questions" [level=2] [ref=e146]
+        - paragraph [ref=e147]: Everything you need to know about removing image backgrounds for free with FreeRemoveBG.
+      - generic [ref=e148]:
+        - group [ref=e149]:
+          - generic "What is Remove BG?" [ref=e150] [cursor=pointer]:
+            - generic [ref=e151]: What is Remove BG?
+            - img [ref=e152]
+        - group [ref=e154]:
+          - generic "How to remove bg from an image?" [ref=e155] [cursor=pointer]:
+            - generic [ref=e156]: How to remove bg from an image?
+            - img [ref=e157]
+        - group [ref=e159]:
+          - generic "Is Remove BG free?" [ref=e160] [cursor=pointer]:
+            - generic [ref=e161]: Is Remove BG free?
+            - img [ref=e162]
+        - group [ref=e164]:
+          - generic "Is Remove BG safe?" [ref=e165] [cursor=pointer]:
+            - generic [ref=e166]: Is Remove BG safe?
+            - img [ref=e167]
+        - group [ref=e169]:
+          - generic "How to remove a background for free?" [ref=e170] [cursor=pointer]:
+            - generic [ref=e171]: How to remove a background for free?
+            - img [ref=e172]
+        - group [ref=e174]:
+          - generic "How to remove bg in Google Slides?" [ref=e175] [cursor=pointer]:
+            - generic [ref=e176]: How to remove bg in Google Slides?
+            - img [ref=e177]
+        - group [ref=e179]:
+          - generic "How to remove bg on slides or a slideshow?" [ref=e180] [cursor=pointer]:
+            - generic [ref=e181]: How to remove bg on slides or a slideshow?
+            - img [ref=e182]
+        - group [ref=e184]:
+          - generic "How to remove bg in Microsoft Word?" [ref=e185] [cursor=pointer]:
+            - generic [ref=e186]: How to remove bg in Microsoft Word?
+            - img [ref=e187]
+        - group [ref=e189]:
+          - generic "How to remove bg in Excel?" [ref=e190] [cursor=pointer]:
+            - generic [ref=e191]: How to remove bg in Excel?
+            - img [ref=e192]
+        - group [ref=e194]:
+          - generic "How to remove bg in PowerPoint (PPT)?" [ref=e195] [cursor=pointer]:
+            - generic [ref=e196]: How to remove bg in PowerPoint (PPT)?
+            - img [ref=e197]
+        - group [ref=e199]:
+          - generic "How to remove bg in Canva?" [ref=e200] [cursor=pointer]:
+            - generic [ref=e201]: How to remove bg in Canva?
+            - img [ref=e202]
+        - group [ref=e204]:
+          - generic "How to remove bg in Photoshop?" [ref=e205] [cursor=pointer]:
+            - generic [ref=e206]: How to remove bg in Photoshop?
+            - img [ref=e207]
+        - group [ref=e209]:
+          - generic "How to remove bg in GIMP?" [ref=e210] [cursor=pointer]:
+            - generic [ref=e211]: How to remove bg in GIMP?
+            - img [ref=e212]
+        - group [ref=e214]:
+          - generic "How to remove bg in Photopea?" [ref=e215] [cursor=pointer]:
+            - generic [ref=e216]: How to remove bg in Photopea?
+            - img [ref=e217]
+        - group [ref=e219]:
+          - generic "Can I remove bg from a GIF?" [ref=e220] [cursor=pointer]:
+            - generic [ref=e221]: Can I remove bg from a GIF?
+            - img [ref=e222]
+        - group [ref=e224]:
+          - generic "Can I remove backgrounds from multiple images at once?" [ref=e225] [cursor=pointer]:
+            - generic [ref=e226]: Can I remove backgrounds from multiple images at once?
+            - img [ref=e227]
+  - contentinfo [ref=e229]:
+    - generic [ref=e230]:
+      - generic [ref=e231]:
+        - generic [ref=e232]:
+          - heading "About" [level=3] [ref=e233]
+          - paragraph [ref=e234]: A free, privacy-first background remover that runs entirely in your browser. Your images never leave your device, so there are no uploads, no accounts, and no waiting.
+        - generic [ref=e235]:
+          - heading "Features" [level=3] [ref=e236]
+          - list [ref=e237]:
+            - listitem [ref=e238]: ✓ 100% Private, On-Device Processing
+            - listitem [ref=e239]: ✓ No Sign-Up or Watermarks
+            - listitem [ref=e240]: ✓ Unlimited Full-Resolution Downloads
+            - listitem [ref=e241]: ✓ Batch Processing with ZIP Export
+            - listitem [ref=e242]: ✓ Smart AI Engine Selection
+            - listitem [ref=e243]: ✓ Works Offline After First Load
+        - generic [ref=e244]:
+          - heading "Great For" [level=3] [ref=e245]
+          - list [ref=e246]:
+            - listitem [ref=e247]: Product photos & online listings
+            - listitem [ref=e248]: Profile pictures & avatars
+            - listitem [ref=e249]: Logos, graphics & design assets
+            - listitem [ref=e250]: Transparent stickers & cutouts
+      - generic [ref=e251]:
+        - navigation "Footer" [ref=e252]:
+          - link "Home" [ref=e253] [cursor=pointer]:
+            - /url: /
+          - link "About" [ref=e254] [cursor=pointer]:
+            - /url: /about
+          - link "Privacy Policy" [ref=e255] [cursor=pointer]:
+            - /url: /privacy-policy
+          - link "Terms" [ref=e256] [cursor=pointer]:
+            - /url: /terms
+          - link "Contact" [ref=e257] [cursor=pointer]:
+            - /url: /contact
+        - paragraph [ref=e258]: © 2026 FreeRemoveBG. All rights reserved.
