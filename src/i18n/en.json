@@ -58,7 +58,8 @@
     "selectImages": "Please select image files (JPG, PNG, WebP, GIF, BMP, AVIF, and more).",
     "glitchWarning": "may have processed with a glitch. Remove it and upload the same image again to redo it.",
     "imagesSelected": "images selected",
-    "imageSelected": "image selected"
+    "imageSelected": "image selected",
+    "globalCounterLabel": " images processed worldwide"
   },
   "features": {
     "heading": "Everything you need to cut out backgrounds",

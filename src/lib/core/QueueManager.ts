@@ -2,6 +2,7 @@ import { normalizeToPng } from './image';
 import { isGlitched } from './glitch';
 import { buildOutName } from './naming';
 import { runRemoval, type ModelMode } from './model';
+import { recordSuccessfulCutout } from '../counter';
 
 type ReceivedI18n = {
   starting: string;
@@ -227,6 +228,7 @@ export class QueueManager {
       );
 
       this.views.thumbs.setStatus(item.id, 'done');
+      recordSuccessfulCutout();
     } catch (err) {
       this.views.thumbs.setStatus(item.id, 'error');
       throw err;
