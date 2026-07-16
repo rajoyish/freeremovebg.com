@@ -6,44 +6,47 @@ A web application at [freeremovebg.com](https://freeremovebg.com) that removes i
 
 ## Deployment Workflow
 
-Two-tier deployment: **Staging** → **Production**.
+Single-tier deployment: pushing to `main` deploys to production ([freeremovebg.com](https://freeremovebg.com)) via the GitHub Actions workflow in `.github/workflows/deploy.yml`.
 
 ### Branch Discipline
-- Active development happens on `staging` (or feature branches off `staging`).
-- `main` is production — never commit directly to it.
-- A PreToolUse hook auto-switches from `main` to `staging` before any file edit.
+- Active development happens on `main` or on feature branches merged into `main`.
+- Every push to `main` triggers a production deploy to Cloudflare Workers.
+
+### Feature / Refactor Workflow
+
+Each feature or refactor flows through a short-lived branch and a squash-merged PR. There is no staging buffer — **merging a PR deploys to production.**
+
+1. **Start clean on `main`:**
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
+2. **Make the change.** No need to branch first — the `ship-it` skill creates the branch.
+3. **Ship it:** say "ship it" (or `/ship`). The skill creates a contextual `feat/…` or `refactor/…` branch, stages everything, commits with a conventional message, pushes, and opens a PR against `main`.
+4. **Review & merge on GitHub** using **Squash and merge**. The PR title (`type(scope): subject`) becomes the squashed commit on `main`. GitHub auto-deletes the head branch, and the push to `main` fires the production deploy.
+5. **Resync locally:**
+   ```bash
+   git checkout main
+   git pull origin main
+   ```
+
+GitHub repo settings backing this flow: **Allow squash merging** (only) and **Automatically delete head branches** are enabled.
+
+Guidelines:
+- `ship-it` runs `git add .` — ensure the working tree holds only intended changes before shipping.
+- Keep PRs small and focused: one feature/refactor per branch → one squashed commit → one deploy.
+- Review the diff *before* merging, since merge = go-live.
 
 ---
 
 ## Skills
 
-When the user asks to push to staging or promote to production, invoke the corresponding skill via the **Skill tool**:
+### ship-it
+**Invoke with:** `Skill({skill: "ship-it"})`
 
-### push-staging
-**Invoke with:** `Skill({skill: "push-staging"})`
+Triggers: "ship it", "commit and pr", "deploy this", "/ship".
 
-Triggers: "push to staging", "deploy to staging", "push staging", "/push-staging"
-
-What it does:
-1. Runs `pnpm build` to verify no errors.
-2. Commits with a conventional commit message (`feat:`, `fix:`, `chore:`, etc.).
-3. Pushes to `origin staging`.
-4. Notifies the user so they can review on the staging URL.
-
-### promote-production
-**Invoke with:** `Skill({skill: "promote-production"})`
-
-Triggers: ONLY the exact phrase **"Promote staging to production."**
-
-What it does:
-1. Verifies on `staging` with all changes committed/pushed.
-2. `git checkout main && git pull origin main`
-3. `git merge staging`
-4. `git push origin main`
-5. `git checkout staging`
-6. Reports completion.
-
-⚠️ Never touch `main` for any other reason. If merge conflicts occur, STOP and report them.
+Commits staged changes on a feature branch, pushes, and opens (or reports) a squash-merge PR against `main`. Uses conventional-commit messages and omits any `Co-Authored-By` trailer. See the Feature / Refactor Workflow above.
 
 ### tailwind-4-docs
 **Invoke with:** `Skill({skill: "tailwind-4-docs"})`
@@ -74,7 +77,7 @@ This project uses the following MCP servers:
 ### Playwright
 **Server:** `@playwright/mcp@latest`
 **Purpose:** Browser automation for testing, screenshots, and UI verification.
-**Use when:** The user asks to test the UI, take screenshots, verify page behavior, or interact with the staging/production site.
+**Use when:** The user asks to test the UI, take screenshots, verify page behavior, or interact with the production site.
 
 All `mcp__playwright__*` tools are available — use them for browser-based testing and verification against the live site.
 
