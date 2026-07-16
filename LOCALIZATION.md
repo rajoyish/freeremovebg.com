@@ -1,9 +1,14 @@
 # Localization Architecture
 
-Zero-cost static localization: Google Cloud Translation runs **only at build
-time**. Every visitor is served English by default; the in-page language
-switcher _suggests_ the language for their detected region but never forces it.
-No translation API is ever called at runtime.
+Fully static localization with **no translation service in the loop**. The
+committed `src/i18n/locales/*.json` files are the single source of translated
+copy — the site reads them at build time and nothing else. Every visitor is
+served English by default; the in-page language switcher _suggests_ the language
+for their detected region but never forces it.
+
+There is deliberately **no automated translation** in the codebase or the deploy
+pipeline (see §1). Locales are data you edit and commit, like any other source
+file.
 
 ## How it fits together
 
@@ -12,11 +17,10 @@ src/i18n/languages.json   ← single source of truth (codes, endonyms, flags, co
         │
         ├── src/i18n/config.ts        derives REGION_MAP, SUPPORTED_CODES, hreflang URLs
         ├── scripts/gen-region-map.mjs → worker/region-map.js   (edge routing data)
-        ├── src/pages/sitemap.xml.ts   → /sitemap.xml            (hreflang sitemap, built by Astro)
-        └── scripts/translate.js       → src/i18n/locales/*.json (Google API, MANUAL only)
+        └── src/pages/sitemap.xml.ts   → /sitemap.xml            (hreflang sitemap, built by Astro)
 
-src/i18n/en.json          ← canonical English copy (the only file you hand-write)
-src/i18n/locales/<lc>.json← flat { "English": "translation" } cache (committed)
+src/i18n/en.json          ← canonical English copy
+src/i18n/locales/<lc>.json← flat { "English": "translation" } (hand-maintained, committed)
         │
         └── src/i18n/dictionaries.ts  inlines locales; dev placeholder / prod English fallback
 
@@ -35,92 +39,67 @@ Edge:
   wrangler.toml     → main + ASSETS binding + run_worker_first = ["/"]
 ```
 
-## 1. Quota protection — three tiers
+## 1. No automated translation (by design)
 
-The 500,000-char/month Google free tier is protected by three independent
-mechanisms, so local development and hot-reloading can never spend it.
+The repo previously called Google Cloud Translation from `scripts/translate.js`
+and from the deploy workflow. **Both are gone.** There is no translation script,
+no API key, and no CI step that contacts a translation service.
 
-### Tier 1 — Cache-first (the locale file _is_ the cache)
+Why it was removed:
 
-Each `src/i18n/locales/<code>.json` is a flat map of the English source string
-to its translation:
+- **It broke deploys.** Making a paid third-party API a prerequisite of shipping
+  meant an API-side failure could block a site deploy.
+- **CI couldn't keep what it bought.** The runner is destroyed after deploy, so
+  fetched locales were discarded unless explicitly committed back — every
+  `en.json` edit risked re-billing the same characters.
+- **The dependency wasn't earning its keep.** Locales change rarely; a build-time
+  network call to a metered API on every deploy is a standing liability for a
+  once-in-a-while task.
 
-```json
-{ "Home": "Inicio", "Choose language": "Elegir idioma" }
-```
+What replaces it: **nothing**. `src/i18n/locales/<code>.json` is a flat
+`{ "English source": "translation" }` map that you edit and commit. Use any
+translator you like (a service, an LLM, a human) and paste the result in. The
+build only ever reads these files.
 
-`scripts/translate.js` reads this file first and only requests the strings that
-are **not already keys** in it. Fetched results are appended back, so any string
-is paid for exactly once and never fetched again. The same file is the runtime
-lookup table read by `dictionaries.ts` — one artifact, two jobs.
+Two properties still hold, and they're what made the pipeline safe to delete:
 
-### Tier 2 — Environment Gate (dev block)
-
-`dictionaries.ts` contains **no network code at all**, so `pnpm dev` physically
-cannot reach Google. On a cache miss it branches on `import.meta.env.DEV`:
-
-- `pnpm dev` → renders a visible placeholder, e.g. `[ES-Pending] Your Text`.
-- production build → falls back to clean English.
-
-### Tier 3 — Manual CLI trigger (decoupled)
-
-The API caller is `scripts/translate.js`, wired to `pnpm run translate`. It is
-**not** part of `dev`, `build`, or `prebuild`, and it self-aborts if invoked
-from any of those lifecycles. You run it deliberately, only when you have new
-copy to sync:
-
-```bash
-pnpm run translate                      # sync every language
-pnpm run translate -- --dry-run         # report char cost, call nothing
-pnpm run translate -- --langs es        # one or more specific languages
-pnpm run translate -- --budget 450000   # cap the run at N chars (free-tier guard)
-pnpm run translate -- --force           # ignore cache, re-translate all
-
-# Provide the key for the real run (PowerShell):
-$env:GOOGLE_TRANSLATE_API_KEY = "your_key"; pnpm run translate
-```
-
-- Current copy is ~13,300 chars/language. All 49 languages would be ~652k —
-  **over** the 500k monthly free tier, so full coverage needs either a curated
-  language set or two calendar months. Re-runs cost **0** once cached.
-- `--budget <chars>` caps a run: languages are taken in `languages.json` order
-  (which is ordered by internet users, i.e. priority) and each is only started
-  if it fits *whole* — a half-translated language would be gated off anyway
-  (see §5). Anything skipped is reported and picked up by the next run.
-- A `SAFETY_CHAR_LIMIT` (200k) aborts an unexpectedly large run unless `--force`
-  or an explicit `--budget` is given.
-- Locale files are committed, so a build never needs a key.
-
-### CI auto-sync (`.github/workflows/deploy.yml`)
-
-Deploying to `main` syncs translations automatically — you edit `en.json`, push,
-and the locales catch up. Three properties make that safe:
-
-1. **Free when nothing changed.** The step runs on every deploy, but
-   `translate.js` returns before any network call (and before it requires a key)
-   once every string is cached, so a normal deploy costs 0 chars.
-2. **Budgeted.** It passes `--langs $TRANSLATE_LANGS --budget $TRANSLATE_BUDGET`
-   (workflow `env`), so a run can't quietly exceed the free tier. Anything that
-   doesn't fit is deferred to the next month's run.
-3. **Committed back.** Fetched locales are committed to `main` as
-   `chore(i18n): sync translations`. Without this the runner would be discarded
-   and the next `en.json` edit would re-buy the same characters. The push uses
-   `GITHUB_TOKEN`, which by design does **not** trigger workflows, so it can't
-   loop.
-
-To change coverage, edit `TRANSLATE_LANGS` in the workflow (or remove `--langs`
-to let successive months fill all 49). Running `pnpm run translate` locally and
-committing the result still works and makes CI's run a no-op.
+- **The build never needs a key or a network call.** Locales are committed, so
+  CI and local builds are hermetic.
+- **A cache miss is not an error.** `dictionaries.ts` has no network code at
+  all. On a miss it renders `[ES-Pending] Your Text` in `pnpm dev` and clean
+  English in a production build, so partial translations are always safe to ship.
 
 ## 2. Adding a language
 
 1. Add an entry to `src/i18n/languages.json` (code, endonym, flag, countries).
-2. Run `pnpm run translate` (or `-- --langs <code>`) to fill its locale cache.
+2. Create `src/i18n/locales/<code>.json` mapping each English source string to
+   its translation. The keys must match `src/i18n/en.json` values byte-for-byte
+   — that string *is* the lookup key.
 3. `pnpm build`. The route, hreflang tags, region map, switcher entry, and
    sitemap entry are all derived automatically.
 
-During `pnpm dev` you can skip step 2 — untranslated copy shows as
-`[<CODE>-Pending] …` until you sync.
+Step 2 is optional to get started: a language with no locale file still builds
+and renders clean English in production, and `[<CODE>-Pending] …` in `pnpm dev`.
+Translate incrementally — partial files are safe.
+
+To list what's still missing for a language:
+
+```bash
+node -e "
+const fs=require('fs');
+const code=process.argv[1];
+const en=JSON.parse(fs.readFileSync('src/i18n/en.json','utf8'));
+const f='src/i18n/locales/'+code+'.json';
+const cache=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};
+const out=new Set();
+(function c(v){if(typeof v==='string'){if(/\p{L}/u.test(v))out.add(v);return}
+if(Array.isArray(v))return v.forEach(c);
+if(v&&typeof v==='object')Object.values(v).forEach(c)})(en);
+const missing=[...out].filter(s=>!cache[s]);
+console.log(code+': '+missing.length+' missing / '+out.size);
+missing.forEach(s=>console.log('  '+JSON.stringify(s)));
+" es
+```
 
 ## 3. Edge routing (`worker/index.js`)
 
@@ -181,9 +160,12 @@ So route generation is gated on real translation coverage:
 - A language with no coverage simply has no localized use-case pages, and its
   footer links to the English originals instead.
 
-The practical effect: translate a language → its pages appear on the next build.
-Nothing to wire up per language, and no way to accidentally ship 294 pages of
-untranslated English.
+The practical effect: fill in a language's `useCases` strings → its pages appear
+on the next build. Nothing to wire up per language, and no way to accidentally
+ship 294 pages of untranslated English.
+
+Today **no** language has the use-case strings, so these pages are English-only
+(`USE_CASE_LANGS === ['en']`) — a deliberate, correct state, not a gap.
 
 Slugs stay English in every language (`/es/transparent-png-maker/`): they're the
 key tying copy to a route, and localizing them would fork the URL space.

@@ -81,7 +81,7 @@ const USE_CASE_STRINGS: string[] = (() => {
  * on a cache miss, so generating /<lang>/<slug>/ for an untranslated language
  * would publish the same English prose at N URLs — duplicate content that hurts
  * the pages it's meant to help. A language earns its localized pages only once
- * `pnpm translate` has actually filled its cache.
+ * its locale file actually carries every `useCases` string.
  */
 export function hasUseCaseTranslations(code: string): boolean {
   if (code === DEFAULT_LANG) return true;

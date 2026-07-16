@@ -12,8 +12,6 @@
     "preview": "astro preview",
     "check": "astro check",
     "astro": "astro",
-    "translate": "node scripts/translate.js",
-    "translate:dry": "node scripts/translate.js --dry-run",
     "i18n:regionmap": "node scripts/gen-region-map.mjs",
     "cf:preview": "astro build && wrangler dev",
     "deploy": "astro build && wrangler deploy"
