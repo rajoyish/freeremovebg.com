@@ -6,10 +6,9 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 
 const title = 'Contact Us: Free Remove BG';
 const description = 'Get in touch with the Free Remove BG team. Questions, feedback, or bug reports about our free AI background remover are always welcome.';
-const canonical = 'https://freeremovebg.com/contact';
 ---
 
-<Layout title={title} description={description} canonical={canonical} basePath="/contact" localized={false}>
+<Layout title={title} description={description} basePath="/contact" localized={false}>
   <div class="min-h-screen flex flex-col">
     <Header />
     <Breadcrumb current="Contact" />
@@ -60,7 +59,7 @@ const canonical = 'https://freeremovebg.com/contact';
           <p class="text-sm text-mute leading-relaxed mt-10 m-0">
             Prefer email? Reach us at
             <a href="mailto:hello@freeremovebg.com" class="text-link no-underline hover:underline">hello@freeremovebg.com</a>.
-            For privacy details, see our <a href="/privacy-policy" class="text-link no-underline hover:underline">Privacy Policy</a>.
+            For privacy details, see our <a href="/privacy-policy/" class="text-link no-underline hover:underline">Privacy Policy</a>.
           </p>
         </div>
       </section>

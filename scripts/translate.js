@@ -20,6 +20,10 @@ const API_KEY =
   process.env.GOOGLE_TRANSLATE_API_KEY || process.env.GOOGLE_API_KEY;
 const ENDPOINT = "https://translation.googleapis.com/language/translate/v2";
 
+// Google Cloud Translation bills per character, with the first 500k each
+// calendar month free. Nothing here reads live quota — pass --budget to cap a
+// run at whatever you know is left this month.
+const FREE_TIER_CHARS = 500_000;
 const SAFETY_CHAR_LIMIT = 200_000;
 
 // Rate-limit safety: throttle API calls and retry on quota errors.
@@ -42,6 +46,21 @@ const langsArg = (() => {
         .map((s) => s.trim())
         .filter(Boolean)
     : null;
+})();
+
+// --budget <chars>: hard cap for this run. Languages are taken in
+// languages.json order (ordered by internet users = priority) and each is only
+// started if it fits whole, because a half-translated language is worse than an
+// untranslated one — coverage gating hides its pages either way.
+const budgetArg = (() => {
+  const i = args.indexOf("--budget");
+  if (i === -1) return null;
+  const raw = args[i + 1];
+  const n = Number(raw);
+  if (!raw || !Number.isFinite(n) || n <= 0) {
+    throw new Error(`--budget needs a positive number of characters, got "${raw}"`);
+  }
+  return Math.floor(n);
 })();
 
 function assertManualInvocation() {
@@ -200,15 +219,54 @@ async function main() {
       );
     }
   }
-  console.log(`\n   Total billable this run: ${plannedChars} characters`);
+
+  // Apply the budget cap, keeping each language atomic.
+  const pending = plan.filter((p) => p.missing.length > 0);
+  const runnable = [];
+  const deferred = [];
+  let remaining = budgetArg ?? Infinity;
+  for (const p of pending) {
+    if (p.cost <= remaining) {
+      runnable.push(p);
+      remaining -= p.cost;
+    } else {
+      deferred.push(p);
+    }
+  }
+
+  const runChars = runnable.reduce((n, p) => n + p.cost, 0);
+
+  console.log(`\n   Total outstanding : ${plannedChars} characters`);
+  if (budgetArg !== null) {
+    console.log(`   Budget for this run: ${budgetArg} characters`);
+    if (deferred.length) {
+      console.log(
+        `   Deferred (over budget): ${deferred.map((p) => p.lang.code).join(", ")}` +
+          ` · ${plannedChars - runChars} chars`,
+      );
+      console.log(
+        `   → cached work is never re-billed; re-run next month to continue.`,
+      );
+    }
+  }
+  console.log(`   Billable this run  : ${runChars} characters`);
+  if (runChars > FREE_TIER_CHARS) {
+    console.log(
+      `   ⚠ exceeds the ${FREE_TIER_CHARS}-char monthly free tier by ${runChars - FREE_TIER_CHARS}.`,
+    );
+  }
 
   if (DRY_RUN) {
     console.log(`\n✅ Dry run complete. Nothing was sent to Google.\n`);
     return;
   }
 
-  if (plannedChars === 0) {
-    console.log(`\n✅ Everything is already cached. No API calls made.\n`);
+  if (runChars === 0) {
+    console.log(
+      deferred.length
+        ? `\n✅ Nothing fits the budget. Raise --budget to proceed.\n`
+        : `\n✅ Everything is already cached. No API calls made.\n`,
+    );
     return;
   }
 
@@ -218,16 +276,17 @@ async function main() {
     );
   }
 
-  if (plannedChars > SAFETY_CHAR_LIMIT && !FORCE) {
+  // An explicit --budget is a deliberate, quantified cap, so it satisfies the
+  // accidental-large-run guard on its own.
+  if (runChars > SAFETY_CHAR_LIMIT && budgetArg === null && !FORCE) {
     throw new Error(
-      `This run would bill ${plannedChars} chars (> ${SAFETY_CHAR_LIMIT} safety limit). ` +
-        `Re-run with --force if that is intentional.`,
+      `This run would bill ${runChars} chars (> ${SAFETY_CHAR_LIMIT} safety limit). ` +
+        `Set --budget <chars> to cap it, or --force if that is intentional.`,
     );
   }
 
   let billed = 0;
-  for (const { lang, file, cache, missing } of plan) {
-    if (missing.length === 0) continue;
+  for (const { lang, file, cache, missing } of runnable) {
     console.log(`\n   ↻ ${lang.code}: fetching ${missing.length} strings…`);
     const translated = await translateBatch(missing, lang.code);
     missing.forEach((src, i) => {
@@ -243,7 +302,14 @@ async function main() {
   }
 
   console.log(`\n✅ Done. Billed ${billed} characters this run.`);
-  console.log(`   (Cached strings cost nothing; re-running now bills 0.)\n`);
+  console.log(`   (Cached strings cost nothing; re-running now bills 0.)`);
+  if (deferred.length) {
+    console.log(
+      `\n   Still outstanding: ${deferred.map((p) => p.lang.code).join(", ")}` +
+        ` · ${plannedChars - runChars} chars. Re-run once the monthly free tier resets.`,
+    );
+  }
+  console.log("");
 }
 
 main().catch((err) => {

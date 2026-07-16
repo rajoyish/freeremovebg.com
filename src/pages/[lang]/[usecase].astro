@@ -1,0 +1,21 @@
+---
+import UseCasePage from '../../components/UseCasePage.astro';
+import { USE_CASE_SLUGS, type UseCaseSlug } from '../../data/useCases';
+import { USE_CASE_LANGS } from '../../i18n/dictionaries';
+import { DEFAULT_LANG } from '../../i18n/config';
+
+// One page per (translated language × use case). USE_CASE_LANGS only contains
+// languages whose locale cache actually holds the use-case copy, so a language
+// that hasn't been translated yet simply has no localized pages rather than
+// duplicating the English prose under a /<lang>/ URL.
+export function getStaticPaths() {
+  return USE_CASE_LANGS.filter((lang) => lang !== DEFAULT_LANG).flatMap((lang) =>
+    USE_CASE_SLUGS.map((slug) => ({ params: { lang, usecase: slug } })),
+  );
+}
+
+const { lang } = Astro.params;
+const slug = Astro.params.usecase as UseCaseSlug;
+---
+
+<UseCasePage slug={slug} lang={lang} />

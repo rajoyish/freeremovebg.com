@@ -1,7 +1,7 @@
 ---
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import { getDictionary } from '../i18n/dictionaries';
-import { DEFAULT_LANG, localizedUrl } from '../i18n/config';
+import { DEFAULT_LANG } from '../i18n/config';
 
 interface Props {
   lang?: string;
@@ -13,9 +13,11 @@ const dict = getDictionary(lang);
 const t = dict.nav;
 
 const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
+// trailingSlash: 'always' — non-root links must end in '/' or they 404 in dev
+// and cost a 301 redirect in production.
 const href = (p: string) => {
   if (p === '/') return prefix === '' ? '/' : `${prefix}/`;
-  return p;
+  return p.endsWith('/') ? p : `${p}/`;
 };
 
 const currentPath = (basePath.replace(/\/$/, '') || '/');

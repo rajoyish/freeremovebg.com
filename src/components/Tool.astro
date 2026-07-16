@@ -1,0 +1,288 @@
+---
+// The background-removal tool: model selector, upload zone, progress bar,
+// processed-image grid, and the client-side engine wiring. Extracted from
+// HomePage.astro so use-case landing pages can embed the same tool.
+import { getDictionary } from '../i18n/dictionaries';
+import { DEFAULT_LANG } from '../i18n/config';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = DEFAULT_LANG } = Astro.props;
+const dict = getDictionary(lang);
+const t = dict.tool;
+
+const toolStrings = {
+  preparingDetection: t.preparingDetection,
+  loadingPortrait: t.loadingPortrait,
+  analysingImage: t.analysingImage,
+  removingBackground: t.removingBackground,
+  starting: t.starting,
+  allDone: t.allDone,
+  processing: t.statusProcessing,
+  selectImages: t.selectImages,
+  glitchWarning: t.glitchWarning,
+  imagesSelected: t.imagesSelected,
+  imageSelected: t.imageSelected,
+  removeImage: t.removeImage,
+  downloadPng: t.downloadPng,
+  original: t.original,
+  removed: t.removed,
+  viewFullImage: t.viewFullImage,
+  status: {
+    queued: t.statusQueued,
+    analysing: t.statusAnalysing,
+    processing: t.statusProcessing,
+    done: t.statusDone,
+    error: t.statusError,
+  },
+};
+---
+
+<section class="px-6 pb-16">
+  <div class="max-w-240 mx-auto">
+
+    <div class="mb-5 flex items-center gap-3 flex-wrap">
+      <span class="text-[13px] font-medium text-body">{t.qualityLabel}</span>
+      <div id="model-selector" class="inline-flex bg-canvas-soft-2 border border-hairline rounded-md p-0.75 gap-0.5">
+        <button data-model="auto"
+          class="px-3.5 py-1.5 border-none rounded-sm text-[13px] font-medium cursor-pointer transition-colors bg-ink text-on-primary">
+          {t.modelSmart}
+        </button>
+        <button data-model="portrait"
+          class="px-3.5 py-1.5 border-none rounded-sm text-[13px] font-medium cursor-pointer transition-colors bg-transparent text-body">
+          {t.modelPortrait}
+        </button>
+        <button data-model="general"
+          class="px-3.5 py-1.5 border-none rounded-sm text-[13px] font-medium cursor-pointer transition-colors bg-transparent text-body">
+          {t.modelGeneral}
+        </button>
+      </div>
+      <span id="model-hint" class="text-xs text-mute italic" data-portrait={t.hintPortrait} data-general={t.hintGeneral}>{t.hintAuto}</span>
+    </div>
+
+    <div id="upload-zone"
+      class="rounded-lg overflow-hidden border-2 border-dashed border-hairline-strong bg-canvas cursor-pointer transition-[border-color,background] duration-200 [&:not(.has-files):hover]:border-ink [&:not(.has-files):hover]:bg-canvas-soft">
+
+      <div id="zone-empty" class="px-6 py-16 text-center">
+        <svg width="48" height="48" fill="none" class="stroke-mute mx-auto mb-4 block" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+        </svg>
+        <p class="text-lg font-semibold text-ink mt-0 mb-2">{t.dropTitle}</p>
+        <p class="text-sm text-mute mt-0 mb-6">{t.dropSubtitle}</p>
+        <button id="browse-btn"
+          class="px-6 py-2.5 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85]">
+          {t.browse}
+        </button>
+      </div>
+
+      <div id="zone-filled" class="hidden p-4">
+        <div id="thumb-grid" class="grid gap-2.5 mb-3 grid-cols-[repeat(auto-fill,minmax(100px,1fr))]"></div>
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <span id="zone-count" class="text-[13px] text-mute"></span>
+          <button id="add-more-btn"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-transparent text-ink border border-hairline rounded-pill text-[13px] font-medium cursor-pointer transition-colors hover:border-ink">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            {t.addMore}
+          </button>
+        </div>
+      </div>
+
+      <input type="file" id="file-input" accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,.svg,.ico,.tif,.tiff" multiple class="hidden" />
+    </div>
+
+    <div id="progress-state" class="hidden mt-5">
+      <div class="bg-canvas border border-hairline rounded-[10px] px-5 py-4">
+        <div class="flex items-center justify-between gap-3 mb-2.5">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div id="spinner" class="shrink-0 w-4 h-4 border-2 border-hairline border-t-ink rounded-full animate-spin"></div>
+            <span id="loading-text" class="text-[13px] font-medium text-ink whitespace-nowrap overflow-hidden text-ellipsis">{t.statusProcessing}</span>
+          </div>
+          <span id="progress-text" class="shrink-0 text-[13px] text-mute tabular-nums">0 / 0</span>
+        </div>
+        <div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+          id="progress-track"
+          class="bg-canvas-soft-2 rounded-pill h-1.5 overflow-hidden">
+          <div id="progress-bar"
+            class="bg-ink h-full rounded-pill w-(--progress) [--progress:0%] transition-[width] duration-400 ease-in-out"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="image-grid" class="hidden mt-10">
+      <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <h2 class="text-2xl font-semibold text-ink m-0">{t.processedImages}</h2>
+        <button id="download-all-btn"
+          class="flex items-center gap-2 px-5 py-2.5 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85]">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          {t.downloadAll}
+        </button>
+      </div>
+      <div id="images-container" class="grid gap-5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]"></div>
+    </div>
+
+  </div>
+</section>
+
+<div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none"></div>
+
+<!-- Localized strings for the client-side background-removal tool. -->
+<script is:inline type="application/json" id="tool-i18n" set:html={JSON.stringify(toolStrings)} />
+
+<script>
+  import type { ModelMode } from '../lib/core/model';
+
+  import { QueueManager } from '../lib/core/QueueManager';
+  import { ThumbsView } from '../lib/ui/thumbs';
+  import { CardsView } from '../lib/ui/cards';
+  import { ProgressView } from '../lib/ui/progress';
+  import { showToast } from '../lib/ui/toast';
+
+  interface ToolI18n {
+    preparingDetection: string; loadingPortrait: string; analysingImage: string;
+    removingBackground: string; starting: string; allDone: string; processing: string;
+    selectImages: string; glitchWarning: string; imagesSelected: string;
+    imageSelected: string; removeImage: string; downloadPng: string;
+    original: string; removed: string; viewFullImage: string;
+    status: { queued: string; analysing: string; processing: string; done: string; error: string };
+  }
+  const I18N: ToolI18n = (() => {
+    try { return JSON.parse(document.getElementById('tool-i18n')?.textContent || '{}'); }
+    catch { return {} as ToolI18n; }
+  })();
+
+  const CACHE_EPOCH = '2026-06-02-coep-fix';
+  try {
+    if (localStorage.getItem('frbg-cache-epoch') !== CACHE_EPOCH) {
+      if (typeof caches !== 'undefined') {
+        const names = await caches.keys();
+        await Promise.all(names.map((n) => caches.delete(n)));
+      }
+      localStorage.setItem('frbg-cache-epoch', CACHE_EPOCH);
+    }
+  } catch {}
+
+  const uploadZone    = document.getElementById('upload-zone')!;
+  const fileInput     = document.getElementById('file-input') as HTMLInputElement;
+  const browseBtn     = document.getElementById('browse-btn')!;
+  const addMoreBtn    = document.getElementById('add-more-btn')!;
+  const zoneEmpty     = document.getElementById('zone-empty')!;
+  const zoneFilled    = document.getElementById('zone-filled')!;
+  const thumbGrid     = document.getElementById('thumb-grid')!;
+  const zoneCount     = document.getElementById('zone-count')!;
+  const progressState = document.getElementById('progress-state')!;
+  const progressTrack = document.getElementById('progress-track')!;
+  const progressBar   = document.getElementById('progress-bar') as HTMLElement;
+  const progressText  = document.getElementById('progress-text')!;
+  const loadingText   = document.getElementById('loading-text')!;
+  const imageGrid     = document.getElementById('image-grid')!;
+  const imagesContainer = document.getElementById('images-container')!;
+  const downloadAllBtn  = document.getElementById('download-all-btn')!;
+  const modelHint       = document.getElementById('model-hint')!;
+
+  const HINTS: Record<ModelMode, string> = {
+    auto:     modelHint.textContent || '',
+    portrait: modelHint.dataset.portrait || '',
+    general:  modelHint.dataset.general || '',
+  };
+
+  const ACTIVE_BTN   = ['bg-ink', 'text-on-primary'];
+  const INACTIVE_BTN = ['bg-transparent', 'text-body'];
+
+  const toastContainer = document.getElementById('toast-container')!;
+
+  const thumbsView = new ThumbsView(
+    { thumbGrid, zoneCount, zoneEmpty, zoneFilled, uploadZone },
+    I18N
+  );
+
+  const cardsView = new CardsView(
+    { imagesContainer, imageGrid },
+    I18N
+  );
+
+  const progressView = new ProgressView({
+    progressState,
+    progressTrack,
+    progressBar,
+    progressText,
+    loadingText,
+  });
+
+  const showToastFn = (message: string) => showToast(toastContainer, message);
+
+  const queueManager = new QueueManager(
+    {
+      thumbs: {
+        addThumb: (item) => thumbsView.addThumb(item),
+        setStatus: (id, status) => thumbsView.setStatus(id, status),
+        removeThumb: (id, done) => thumbsView.removeThumb(id, done),
+        showInZone: (items, total) => thumbsView.showInZone(items, total),
+        updateCount: (n) => thumbsView.updateCount(n),
+        reset: () => thumbsView.reset(),
+      },
+      cards: {
+        addCard: (name, orig, proc, label, onDl) => cardsView.addCard(name, orig, proc, label, onDl),
+        removeCard: (el) => cardsView.removeCard(el),
+        reset: () => cardsView.reset(),
+      },
+      progress: {
+        show: () => progressView.show(),
+        hide: () => progressView.hide(),
+        set: (d, t, m) => progressView.set(d, t, m),
+        scheduleHide: (ms) => progressView.scheduleHide(ms),
+      },
+      showToast: showToastFn,
+    },
+    I18N as any
+  );
+
+  thumbsView.setOnRemove((id) => queueManager.remove(id));
+
+  const modelSelector = document.getElementById('model-selector')!;
+  const modelButtons = Array.from(modelSelector.querySelectorAll<HTMLButtonElement>('button[data-model]'));
+  modelSelector.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('button[data-model]') as HTMLButtonElement | null;
+    if (!btn) return;
+    const mode = btn.dataset.model as ModelMode;
+    queueManager.setMode(mode);
+    modelButtons.forEach(b => {
+      const active = b.dataset.model === mode;
+      b.classList.remove(...(active ? INACTIVE_BTN : ACTIVE_BTN));
+      b.classList.add(...(active ? ACTIVE_BTN : INACTIVE_BTN));
+    });
+    modelHint.textContent = HINTS[mode];
+  });
+
+  const DRAG_ON  = ['border-ink', 'bg-canvas-soft'];
+  const DRAG_OFF = ['border-hairline-strong', 'bg-canvas'];
+
+  function setDragState(active: boolean) {
+    uploadZone.classList.remove(...(active ? DRAG_OFF : DRAG_ON));
+    uploadZone.classList.add(...(active ? DRAG_ON : DRAG_OFF));
+  }
+
+  uploadZone.addEventListener('click', () => {
+    if (!uploadZone.classList.contains('has-files')) fileInput.click();
+  });
+  browseBtn.addEventListener('click',  (e) => { e.stopPropagation(); fileInput.click(); });
+  addMoreBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files?.length) queueManager.addFiles(Array.from(fileInput.files));
+    fileInput.value = '';
+  });
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if (!uploadZone.classList.contains('has-files')) setDragState(true);
+  });
+  uploadZone.addEventListener('dragleave', () => {
+    if (!uploadZone.classList.contains('has-files')) setDragState(false);
+  });
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (!uploadZone.classList.contains('has-files')) setDragState(false);
+    if (e.dataTransfer?.files.length) queueManager.addFiles(Array.from(e.dataTransfer.files));
+  });
+  downloadAllBtn.addEventListener('click', () => { queueManager.downloadAll(); });
+</script>

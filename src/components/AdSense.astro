@@ -3,6 +3,7 @@ import { ADSENSE_ENABLED, ADSENSE_CLIENT, ADSENSE_LOADER_SRC } from '../lib/adse
 ---
 {ADSENSE_ENABLED && (
   <script
+    is:inline
     async
     src={ADSENSE_LOADER_SRC}
     crossorigin="anonymous"
