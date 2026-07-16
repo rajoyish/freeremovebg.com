@@ -52,23 +52,6 @@ function getCookie(request, name) {
   return null;
 }
 
-function addStagingNoindex(response, env) {
-  if (!env || env.ENVIRONMENT !== 'staging') {
-    return response;
-  }
-  const contentType = response.headers.get('content-type') || '';
-  if (!contentType.includes('text/html')) {
-    return response;
-  }
-  const headers = new Headers(response.headers);
-  headers.set('X-Robots-Tag', 'noindex, nofollow');
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
-}
-
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -83,27 +66,22 @@ export default {
       !/\.[a-z0-9]+$/i.test(pathname);
 
     if (!isNavigation || pathname !== "/") {
-      const assetResponse = await env.ASSETS.fetch(request);
-      return addStagingNoindex(assetResponse, env);
+      return env.ASSETS.fetch(request);
     }
 
     if (isCrawler(request.headers.get("User-Agent"))) {
-      const assetResponse = await env.ASSETS.fetch(request);
-      return addStagingNoindex(assetResponse, env);
+      return env.ASSETS.fetch(request);
     }
 
     const cookieLang = getCookie(request, 'preferred_lang');
     if (cookieLang && supportedCodes.includes(cookieLang)) {
       if (cookieLang === defaultLang) {
-        const assetResponse = await env.ASSETS.fetch(request);
-        return addStagingNoindex(assetResponse, env);
+        return env.ASSETS.fetch(request);
       }
-      const redirectResponse = redirectTo(url, cookieLang);
-      return addStagingNoindex(redirectResponse, env);
+      return redirectTo(url, cookieLang);
     }
 
-    const assetResponse = await env.ASSETS.fetch(request);
-    return addStagingNoindex(assetResponse, env);
+    return env.ASSETS.fetch(request);
   },
 };
 
@@ -127,7 +105,6 @@ function redirectTo(url, lang) {
 const COUNTER_ALLOWED_ORIGINS = [
   "https://freeremovebg.com",
   "https://www.freeremovebg.com",
-  "https://staging.freeremovebg.com",
 ];
 
 const COUNTER_MAX_PER_REQUEST = 50;
