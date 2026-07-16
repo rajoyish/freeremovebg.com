@@ -6,11 +6,10 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 
 const title = 'Privacy Policy: Free Remove BG';
 const description = 'How Free Remove BG handles your data. All image processing happens locally in your browser. Your images are never uploaded, stored, or shared.';
-const canonical = 'https://freeremovebg.com/privacy-policy';
 const updated = 'June 2, 2026';
 ---
 
-<Layout title={title} description={description} canonical={canonical} basePath="/privacy-policy" localized={false}>
+<Layout title={title} description={description} basePath="/privacy-policy" localized={false}>
   <div class="min-h-screen flex flex-col">
     <Header />
     <Breadcrumb current="Privacy Policy" />
@@ -43,7 +42,7 @@ const updated = 'June 2, 2026';
             <p>We may update this policy from time to time. Any changes will be posted on this page with a revised "last updated" date.</p>
 
             <h2>Contact</h2>
-            <p>If you have any questions about this Privacy Policy, please reach out through our <a href="/contact">contact page</a>.</p>
+            <p>If you have any questions about this Privacy Policy, please reach out through our <a href="/contact/">contact page</a>.</p>
           </div>
         </article>
       </section>

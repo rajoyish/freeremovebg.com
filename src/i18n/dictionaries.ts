@@ -1,5 +1,5 @@
 import en from "./en.json";
-import { DEFAULT_LANG } from "./config";
+import { DEFAULT_LANG, LANGUAGES } from "./config";
 
 export type Dictionary = typeof en;
 
@@ -52,3 +52,48 @@ export function getDictionary(code: string): Dictionary {
   if (!cache) return IS_DEV ? rebuild(en, code, {}) : en;
   return rebuild(en, code, cache);
 }
+
+function collectStrings(value: unknown, out: Set<string>): void {
+  if (typeof value === "string") {
+    if (isTranslatable(value)) out.add(value);
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((v) => collectStrings(v, out));
+    return;
+  }
+  if (value && typeof value === "object") {
+    Object.values(value).forEach((v) => collectStrings(v, out));
+  }
+}
+
+// Every English string the use-case pages render. Computed once at module load.
+const USE_CASE_STRINGS: string[] = (() => {
+  const set = new Set<string>();
+  collectStrings(en.useCases, set);
+  return [...set];
+})();
+
+/**
+ * Whether `code` has a complete translation of the use-case copy.
+ *
+ * This gates route generation on purpose. `getDictionary` falls back to English
+ * on a cache miss, so generating /<lang>/<slug>/ for an untranslated language
+ * would publish the same English prose at N URLs — duplicate content that hurts
+ * the pages it's meant to help. A language earns its localized pages only once
+ * `pnpm translate` has actually filled its cache.
+ */
+export function hasUseCaseTranslations(code: string): boolean {
+  if (code === DEFAULT_LANG) return true;
+  const cache = LOCALE_MAPS[code];
+  if (!cache) return false;
+  return USE_CASE_STRINGS.every((s) => {
+    const hit = cache[s];
+    return hit !== undefined && hit !== "";
+  });
+}
+
+/** Language codes with localized use-case pages, in languages.json order. */
+export const USE_CASE_LANGS: string[] = LANGUAGES.map((l) => l.code).filter(
+  hasUseCaseTranslations,
+);

@@ -1,6 +1,7 @@
 ---
-import { getDictionary } from '../i18n/dictionaries';
+import { getDictionary, hasUseCaseTranslations } from '../i18n/dictionaries';
 import { DEFAULT_LANG } from '../i18n/config';
+import { USE_CASE_SLUGS } from '../data/useCases';
 
 interface Props {
   lang?: string;
@@ -12,15 +13,22 @@ const t = dict.footer;
 const nav = dict.nav;
 
 const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
+// trailingSlash: 'always' — non-root links must end in '/' or they 404 in dev
+// and cost a 301 redirect in production.
 const href = (p: string) => {
   if (p === '/') return prefix === '' ? '/' : `${prefix}/`;
-  return p;
+  return p.endsWith('/') ? p : `${p}/`;
 };
+
+// Use-case pages exist only in languages whose copy is translated; everyone
+// else links to the English original rather than a URL that doesn't exist.
+const useCasePrefix = hasUseCaseTranslations(lang) ? prefix : '';
+const useCaseHref = (slug: string) => `${useCasePrefix}/${slug}/`;
 ---
 
 <footer class="bg-[#0a0a0a] border-t border-[#2a2a2a] mt-auto">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
       <div>
         <h3 class="text-sm font-semibold mb-3 text-[#ededed]">{t.aboutHeading}</h3>
         <p class="text-sm text-[#a3a3a3] leading-relaxed">{t.aboutBody}</p>
@@ -37,6 +45,17 @@ const href = (p: string) => {
         <h3 class="text-sm font-semibold mb-3 text-[#ededed]">{t.greatForHeading}</h3>
         <ul class="space-y-2 text-sm text-[#a3a3a3]">
           {t.greatFor.map((g) => <li set:html={g} />)}
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="text-sm font-semibold mb-3 text-[#ededed]">{dict.useCases.footerHeading}</h3>
+        <ul class="space-y-2 text-sm">
+          {USE_CASE_SLUGS.map((slug) => (
+            <li>
+              <a href={useCaseHref(slug)} class="text-[#a3a3a3] no-underline hover:text-[#ededed] transition-colors">{dict.useCases.items[slug].label}</a>
+            </li>
+          ))}
         </ul>
       </div>
     </div>

@@ -6,11 +6,10 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 
 const title = 'Terms & Conditions: Free Remove BG';
 const description = 'The terms and conditions for using Free Remove BG, the free in-browser AI background remover. Free for personal and commercial use.';
-const canonical = 'https://freeremovebg.com/terms';
 const updated = 'June 2, 2026';
 ---
 
-<Layout title={title} description={description} canonical={canonical} basePath="/terms" localized={false}>
+<Layout title={title} description={description} basePath="/terms" localized={false}>
   <div class="min-h-screen flex flex-col">
     <Header />
     <Breadcrumb current="Terms & Conditions" />
@@ -47,7 +46,7 @@ const updated = 'June 2, 2026';
             <p>We may revise these terms from time to time. Continued use of the tool after changes are posted constitutes acceptance of the updated terms.</p>
 
             <h2>Contact</h2>
-            <p>Questions about these terms? Visit our <a href="/contact">contact page</a>.</p>
+            <p>Questions about these terms? Visit our <a href="/contact/">contact page</a>.</p>
           </div>
         </article>
       </section>

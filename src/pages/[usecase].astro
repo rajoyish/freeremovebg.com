@@ -1,0 +1,12 @@
+---
+import UseCasePage from '../components/UseCasePage.astro';
+import { USE_CASE_SLUGS, type UseCaseSlug } from '../data/useCases';
+
+export function getStaticPaths() {
+  return USE_CASE_SLUGS.map((slug) => ({ params: { usecase: slug } }));
+}
+
+const slug = Astro.params.usecase as UseCaseSlug;
+---
+
+<UseCasePage slug={slug} />

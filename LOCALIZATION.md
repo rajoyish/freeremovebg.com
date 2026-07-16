@@ -12,7 +12,7 @@ src/i18n/languages.json   ← single source of truth (codes, endonyms, flags, co
         │
         ├── src/i18n/config.ts        derives REGION_MAP, SUPPORTED_CODES, hreflang URLs
         ├── scripts/gen-region-map.mjs → worker/region-map.js   (edge routing data)
-        ├── scripts/gen-sitemap.mjs    → public/sitemap.xml      (hreflang sitemap)
+        ├── src/pages/sitemap.xml.ts   → /sitemap.xml            (hreflang sitemap, built by Astro)
         └── scripts/translate.js       → src/i18n/locales/*.json (Google API, MANUAL only)
 
 src/i18n/en.json          ← canonical English copy (the only file you hand-write)
@@ -21,9 +21,14 @@ src/i18n/locales/<lc>.json← flat { "English": "translation" } cache (committed
         └── src/i18n/dictionaries.ts  inlines locales; dev placeholder / prod English fallback
 
 Routes:
-  src/pages/index.astro        → /            (English root)
-  src/pages/[lang]/index.astro → /hi/, /es/…  (one static page per target lang)
-  src/components/HomePage.astro→ shared dictionary-driven markup for both
+  src/pages/index.astro          → /            (English root)
+  src/pages/[lang]/index.astro   → /hi/, /es/…  (one static page per target lang)
+  src/components/HomePage.astro  → shared dictionary-driven markup for both
+
+  src/data/useCases.ts           → slugs + order only (copy lives in en.json)
+  src/pages/[usecase].astro      → /transparent-png-maker/       (English)
+  src/pages/[lang]/[usecase].astro → /es/transparent-png-maker/   (translated langs only)
+  src/components/UseCasePage.astro → shared markup for both
 
 Edge:
   worker/index.js   → crawler bypass • cookie override • assets fallback (NO geo redirect)
@@ -65,20 +70,47 @@ from any of those lifecycles. You run it deliberately, only when you have new
 copy to sync:
 
 ```bash
-pnpm run translate                 # sync every language
-pnpm run translate -- --dry-run    # report char cost, call nothing
-pnpm run translate -- --langs es   # one or more specific languages
-pnpm run translate -- --force      # ignore cache, re-translate all
+pnpm run translate                      # sync every language
+pnpm run translate -- --dry-run         # report char cost, call nothing
+pnpm run translate -- --langs es        # one or more specific languages
+pnpm run translate -- --budget 450000   # cap the run at N chars (free-tier guard)
+pnpm run translate -- --force           # ignore cache, re-translate all
 
 # Provide the key for the real run (PowerShell):
 $env:GOOGLE_TRANSLATE_API_KEY = "your_key"; pnpm run translate
 ```
 
-- Current copy is ~8,000 chars/language × 12 languages ≈ 96k chars — comfortably
-  inside the free tier, and **0 chars** on re-runs once cached.
-- A `SAFETY_CHAR_LIMIT` (200k) aborts an unexpectedly large run unless `--force`.
-- Locale files are committed, so CI builds without a key. The deploy workflow
-  runs `pnpm run translate` only when `GOOGLE_TRANSLATE_API_KEY` is set.
+- Current copy is ~13,300 chars/language. All 49 languages would be ~652k —
+  **over** the 500k monthly free tier, so full coverage needs either a curated
+  language set or two calendar months. Re-runs cost **0** once cached.
+- `--budget <chars>` caps a run: languages are taken in `languages.json` order
+  (which is ordered by internet users, i.e. priority) and each is only started
+  if it fits *whole* — a half-translated language would be gated off anyway
+  (see §5). Anything skipped is reported and picked up by the next run.
+- A `SAFETY_CHAR_LIMIT` (200k) aborts an unexpectedly large run unless `--force`
+  or an explicit `--budget` is given.
+- Locale files are committed, so a build never needs a key.
+
+### CI auto-sync (`.github/workflows/deploy.yml`)
+
+Deploying to `main` syncs translations automatically — you edit `en.json`, push,
+and the locales catch up. Three properties make that safe:
+
+1. **Free when nothing changed.** The step runs on every deploy, but
+   `translate.js` returns before any network call (and before it requires a key)
+   once every string is cached, so a normal deploy costs 0 chars.
+2. **Budgeted.** It passes `--langs $TRANSLATE_LANGS --budget $TRANSLATE_BUDGET`
+   (workflow `env`), so a run can't quietly exceed the free tier. Anything that
+   doesn't fit is deferred to the next month's run.
+3. **Committed back.** Fetched locales are committed to `main` as
+   `chore(i18n): sync translations`. Without this the runner would be discarded
+   and the next `en.json` edit would re-buy the same characters. The push uses
+   `GITHUB_TOKEN`, which by design does **not** trigger workflows, so it can't
+   loop.
+
+To change coverage, edit `TRANSLATE_LANGS` in the workflow (or remove `--langs`
+to let successive months fill all 49). Running `pnpm run translate` locally and
+committing the result still works and makes CI's run a no-op.
 
 ## 2. Adding a language
 
@@ -125,6 +157,33 @@ node worker/routing.test.mjs
 
 - **Layout** emits `<link rel="alternate" hreflang="…">` for every language plus
   `hreflang="x-default"` → English root, on pages that have localized variants.
-- **Sitemap** (`public/sitemap.xml`) lists each localized home URL with the full
-  `xhtml:link` alternate set.
+- **Sitemap** (`src/pages/sitemap.xml.ts`, prerendered to `/sitemap.xml` at
+  build) lists each localized home URL with the full `xhtml:link` alternate set,
+  plus the static pages, with `<lastmod>` set to the build date.
 - `<html lang>` and `dir` (incl. `rtl` for Arabic) are set per page.
+- hreflang clusters are **per page**, not global: `Layout` takes `hreflangLangs`
+  (default: every language). A cluster of one is omitted entirely.
+
+## 5. Use-case pages — coverage gating
+
+Use-case landing pages are long-form prose, and `getDictionary` falls back to
+English on a cache miss. Generating `/<lang>/<slug>/` for an untranslated
+language would therefore publish the *same English text* at 49 URLs — duplicate
+content that harms the pages it's meant to help, and the pattern Google's
+"scaled content abuse" policy targets.
+
+So route generation is gated on real translation coverage:
+
+- `hasUseCaseTranslations(code)` (dictionaries.ts) is true only when every
+  string under `en.useCases` is present in that locale cache.
+- `USE_CASE_LANGS` is the gated list. It drives `getStaticPaths`, the sitemap
+  entries, the hreflang cluster, and the footer links — all from one source.
+- A language with no coverage simply has no localized use-case pages, and its
+  footer links to the English originals instead.
+
+The practical effect: translate a language → its pages appear on the next build.
+Nothing to wire up per language, and no way to accidentally ship 294 pages of
+untranslated English.
+
+Slugs stay English in every language (`/es/transparent-png-maker/`): they're the
+key tying copy to a route, and localizing them would fork the URL space.

@@ -221,5 +221,223 @@
       "Transparent stickers & cutouts"
     ],
     "rights": "All rights reserved."
+  },
+  "useCases": {
+    "footerHeading": "Popular Uses",
+    "faqHeading": "Frequently Asked Questions",
+    "relatedHeading": "More ways to use FreeRemoveBG",
+    "backToTool": "Free Background Remover",
+    "items": {
+      "remove-background-from-product-photos": {
+        "label": "Product Photos",
+        "title": "Remove Background from Product Photos Free (Batch, HD)",
+        "description": "Remove the background from product photos free, in batches, at full resolution. Runs in your browser — perfect for Etsy, Amazon, Shopify and eBay listings.",
+        "h1": "Remove Background from Product Photos",
+        "intro": "Turn phone snapshots into clean, marketplace-ready product images. Drop your photos below — the AI cuts out each product on a transparent background, in HD, without uploading anything to a server.",
+        "sections": [
+          {
+            "heading": "Built for sellers, not just single shots",
+            "body": "Marketplaces like Amazon require a pure white background, and Etsy or Shopify stores look far more professional with consistent product imagery. A transparent PNG is the universal starting point: place your cutout on white for Amazon, on a brand color for your storefront, or straight into a banner. Because FreeRemoveBG handles batches, you can drop an entire product line in at once and download every cutout as a single ZIP."
+          },
+          {
+            "heading": "Your product shots stay on your device",
+            "body": "Unpublished products, pre-launch photography, and client catalogs are commercially sensitive. Unlike cloud removers, FreeRemoveBG runs the entire AI locally in your browser — nothing is uploaded, stored, or seen by anyone. You can even load the page once and keep processing product photos offline."
+          },
+          {
+            "heading": "Full resolution, no watermark, no per-image fees",
+            "body": "Paid tools typically watermark the free tier or cap it at low resolution, which is useless for zoomable listing images. Here every download is the original resolution of your photo, watermark-free, with no credits or account. Process ten photos or five hundred — the price is the same: free."
+          }
+        ],
+        "faqs": [
+          {
+            "q": "Can I remove backgrounds from many product photos at once?",
+            "a": "Yes. Drop dozens of images into the upload zone in one go. Each product is cut out automatically and you can download the whole set as a single ZIP file."
+          },
+          {
+            "q": "How do I get the white background Amazon requires?",
+            "a": "Download the transparent PNG, then place it on a white canvas in any editor (Canva, Photoshop, even PowerPoint). Starting from a transparent cutout gives you a perfectly uniform white, which re-shot photos rarely achieve."
+          },
+          {
+            "q": "Will the image quality be good enough for zoomed listing photos?",
+            "a": "Yes. The cutout is exported at the original resolution of your upload with no compression or upscaling, so a 4000px photo stays 4000px."
+          }
+        ]
+      },
+      "remove-background-from-signature": {
+        "label": "Signatures",
+        "title": "Remove Background from Signature Free (Private, No Upload)",
+        "description": "Turn a photo of your signature into a transparent PNG stamp for Word, PDFs and email — processed locally in your browser, so your signature is never uploaded.",
+        "h1": "Remove Background from Your Signature",
+        "intro": "Sign a piece of white paper, photograph it, and drop it below. You get a transparent PNG signature you can place on contracts, PDFs and documents — and because everything runs in your browser, your signature never leaves your device.",
+        "sections": [
+          {
+            "heading": "Why you should never upload your signature",
+            "body": "Your signature is an identity credential — the thing banks and notaries use to verify you. Sending it to an unknown cloud server to \"remove the background\" is a real risk. FreeRemoveBG is different by architecture: the AI model downloads to your browser and the processing happens on your machine. The signature image never travels over the network at all."
+          },
+          {
+            "heading": "From paper to a reusable digital stamp",
+            "body": "For the cleanest result, sign with a dark pen on plain white paper, photograph it straight-on in good light, and upload the photo. The AI removes the paper background and keeps the ink, giving you a transparent PNG. Save it once and reuse it forever: insert it into Word or Google Docs above the signature line, drop it into a PDF field, or add it to your email signature."
+          },
+          {
+            "heading": "Works for stamps, seals and handwritten notes too",
+            "body": "The same flow digitizes company stamps, wax-seal impressions and handwritten annotations. Anything inked on paper can become a clean transparent overlay for your documents — for free, with no watermark placed anywhere near it."
+          }
+        ],
+        "faqs": [
+          {
+            "q": "Is it safe to remove the background from my signature online?",
+            "a": "With most tools your signature is uploaded to a server, which is a genuine identity risk. FreeRemoveBG processes the image entirely in your browser — the signature never leaves your device, so there is nothing to intercept, store or leak."
+          },
+          {
+            "q": "How do I put a transparent signature into a Word document or PDF?",
+            "a": "Download the PNG, then use Insert → Picture in Word or Google Docs and drag it over the signature line. In PDF editors like Adobe Acrobat, use Fill & Sign → Add image. The transparency means the document text and lines show through around the ink."
+          },
+          {
+            "q": "What kind of photo works best?",
+            "a": "Dark ink on plain white paper, photographed straight-on in even light without shadows. Avoid lined or textured paper — the cleaner the contrast between ink and background, the crisper the cutout."
+          }
+        ]
+      },
+      "remove-background-from-profile-picture": {
+        "label": "Profile Pictures",
+        "title": "Remove Background from Profile Picture Free (LinkedIn, CV)",
+        "description": "Make a clean profile picture for LinkedIn, your CV or social media. AI portrait cutout in your browser — free, HD, no sign-up, and your photo is never uploaded.",
+        "h1": "Remove Background from Your Profile Picture",
+        "intro": "A cluttered background is the fastest way to make a good headshot look unprofessional. Drop your photo below, let the portrait AI cut you out cleanly — hair included — and place yourself on any backdrop you like.",
+        "sections": [
+          {
+            "heading": "A portrait model tuned for people",
+            "body": "Profile photos live or die on edge quality around hair and shoulders. FreeRemoveBG ships a dedicated portrait model for exactly this: in Auto mode it detects that your image contains a person and switches to it automatically, preserving stray hairs and soft edges that generic cutout tools amputate. You can also force Portrait mode from the quality selector above the upload zone."
+          },
+          {
+            "heading": "One headshot, every platform",
+            "body": "With a transparent PNG of yourself, one decent photo becomes a full identity kit: a neutral studio-style backdrop for LinkedIn and your CV, your brand color for a website team page, something playful for Discord or X. Recruiters consistently respond better to clean, distraction-free headshots — and you get one without booking a studio."
+          },
+          {
+            "heading": "Your face is biometric data — keep it local",
+            "body": "A photo of your face is exactly the kind of data you should hesitate to hand to a free cloud service. Here the cutout runs on your own device: nothing is uploaded, nothing is retained, and nobody trains a model on your face. It is the same result as a cloud remover, without the quiet data trade."
+          }
+        ],
+        "faqs": [
+          {
+            "q": "Will it handle hair and beard edges properly?",
+            "a": "Yes — that is what the dedicated portrait model is for. Auto mode detects people and applies it automatically, keeping fine hair detail instead of a hard cardboard-cutout edge."
+          },
+          {
+            "q": "How do I add a new background behind my headshot?",
+            "a": "Download the transparent PNG, then layer it over any backdrop in Canva, PowerPoint, or any photo editor. Solid light gray or soft gradients read as most professional for LinkedIn and CVs."
+          },
+          {
+            "q": "Is my photo uploaded anywhere?",
+            "a": "No. The AI runs inside your browser, so the photo never leaves your device. You can even switch to airplane mode after the page loads and the cutout still works."
+          }
+        ]
+      },
+      "batch-background-removal": {
+        "label": "Batch Removal",
+        "title": "Batch Background Removal Free: Multiple Images at Once",
+        "description": "Remove backgrounds from multiple images at once, free and unlimited. Queue dozens of photos, get HD transparent PNGs, and download everything as one ZIP.",
+        "h1": "Batch Background Removal",
+        "intro": "Why remove backgrounds one photo at a time? Drop an entire folder below — every image is queued, cut out in HD, and bundled into a single ZIP download. Free, unlimited, and processed entirely on your device.",
+        "sections": [
+          {
+            "heading": "A real queue, not a one-at-a-time loop",
+            "body": "FreeRemoveBG is built around a processing queue: add dozens of images in one drop (or keep adding while it works), watch per-image progress, remove anything you did not mean to include, and hit Download All for a single ZIP of transparent PNGs. What used to be an afternoon of repetitive clicking becomes a couple of minutes of waiting."
+          },
+          {
+            "heading": "Unlimited batches — because there is no server bill",
+            "body": "Cloud removers meter batch work with credits because every image costs them compute. FreeRemoveBG has no server doing the work — your own device does it — so there is nothing to meter. Fifty images or five hundred, today and tomorrow: all free, all at original resolution, no watermarks."
+          },
+          {
+            "heading": "Ideal for catalogs, teams and archives",
+            "body": "Batch mode shines on repetitive sets: a product catalog before a store launch, staff headshots for a company page, event photos for an album, or a design-asset library being converted to transparent PNGs. Since nothing uploads, even confidential client sets are safe to process."
+          }
+        ],
+        "faqs": [
+          {
+            "q": "How many images can I process at once?",
+            "a": "There is no imposed limit — no credits, no daily cap. Because processing happens on your device, the practical limit is your computer’s memory; dozens of images per batch is routine on an ordinary laptop."
+          },
+          {
+            "q": "Can I download all the results in one go?",
+            "a": "Yes. When the queue finishes, the Download All button packages every transparent PNG into a single ZIP file."
+          },
+          {
+            "q": "Do all images in a batch get the same quality?",
+            "a": "Yes — each image is processed individually at its own original resolution. In Auto mode the AI even picks the best model per image, using the portrait model for photos of people and the general model for everything else."
+          }
+        ]
+      },
+      "remove-background-from-logo": {
+        "label": "Logos",
+        "title": "Remove Background from Logo Free: Transparent Logo PNG",
+        "description": "Remove the white background from a logo and get a clean transparent PNG for websites, watermarks and merch. Free, HD, in-browser — no sign-up, no watermark.",
+        "h1": "Remove Background from a Logo",
+        "intro": "Stuck with a logo trapped in a white box? Drop it below and get a transparent PNG that sits cleanly on any website, slide deck, invoice or product mockup — at full resolution, for free.",
+        "sections": [
+          {
+            "heading": "The white-box logo problem",
+            "body": "Logos get exported on white backgrounds constantly — from old design files, Word letterheads, or a JPEG a client dug out of their email. The moment you place that file on a colored website header or a dark slide, the white box shows. The fix is a transparent PNG, and the AI extracts one in seconds while preserving clean edges on text and shapes."
+          },
+          {
+            "heading": "One transparent file, used everywhere",
+            "body": "With a transparent logo you can watermark photos, brand invoices and quotations, drop the mark onto merch mockups, add it to video overlays, and place it on any web background without an ugly halo. It is the single most reused asset a small business has — worth getting right once."
+          },
+          {
+            "heading": "Safe for unreleased brand work",
+            "body": "Rebrands and client logos are often under NDA before launch. Because FreeRemoveBG processes everything locally in your browser, an unreleased mark never touches a third-party server — a real consideration when agencies handle client brand assets."
+          }
+        ],
+        "faqs": [
+          {
+            "q": "Will the edges of my logo text stay sharp?",
+            "a": "The AI preserves edges at the original resolution of your file, so start from the largest, cleanest version of the logo you have. A high-resolution source gives crisp text; a tiny compressed JPEG will always be limited by its source quality."
+          },
+          {
+            "q": "Can I remove the background from a client’s logo confidentially?",
+            "a": "Yes. Processing is fully local — the logo is never uploaded, which matters for unreleased or NDA-covered brand work."
+          },
+          {
+            "q": "What formats can I upload?",
+            "a": "JPG, PNG, WebP, BMP, AVIF, SVG, ICO and TIFF all work. The result is always a transparent PNG at the original resolution."
+          }
+        ]
+      },
+      "transparent-png-maker": {
+        "label": "Transparent PNG",
+        "title": "Transparent PNG Maker: Make Any Image Background Transparent",
+        "description": "Make the background of any image transparent and download it as an HD PNG. Free AI transparent PNG maker that runs in your browser — no upload, no watermark.",
+        "h1": "Transparent PNG Maker",
+        "intro": "Convert any JPG, WebP or photo into a transparent PNG. Drop an image below — the AI erases the background and hands you a clean, full-resolution PNG with real alpha transparency.",
+        "sections": [
+          {
+            "heading": "Why transparent PNGs matter",
+            "body": "JPGs cannot store transparency — every JPG has a baked-in background. PNG supports an alpha channel, which is why transparent PNGs are the working currency of design: they layer cleanly into presentations, thumbnails, collages, stickers, websites and documents. This tool converts any common format (JPG, WebP, BMP, AVIF, TIFF and more) into that universal transparent asset."
+          },
+          {
+            "heading": "AI cutout, not a color-key trick",
+            "body": "Simple \"make white transparent\" tools erase every white pixel — including the ones inside your subject — and fall apart on photos with real-world backgrounds. FreeRemoveBG instead runs a segmentation AI that understands what the subject is, so it works on busy, non-uniform backgrounds and keeps interior details intact."
+          },
+          {
+            "heading": "Free, HD and private, with no catch",
+            "body": "The usual trade-offs do not apply here: downloads are full resolution (no paid HD tier), there is no watermark, no account, and no upload — the conversion happens on your device. Load the page once and it even works offline."
+          }
+        ],
+        "faqs": [
+          {
+            "q": "How do I make an image background transparent?",
+            "a": "Upload the image, let the AI detect and remove the background automatically, and download the result. The output is a PNG with true alpha transparency, ready to layer anywhere."
+          },
+          {
+            "q": "Why is my downloaded PNG showing a checkered background?",
+            "a": "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath."
+          },
+          {
+            "q": "Does converting to transparent PNG reduce quality?",
+            "a": "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled."
+          }
+        ]
+      }
+    }
   }
 }

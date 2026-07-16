@@ -1,0 +1,144 @@
+---
+// Shared markup for a use-case landing page, dictionary-driven so the English
+// route (/[usecase]) and the localized route (/[lang]/[usecase]) render from
+// one source. Copy comes from en.json → useCases.items[slug].
+import Layout from '../layouts/Layout.astro';
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+import Breadcrumb from './Breadcrumb.astro';
+import Tool from './Tool.astro';
+import { getDictionary, USE_CASE_LANGS } from '../i18n/dictionaries';
+import { DEFAULT_LANG } from '../i18n/config';
+import { USE_CASE_SLUGS, type UseCaseSlug } from '../data/useCases';
+
+interface Props {
+  slug: UseCaseSlug;
+  lang?: string;
+}
+
+const { slug, lang = DEFAULT_LANG } = Astro.props;
+
+const dict = getDictionary(lang);
+const uc = dict.useCases.items[slug];
+const t = dict.useCases;
+
+const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
+const useCaseHref = (s: string) => `${prefix}/${s}/`;
+const homeHref = prefix === '' ? '/' : `${prefix}/`;
+
+const related = USE_CASE_SLUGS.filter((s) => s !== slug);
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: uc.faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.q,
+    acceptedAnswer: { '@type': 'Answer', text: faq.a },
+  })),
+};
+---
+
+<Layout
+  title={uc.title}
+  description={uc.description}
+  lang={lang}
+  basePath={`/${slug}`}
+  hreflangLangs={USE_CASE_LANGS}
+>
+  <div class="min-h-screen flex flex-col">
+    <Header lang={lang} basePath={`/${slug}`} />
+    <Breadcrumb current={uc.label} lang={lang} />
+
+    <main class="flex-1">
+
+      <section class="px-6 pt-16 pb-8 text-center">
+        <div class="max-w-190 mx-auto">
+          <h1 class="text-[clamp(2rem,5vw,3.25rem)] font-semibold tracking-[-2px] leading-[1.1] mt-0 mb-5 text-ink">
+            {uc.h1}
+          </h1>
+          <p class="text-lg text-body leading-[1.7] mt-0 mb-0 max-w-150 mx-auto">
+            {uc.intro}
+          </p>
+        </div>
+      </section>
+
+      <Tool lang={lang} />
+
+      <section class="px-6 py-16 bg-canvas-soft-2 border-t border-hairline">
+        <article class="max-w-190 mx-auto">
+          {uc.sections.map((section, i) => (
+            <div class:list={['reveal', i > 0 && 'mt-12']} data-reveal>
+              <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-5">{section.heading}</h2>
+              <p class="text-base text-body leading-[1.8] m-0">{section.body}</p>
+            </div>
+          ))}
+        </article>
+      </section>
+
+      <section class="px-6 py-16 border-t border-hairline">
+        <div class="max-w-190 mx-auto">
+          <div class="reveal text-center mb-10" data-reveal>
+            <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-3">{t.faqHeading}</h2>
+          </div>
+
+          <div class="reveal flex flex-col gap-3" data-reveal>
+            {uc.faqs.map((faq) => (
+              <details class="group bg-canvas border border-hairline rounded-lg overflow-hidden">
+                <summary class="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer list-none text-[15px] font-medium text-ink select-none">
+                  <span>{faq.q}</span>
+                  <svg class="shrink-0 w-4 h-4 text-mute transition-transform duration-200 group-open:rotate-45" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+                  </svg>
+                </summary>
+                <div class="px-5 pb-4 pt-0 text-[14px] text-body leading-[1.7]">{faq.a}</div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="px-6 py-16 bg-canvas-soft-2 border-t border-hairline">
+        <div class="max-w-190 mx-auto text-center">
+          <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-6">{t.relatedHeading}</h2>
+          <div class="flex flex-wrap justify-center gap-3">
+            {related.map((s) => (
+              <a href={useCaseHref(s)}
+                class="px-4 py-2 bg-canvas border border-hairline rounded-pill text-sm font-medium text-body no-underline transition-colors hover:border-ink hover:text-ink">
+                {dict.useCases.items[s].label}
+              </a>
+            ))}
+            <a href={homeHref}
+              class="px-4 py-2 bg-ink text-on-primary border border-ink rounded-pill text-sm font-medium no-underline transition-opacity hover:opacity-[0.85]">
+              {t.backToTool}
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <script is:inline type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+
+    </main>
+
+    <Footer lang={lang} />
+  </div>
+</Layout>
+
+<script>
+  const revealEls = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+    revealEls.forEach(el => el.classList.add('is-visible'));
+  } else {
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+    revealEls.forEach(el => observer.observe(el));
+  }
+</script>

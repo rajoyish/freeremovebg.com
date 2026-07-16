@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { SITE, LANGUAGES, DEFAULT_LANG, LANG_BY_CODE, localizedUrl } from '../i18n/config';
+import { SITE, LANGUAGES, DEFAULT_LANG, LANG_BY_CODE } from '../i18n/config';
 import AdSense from '../components/AdSense.astro';
 
 interface Props {
@@ -13,6 +13,12 @@ interface Props {
 	lang?: string;
 	basePath?: string;
 	localized?: boolean;
+	/**
+	 * Language codes this page actually exists in. Defaults to every language.
+	 * Pages that are only translated into a subset (use-case pages) pass their
+	 * own list — hreflang must never advertise a URL that 404s.
+	 */
+	hreflangLangs?: string[];
 }
 
 const {
@@ -22,16 +28,19 @@ const {
 	lang = DEFAULT_LANG,
 	basePath = '/',
 	localized = true,
+	hreflangLangs = LANGUAGES.map((l) => l.code),
 	canonical: providedCanonical,
 	ogImage = `${SITE}/images/og-frbg.png`,
 	noindex = false,
 } = Astro.props;
 
-const getPagePath = () => {
-  const langPrefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
+// Localized, trailing-slash-normalized path for a language code, e.g.
+// pagePath('en') → '/about/', pagePath('fr') → '/fr/about/'.
+const pagePath = (code: string) => {
+  const langPrefix = code === DEFAULT_LANG ? '' : `/${code}`;
   let p = basePath || '/';
   if (p === '/') {
-    return langPrefix || '/';
+    return langPrefix ? `${langPrefix}/` : '/';
   }
   if (!p.startsWith('/')) p = `/${p}`;
   if (!p.endsWith('/')) p = `${p}/`;
@@ -40,18 +49,25 @@ const getPagePath = () => {
 
 const canonicalHref = providedCanonical
   ? new URL(providedCanonical, Astro.site).href
-  : new URL(getPagePath(), Astro.site).href;
+  : new URL(pagePath(lang), Astro.site).href;
 
 const activeLang = LANG_BY_CODE[lang] ?? LANG_BY_CODE[DEFAULT_LANG];
 
-const hreflangAlternates = localized
-	? LANGUAGES.map((l) => {
-			const path = l.code === DEFAULT_LANG ? '/' : `/${l.code}/`;
-			return {
-				hreflang: l.code,
-				href: new URL(path, Astro.site).href,
-			};
-		})
+// hreflang cluster for this page — only the languages it exists in; x-default
+// points at the default-language version (no lang prefix). A cluster of one is
+// just the canonical restated, so it's omitted (e.g. use-case pages before any
+// translation lands).
+const hreflangAlternates = localized && hreflangLangs.length > 1
+	? [
+			...hreflangLangs.map((code) => ({
+				hreflang: code,
+				href: new URL(pagePath(code), Astro.site).href,
+			})),
+			{
+				hreflang: 'x-default',
+				href: new URL(pagePath(DEFAULT_LANG), Astro.site).href,
+			},
+		]
 	: [];
 const ogLocale = `${lang}_${activeLang.flag.toUpperCase()}`;
 
@@ -106,9 +122,6 @@ const jsonLd = {
 		{hreflangAlternates.map((alt) => (
 			<link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
 		))}
-		{localized && (
-			<link rel="alternate" hreflang="x-default" href={new URL(basePath === '/' ? '/' : `/${DEFAULT_LANG}${basePath}`, Astro.site).href} />
-		)}
 
 		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -132,7 +145,7 @@ const jsonLd = {
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={ogImage} />
 
-		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+		<script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
 		<AdSense />
 
