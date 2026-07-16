@@ -49,7 +49,14 @@ jobs:
       # (and before requiring a key) when every string is already cached, so a
       # deploy that didn't change en.json costs nothing and needs no secret.
       # --budget caps the spend and keeps each language atomic.
+      #
+      # continue-on-error: translation is an enhancement, never a prerequisite —
+      # the build falls back to English, so a rate limit or API outage must not
+      # take the site's deploy down with it. The step still shows red in the UI,
+      # and because each finished language is written to disk and committed
+      # below, a partial run keeps its progress and the next deploy resumes.
       - name: Sync translations
+        continue-on-error: true
         env:
           GOOGLE_TRANSLATE_API_KEY: ${{ secrets.GOOGLE_TRANSLATE_API_KEY }}
         run: pnpm run translate -- --langs "$TRANSLATE_LANGS" --budget "$TRANSLATE_BUDGET"

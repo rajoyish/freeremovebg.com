@@ -27,9 +27,12 @@ const FREE_TIER_CHARS = 500_000;
 const SAFETY_CHAR_LIMIT = 200_000;
 
 // Rate-limit safety: throttle API calls and retry on quota errors.
-const CHUNK_DELAY_MS = 500; // wait between API calls (free-tier burst limit)
-const MAX_RETRIES = 3; // retries for 403/429 rate-limit errors
-const BASE_RETRY_DELAY_MS = 2000; // starting backoff (doubles each retry)
+// Google's rate windows are measured in tens of seconds, so backoff has to
+// outlast one. 5 retries doubling from 5s spans ~155s of waiting; the previous
+// 3×2s (14s total) gave up long before the window could reset.
+const CHUNK_DELAY_MS = 1000; // pacing between API calls
+const MAX_RETRIES = 5; // retries for rate-limit errors
+const BASE_RETRY_DELAY_MS = 5000; // starting backoff (doubles each retry)
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
@@ -105,8 +108,30 @@ function decodeHtmlEntities(str) {
     .replace(/&amp;/g, "&");
 }
 
+// Google returns 403 for both "slow down" and "you're out of quota". Only the
+// former is worth retrying — hammering an exhausted quota just delays the
+// failure and muddies the log.
+const RETRYABLE_REASONS = new Set([
+  "userRateLimitExceeded",
+  "rateLimitExceeded",
+  "backendError",
+  "internalError",
+]);
+
+function rateLimitReason(status, detail) {
+  let reason = "";
+  try {
+    reason = JSON.parse(detail)?.error?.errors?.[0]?.reason ?? "";
+  } catch {}
+  if (status === 429) return reason || "rateLimitExceeded";
+  if (status >= 500) return reason || "backendError";
+  return reason;
+}
+
 async function translateBatch(texts, target) {
-  const CHUNK = 100;
+  // 50 rather than 100: halving the characters per request keeps each call
+  // further under the per-user throughput cap that broke CI deploys.
+  const CHUNK = 50;
   const out = [];
   for (let i = 0; i < texts.length; i += CHUNK) {
     const chunk = texts.slice(i, i + CHUNK);
@@ -134,13 +159,18 @@ async function translateBatch(texts, target) {
       }
 
       const detail = await res.text();
-      lastError = new Error(`Google Translate API ${res.status}: ${detail}`);
+      const reason = rateLimitReason(res.status, detail);
+      lastError = new Error(
+        `Google Translate API ${res.status}${reason ? ` (${reason})` : ""}: ${detail}`,
+      );
 
-      // Retry only on rate-limit errors (403/429)
-      if ((res.status === 403 || res.status === 429) && attempt < MAX_RETRIES) {
-        const wait = BASE_RETRY_DELAY_MS * 2 ** attempt;
+      if (RETRYABLE_REASONS.has(reason) && attempt < MAX_RETRIES) {
+        // Exponential backoff with jitter, so parallel jobs don't resynchronise
+        // onto the same retry instant.
+        const base = BASE_RETRY_DELAY_MS * 2 ** attempt;
+        const wait = Math.round(base + Math.random() * 1000);
         console.error(
-          `     ⚠ rate limited (${res.status}). Retrying in ${wait}ms… (${attempt + 1}/${MAX_RETRIES})`,
+          `     ⚠ ${reason} (${res.status}). Retrying in ${(wait / 1000).toFixed(1)}s… (${attempt + 1}/${MAX_RETRIES})`,
         );
         await sleep(wait);
         continue;
