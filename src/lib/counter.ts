@@ -67,6 +67,16 @@ declare global {
 let scriptPromise: Promise<void> | null = null;
 let widgetId: string | null = null;
 let widgetEl: HTMLElement | null = null;
+// Resolver for the in-flight token request. The widget's callbacks are
+// registered once (at render) and route their result here, so each request can
+// reuse the same widget without re-rendering it.
+let currentResolve: ((token: string) => void) | null = null;
+
+function settleToken(token: string): void {
+  const resolve = currentResolve;
+  currentResolve = null;
+  resolve?.(token);
+}
 
 function loadTurnstileScript(): Promise<void> {
   if (scriptPromise) return scriptPromise;
@@ -94,36 +104,38 @@ async function getTurnstileToken(): Promise<string> {
     if (!turnstile) return '';
 
     return await new Promise<string>((resolve) => {
-      const onToken = (token: string) => resolve(token);
-      const onFail = () => resolve('');
+      // Single-flight: never call execute() while a request is still pending,
+      // or Turnstile warns "already executing". A dropped batch is harmless.
+      if (currentResolve) {
+        resolve('');
+        return;
+      }
+      currentResolve = resolve;
 
       if (widgetId === null) {
+        // Render the invisible widget once. Its callbacks route every future
+        // token (including after reset) through settleToken.
         widgetEl = document.createElement('div');
         widgetEl.style.display = 'none';
         document.body.appendChild(widgetEl);
         widgetId = turnstile.render(widgetEl, {
           sitekey: TURNSTILE_SITE_KEY,
           size: 'invisible',
-          callback: onToken,
-          'error-callback': onFail,
-          'timeout-callback': onFail,
+          callback: settleToken,
+          'error-callback': () => settleToken(''),
+          'timeout-callback': () => settleToken(''),
         });
-      } else {
-        // Re-arm the existing widget with this invocation's callbacks.
-        turnstile.reset(widgetId);
-        if (widgetEl) {
-          widgetId = turnstile.render(widgetEl, {
-            sitekey: TURNSTILE_SITE_KEY,
-            size: 'invisible',
-            callback: onToken,
-            'error-callback': onFail,
-            'timeout-callback': onFail,
-          });
+        if (widgetId === null) {
+          settleToken('');
+          return;
         }
+      } else {
+        // Reuse the existing widget — reset then execute. Re-rendering the same
+        // container is rejected by Turnstile ("already rendered in this container").
+        turnstile.reset(widgetId);
       }
 
-      if (widgetId !== null) turnstile.execute(widgetId);
-      else resolve('');
+      turnstile.execute(widgetId);
     });
   } catch {
     return '';
