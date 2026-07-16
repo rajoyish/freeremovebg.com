@@ -13,17 +13,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      # write: the translation sync commits fetched locales back to the repo.
-      contents: write
+      contents: read
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-      # Languages auto-translated on an en.json change, and the per-run
-      # character cap. Google's free tier is 500k chars/month; all 49 languages
-      # would cost ~652k, so this covers the top 16 by internet users (the order
-      # languages.json is already sorted in). Widen the list or drop --langs to
-      # let later runs fill in the rest — the cache means nothing is re-billed.
-      TRANSLATE_LANGS: zh,es,ar,id,pt,fr,ja,ru,de,hi,ko,tr,it,vi,pl,fa
-      TRANSLATE_BUDGET: "450000"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,37 +36,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      # Runs unconditionally: translate.js exits before touching the network
-      # (and before requiring a key) when every string is already cached, so a
-      # deploy that didn't change en.json costs nothing and needs no secret.
-      # --budget caps the spend and keeps each language atomic.
-      #
-      # continue-on-error: translation is an enhancement, never a prerequisite —
-      # the build falls back to English, so a rate limit or API outage must not
-      # take the site's deploy down with it. The step still shows red in the UI,
-      # and because each finished language is written to disk and committed
-      # below, a partial run keeps its progress and the next deploy resumes.
-      - name: Sync translations
-        continue-on-error: true
-        env:
-          GOOGLE_TRANSLATE_API_KEY: ${{ secrets.GOOGLE_TRANSLATE_API_KEY }}
-        run: pnpm run translate -- --langs "$TRANSLATE_LANGS" --budget "$TRANSLATE_BUDGET"
-
-      # Persist what the run just paid for. Without this the runner is destroyed
-      # and every future en.json edit re-buys the same characters. Pushes made
-      # with GITHUB_TOKEN do not trigger workflows, so this cannot loop.
-      - name: Commit synced translations
-        run: |
-          if git diff --quiet -- src/i18n/locales; then
-            echo "Locales unchanged — nothing to commit."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/i18n/locales
-          git commit -m "chore(i18n): sync translations [skip ci]"
-          git push origin HEAD:${{ github.ref_name }}
 
       - name: Build
         run: pnpm build
