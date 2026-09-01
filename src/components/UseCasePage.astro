@@ -24,7 +24,7 @@ const t = dict.useCases;
 
 const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
 const useCaseHref = (s: string) => `${prefix}/${s}/`;
-const homeHref = prefix === '' ? '/' : `${prefix}/`;
+const toolHref = prefix === '' ? '/' : `${prefix}/`;
 
 const related = USE_CASE_SLUGS.filter((s) => s !== slug);
 
@@ -47,7 +47,7 @@ const faqJsonLd = {
   hreflangLangs={USE_CASE_LANGS}
 >
   <div class="min-h-screen flex flex-col">
-    <Header lang={lang} basePath={`/${slug}`} />
+    <Header lang={lang} basePath={`/${slug}`} availableLangs={USE_CASE_LANGS} />
     <Breadcrumb current={uc.label} lang={lang} />
 
     <main class="flex-1">
@@ -108,7 +108,7 @@ const faqJsonLd = {
                 {dict.useCases.items[s].label}
               </a>
             ))}
-            <a href={homeHref}
+            <a href={toolHref}
               class="px-4 py-2 bg-ink text-on-primary border border-ink rounded-pill text-sm font-medium no-underline transition-opacity hover:opacity-[0.85]">
               {t.backToTool}
             </a>

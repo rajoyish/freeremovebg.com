@@ -37,6 +37,9 @@ delete batch.__meta;
 
 const KNOWN = new Set(ALL_STRINGS);
 const tags = (s) => (s.match(/<[^>]+>|&[a-z]+;/gi) ?? []).join("");
+// {link} marks where an inline link goes. A translation may move it, but losing
+// it drops the link out of the sentence.
+const slots = (s) => (s.match(/\{[a-z]+\}/gi) ?? []).sort().join("");
 const errors = [];
 const warnings = [];
 
@@ -55,6 +58,10 @@ for (const [english, translation] of Object.entries(batch)) {
   }
   if (tags(english) !== tags(translation)) {
     errors.push(`HTML tags/entities differ from the source in: ${JSON.stringify(english.slice(0, 80))}`);
+    continue;
+  }
+  if (slots(english) !== slots(translation)) {
+    errors.push(`{placeholder} missing or altered in: ${JSON.stringify(english.slice(0, 80))}`);
     continue;
   }
   if (translation === english && english.split(/\s+/).length > 2) {

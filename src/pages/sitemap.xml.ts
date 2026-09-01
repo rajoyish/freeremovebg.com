@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { DEFAULT_LANG, LANGUAGES, SITE } from "../i18n/config";
 import { USE_CASE_SLUGS } from "../data/useCases";
-import { USE_CASE_LANGS } from "../i18n/dictionaries";
+import { PAGE_LANGS, USE_CASE_LANGS } from "../i18n/dictionaries";
 
 // Prerendered at build time into dist/sitemap.xml. Every deploy rebuilds the
 // site, so the build date is an honest <lastmod> for all URLs.
@@ -31,10 +31,22 @@ const useCaseAlternates = (slug: string) => [
 ];
 
 const STATIC_PAGES = [
-  { path: "/about/", changefreq: "monthly", priority: "0.7" },
-  { path: "/contact/", changefreq: "monthly", priority: "0.5" },
-  { path: "/privacy-policy/", changefreq: "yearly", priority: "0.3" },
-  { path: "/terms/", changefreq: "yearly", priority: "0.3" },
+  { path: "about", changefreq: "monthly", priority: "0.7" },
+  { path: "contact", changefreq: "monthly", priority: "0.5" },
+  { path: "privacy-policy", changefreq: "yearly", priority: "0.3" },
+  { path: "terms", changefreq: "yearly", priority: "0.3" },
+];
+
+const staticUrl = (code: string, path: string) =>
+  code === DEFAULT_LANG ? `${SITE}/${path}/` : `${SITE}/${code}/${path}/`;
+
+// Like the use-case cluster: only the languages the page was generated in.
+const staticAlternates = (path: string) => [
+  ...PAGE_LANGS.map((code) => ({
+    hreflang: code,
+    href: staticUrl(code, path),
+  })),
+  { hreflang: "x-default", href: staticUrl(DEFAULT_LANG, path) },
 ];
 
 interface UrlEntry {
@@ -80,11 +92,14 @@ const entries: UrlEntry[] = [
       alternates: useCaseAlternates(slug),
     })),
   ),
-  ...STATIC_PAGES.map((p) => ({
-    loc: `${SITE}${p.path}`,
-    changefreq: p.changefreq,
-    priority: p.priority,
-  })),
+  ...STATIC_PAGES.flatMap((p) =>
+    PAGE_LANGS.map((code) => ({
+      loc: staticUrl(code, p.path),
+      changefreq: p.changefreq,
+      priority: code === DEFAULT_LANG ? p.priority : "0.3",
+      alternates: staticAlternates(p.path),
+    })),
+  ),
 ];
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>

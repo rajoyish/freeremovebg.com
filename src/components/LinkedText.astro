@@ -1,0 +1,17 @@
+---
+// Renders a sentence that contains one inline link, e.g.
+//   "For privacy details, see our {link}."
+// The {link} placeholder lets a translator move the link to wherever the
+// sentence needs it. If a translation drops the placeholder, the link is
+// appended instead of silently disappearing.
+interface Props {
+  text: string;
+  href: string;
+  label: string;
+  linkClass?: string;
+}
+
+const { text, href, label, linkClass = '' } = Astro.props;
+const [before, after = ''] = text.split('{link}');
+---
+{before}<a href={href} class={linkClass || undefined}>{label}</a>{after}

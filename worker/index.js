@@ -1,4 +1,4 @@
-import { supportedCodes, defaultLang } from "./region-map.js";
+import { supportedCodes, defaultLang, langCookie } from "./region-map.js";
 
 const CRAWLER_UA = [
   "googlebot",
@@ -73,7 +73,9 @@ export default {
       return env.ASSETS.fetch(request);
     }
 
-    const cookieLang = getCookie(request, 'preferred_lang');
+    // langCookie comes from the same generated file the switcher's cookie name
+    // is derived from — hardcoding it here is how the two drifted apart before.
+    const cookieLang = getCookie(request, langCookie);
     if (cookieLang && supportedCodes.includes(cookieLang)) {
       if (cookieLang === defaultLang) {
         return env.ASSETS.fetch(request);

@@ -74,6 +74,23 @@ const USE_CASE_STRINGS: string[] = (() => {
   return [...set];
 })();
 
+// Same, for the static content pages (about / contact / privacy / terms).
+const PAGE_STRINGS: string[] = (() => {
+  const set = new Set<string>();
+  collectStrings(en.pages, set);
+  return [...set];
+})();
+
+function fullyTranslated(code: string, strings: string[]): boolean {
+  if (code === DEFAULT_LANG) return true;
+  const cache = LOCALE_MAPS[code];
+  if (!cache) return false;
+  return strings.every((s) => {
+    const hit = cache[s];
+    return hit !== undefined && hit !== "";
+  });
+}
+
 /**
  * Whether `code` has a complete translation of the use-case copy.
  *
@@ -84,16 +101,28 @@ const USE_CASE_STRINGS: string[] = (() => {
  * its locale file actually carries every `useCases` string.
  */
 export function hasUseCaseTranslations(code: string): boolean {
-  if (code === DEFAULT_LANG) return true;
-  const cache = LOCALE_MAPS[code];
-  if (!cache) return false;
-  return USE_CASE_STRINGS.every((s) => {
-    const hit = cache[s];
-    return hit !== undefined && hit !== "";
-  });
+  return fullyTranslated(code, USE_CASE_STRINGS);
+}
+
+/**
+ * Whether `code` has a complete translation of the static content pages.
+ *
+ * Gates /<lang>/about/, /<lang>/contact/, /<lang>/privacy-policy/ and
+ * /<lang>/terms/ for the same reason `hasUseCaseTranslations` gates the
+ * use-case routes: a partial translation would publish English prose under a
+ * localized URL. Until a language qualifies, its header and footer link to the
+ * English originals.
+ */
+export function hasPageTranslations(code: string): boolean {
+  return fullyTranslated(code, PAGE_STRINGS);
 }
 
 /** Language codes with localized use-case pages, in languages.json order. */
 export const USE_CASE_LANGS: string[] = LANGUAGES.map((l) => l.code).filter(
   hasUseCaseTranslations,
+);
+
+/** Language codes with localized about/contact/privacy/terms pages. */
+export const PAGE_LANGS: string[] = LANGUAGES.map((l) => l.code).filter(
+  hasPageTranslations,
 );

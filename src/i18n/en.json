@@ -222,6 +222,97 @@
     ],
     "rights": "All rights reserved."
   },
+  "pages": {
+    "about": {
+      "title": "About Free Remove BG: The Private AI Background Remover",
+      "description": "Learn about Free Remove BG, the free AI background remover that runs entirely in your browser. Private, unlimited, watermark-free, and built for real work.",
+      "h1": "About Free Remove BG",
+      "intro": "A free AI background remover built on a simple idea: removing the background from an image should be fast, private, and cost nothing.",
+      "sections": [
+        {
+          "heading": "Our Mission",
+          "body": "Most background removers ask you to sign up, watch a watermark land on your download, or pay for the resolution you actually need. Free Remove BG was created to remove that friction. It is a free AI bg remove tool that turns any photo into a clean transparent cutout in seconds, with no account, no watermark, and no hidden limits. Whether you are preparing a single profile picture or a folder full of product shots, the tool is ready the moment you open the page."
+        },
+        {
+          "heading": "Privacy by Design",
+          "body": "The biggest difference is where the work happens. Instead of uploading your photos to a cloud server, Free Remove BG runs the entire cutout locally inside your browser. Your images are never sent anywhere, never stored, and never seen by anyone. That makes it a safe choice for sensitive product shots, client work, and personal photos. After the page loads once, you can even disconnect from the internet and keep removing backgrounds offline."
+        },
+        {
+          "heading": "Smart AI for Every Image",
+          "body": "Different pictures need different handling. A portrait with fine, flyaway hair needs careful matting, while a hard-edged logo or product needs crisp, clean lines. Smart mode analyses each image and automatically routes it to the best engine, using a portrait-optimised model for people and a general-purpose model for objects, graphics, and animals. You can also choose the engine yourself at any time. The result is a high-quality cutout exported as a full-resolution transparent PNG."
+        },
+        {
+          "heading": "Built for Real Work",
+          "body": "Free Remove BG handles JPG, PNG, WebP, AVIF, and even GIF images, and it can process many files at once. Drop in a batch, watch each one cut out with a live before-and-after preview, and download every result together as a single ZIP. The transparent PNGs slot straight into the tools you already use, from Canva, PowerPoint, and Google Slides to Photoshop, GIMP, and Photopea, making it a practical part of any everyday design workflow."
+        },
+        {
+          "heading": "Always Free",
+          "body": "There is no paywall hiding better output and no stamp across your downloads. Every cutout comes out at the original resolution you uploaded, free to use for personal and commercial projects alike. Install nothing, sign up for nothing, and open the page whenever you need a fast, private, free background remover that simply works."
+        }
+      ],
+      "cta": "Try Free Remove BG"
+    },
+    "contact": {
+      "title": "Contact Us: Free Remove BG",
+      "description": "Get in touch with the Free Remove BG team. Questions, feedback, or bug reports about our free AI background remover are always welcome.",
+      "h1": "Contact Us",
+      "intro": "Have a question, some feedback, or found a bug? We'd love to hear from you. Fill in the form below or email us directly, and we'll get back to you as soon as we can.",
+      "nameLabel": "Name",
+      "namePlaceholder": "Your name",
+      "emailLabel": "Email",
+      "messageLabel": "Message",
+      "messagePlaceholder": "How can we help?",
+      "submit": "Send Message",
+      "emailNote": "Prefer email? Reach us at {link}.",
+      "privacyNote": "For privacy details, see our {link}."
+    },
+    "privacy": {
+      "title": "Privacy Policy: Free Remove BG",
+      "description": "How Free Remove BG handles your data. All image processing happens locally in your browser. Your images are never uploaded, stored, or shared.",
+      "h1": "Privacy Policy",
+      "updatedLabel": "Last updated:",
+      "intro": "Free Remove BG is built around a single privacy principle: your images belong to you. This policy explains what data we do and do not collect when you use the tool.",
+      "imagesHeading": "Your Images Stay on Your Device",
+      "imagesBody": "All background removal happens locally in your browser using on-device AI. Your images are never uploaded to a server, never stored, and never seen by us or anyone else. When you close the tab, any images you worked with are gone from memory. After the page has loaded once, you can even use the tool offline.",
+      "collectHeading": "Information We Collect",
+      "collectBody": "We do not require an account, and we do not ask for your name, email, or any personal details to use the background remover. We do not collect, transmit, or retain the images you process.",
+      "analyticsHeading": "Analytics and Cookies",
+      "analyticsBody": "The core tool works without tracking you. If basic, privacy-respecting analytics are used, they are limited to aggregate, anonymous usage statistics (such as page views) and are never linked to the images you process. We do not sell or share personal data.",
+      "thirdPartyHeading": "Third-Party Resources",
+      "thirdPartyBody": "To run, the page may load assets such as web fonts and the AI model files from content delivery networks. These requests are limited to delivering the application itself and do not include your images.",
+      "childrenHeading": "Children's Privacy",
+      "childrenBody": "Free Remove BG is a general-purpose tool and is not directed at children under 13. Because we do not collect personal information, no such data is knowingly gathered.",
+      "changesHeading": "Changes to This Policy",
+      "changesBody": "We may update this policy from time to time. Any changes will be posted on this page with a revised \"last updated\" date.",
+      "contactHeading": "Contact",
+      "contactBody": "If you have any questions about this Privacy Policy, please reach out through our {link}.",
+      "contactLink": "contact page"
+    },
+    "terms": {
+      "title": "Terms & Conditions: Free Remove BG",
+      "description": "The terms and conditions for using Free Remove BG, the free in-browser AI background remover. Free for personal and commercial use.",
+      "h1": "Terms & Conditions",
+      "intro": "By using Free Remove BG, you agree to these terms. Please read them carefully. If you do not agree, please do not use the tool.",
+      "useHeading": "Use of the Service",
+      "useBody": "Free Remove BG is a free tool that removes backgrounds from images directly in your browser. You may use it for both personal and commercial projects at no cost, with no sign-up and no watermarks. You are responsible for ensuring you have the right to edit any image you process.",
+      "contentHeading": "Your Content",
+      "contentBody": "You retain all rights to the images you upload and the cutouts you create. Because processing happens entirely on your device, we never receive, store, or claim any ownership over your content.",
+      "acceptableHeading": "Acceptable Use",
+      "acceptableItems": [
+        "Do not use the tool to process images you do not have permission to use.",
+        "Do not use the tool to create unlawful, infringing, or harmful content.",
+        "Do not attempt to disrupt, reverse-engineer, or misuse the service."
+      ],
+      "warrantyHeading": "No Warranty",
+      "warrantyBody": "The tool is provided \"as is\" without warranties of any kind. While we aim for high-quality, accurate cutouts, results can vary depending on the image, and we do not guarantee that the service will be uninterrupted or error-free.",
+      "liabilityHeading": "Limitation of Liability",
+      "liabilityBody": "To the fullest extent permitted by law, Free Remove BG and its operators are not liable for any damages arising from your use of, or inability to use, the tool, including any loss of data or output.",
+      "changesHeading": "Changes to These Terms",
+      "changesBody": "We may revise these terms from time to time. Continued use of the tool after changes are posted constitutes acceptance of the updated terms.",
+      "contactHeading": "Contact",
+      "contactBody": "Questions about these terms? Visit our {link}."
+    }
+  },
   "useCases": {
     "footerHeading": "Popular Uses",
     "faqHeading": "Frequently Asked Questions",

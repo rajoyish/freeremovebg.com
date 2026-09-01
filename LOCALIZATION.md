@@ -34,6 +34,14 @@ Routes:
   src/pages/[lang]/[usecase].astro → /es/transparent-png-maker/   (translated langs only)
   src/components/UseCasePage.astro → shared markup for both
 
+  src/pages/about.astro          → /about/                       (English)
+  src/pages/[lang]/about.astro   → /es/about/                    (translated langs only)
+  src/components/pages/*.astro   → shared markup for both
+                                   (same pairing for contact, privacy-policy, terms)
+
+  src/i18n/routes.ts             → link builders; keep the language prefix where
+                                   the language has the page, else link English
+
 Edge:
   worker/index.js   → crawler bypass • cookie override • assets fallback (NO geo redirect)
   wrangler.toml     → main + ASSETS binding + run_worker_first = ["/"]
@@ -97,8 +105,8 @@ node scripts/i18n/merge.mjs es              # validate, merge, log, delete batch
 
 `extract` writes a flat `{ "English source": "" }` batch. `merge` refuses the
 **whole** batch, writing nothing, if any key is not an `en.json` source string,
-any value is empty, any HTML tag sequence drifted from the source, or a
-`[XX-Pending]` placeholder survived. That all-or-nothing behaviour is the point:
+any value is empty, any HTML tag sequence drifted from the source, a `{link}`
+placeholder went missing, or a `[XX-Pending]` placeholder survived. That all-or-nothing behaviour is the point:
 a locale file can never half-absorb a bad batch.
 
 On success `merge` appends to `src/i18n/translation-log.json`, which records
@@ -142,7 +150,15 @@ Order of precedence on a request to `/`:
    canonical pages index cleanly.
 2. **Cookie override** — a supported `lang` cookie (set when the user picks a
    language in the switcher) routes returning visitors to `/<lang>/`. An
-   unsupported value is ignored. `en` stays on the root.
+   unsupported value is ignored. `en` stays on the root. The Worker reads the
+   cookie name from `langCookie` in the generated `worker/region-map.js`, which
+   is the same constant the switcher writes — the two hardcoded their own names
+   once and silently stopped agreeing, which is what `worker/routing.test.mjs`
+   now guards.
+
+   Only `/` is redirected. A returning visitor who lands directly on
+   `/about/` or a use-case URL gets the English page; the in-page links from
+   there keep whatever language that page is in.
 3. **Fallback** — everyone else gets the English root via
    `env.ASSETS.fetch(request)`.
 
@@ -171,12 +187,13 @@ node worker/routing.test.mjs
   `hreflang="x-default"` → English root, on pages that have localized variants.
 - **Sitemap** (`src/pages/sitemap.xml.ts`, prerendered to `/sitemap.xml` at
   build) lists each localized home URL with the full `xhtml:link` alternate set,
-  plus the static pages, with `<lastmod>` set to the build date.
+  plus the use-case and static pages in every language they were generated in,
+  with `<lastmod>` set to the build date.
 - `<html lang>` and `dir` (incl. `rtl` for Arabic) are set per page.
 - hreflang clusters are **per page**, not global: `Layout` takes `hreflangLangs`
   (default: every language). A cluster of one is omitted entirely.
 
-## 5. Use-case pages — coverage gating
+## 5. Localized routes — coverage gating
 
 Use-case landing pages are long-form prose, and `getDictionary` falls back to
 English on a cache miss. Generating `/<lang>/<slug>/` for an untranslated
@@ -193,13 +210,28 @@ So route generation is gated on real translation coverage:
 - A language with no coverage simply has no localized use-case pages, and its
   footer links to the English originals instead.
 
-The practical effect: fill in a language's `useCases` strings → its pages appear
-on the next build. Nothing to wire up per language, and no way to accidentally
-ship 294 pages of untranslated English.
+The same gate covers the static content pages (about, contact, privacy-policy,
+terms) through `hasPageTranslations(code)` and `PAGE_LANGS`, over every string
+under `en.pages`.
 
-As of this writing no language has the full use-case set, so these pages are
-English-only (`USE_CASE_LANGS === ['en']`). That is a deliberate, correct state,
-not a gap. `pnpm i18n:status` shows the live count under `pages`.
+The practical effect: fill in a language's `useCases` strings → its six pages
+appear on the next build; fill in its `pages` strings → its four content pages
+appear. Nothing to wire up per language, and no way to accidentally ship
+hundreds of pages of untranslated English.
+
+`pnpm i18n:status` shows the live count under `pages`.
+
+### Links follow the same gate
+
+`src/i18n/routes.ts` builds every header and footer link, so a visitor's chosen
+language survives navigation instead of resetting to English on the first click.
+Where the language does not have the page, the link falls back to the English
+original — the alternative is a link to a URL that was never generated.
+
+`LanguageSwitcher` takes the same list as `availableLangs`: picking a language
+that lacks the current page lands on that language's home page rather than a
+404. Pages pass their own list (`PAGE_LANGS`, `USE_CASE_LANGS`); the home page
+passes every language.
 
 Slugs stay English in every language (`/es/transparent-png-maker/`): they're the
 key tying copy to a route, and localizing them would fork the URL space.

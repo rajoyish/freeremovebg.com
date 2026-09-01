@@ -26,6 +26,7 @@ const complete = rows.filter((r) => r.complete);
 const started = rows.filter((r) => !r.complete && r.done > 0);
 const untouched = rows.filter((r) => r.done === 0);
 const withPages = rows.filter((r) => r.hasPages);
+const withContentPages = rows.filter((r) => r.hasContentPages);
 
 // Languages finished under the current session id, in completion order.
 const thisSession = session
@@ -94,6 +95,7 @@ Overall
   remaining             ${rows.length - complete.length}
   strings left          ${totalMissing}
   localized use-case pages live  ${withPages.length * 6} (${withPages.length} langs x 6 slugs)
+  localized content pages live   ${withContentPages.length * 4} (${withContentPages.length} langs x about/contact/privacy/terms)
 
 Next up               ${queue.slice(0, 5).map((r) => `${r.code} (${langEndonym(r.code)})`).join(", ") || "nothing — all done"}
 `);
