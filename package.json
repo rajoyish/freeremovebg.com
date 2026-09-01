@@ -20,6 +20,7 @@
     "i18n:merge": "node scripts/i18n/merge.mjs"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.3",
     "@huggingface/transformers": "^4.2.0",
     "@imgly/background-removal": "^1.7.0",
     "@tailwindcss/vite": "^4.3.0",
