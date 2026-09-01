@@ -13,7 +13,8 @@
     "englishName": "Chinese",
     "flag": "cn",
     "dir": "ltr",
-    "countries": ["CN", "TW", "HK", "SG", "MO"]
+    "countries": ["CN", "TW", "HK", "SG", "MO"],
+    "hreflang": "zh-Hans"
   },
   {
     "code": "es",
@@ -165,7 +166,8 @@
     "englishName": "Filipino",
     "flag": "ph",
     "dir": "ltr",
-    "countries": ["PH"]
+    "countries": ["PH"],
+    "hreflang": "fil"
   },
   {
     "code": "ro",

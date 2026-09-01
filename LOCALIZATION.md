@@ -29,9 +29,11 @@ Routes:
   src/pages/[lang]/index.astro   → /hi/, /es/…  (one static page per target lang)
   src/components/HomePage.astro  → shared dictionary-driven markup for both
 
-  src/data/useCases.ts           → slugs + order only (copy lives in en.json)
+  src/data/useCases.ts           → canonical slugs + order (copy lives in en.json)
+  src/i18n/slugs.ts              → translated slugs per language
   src/pages/[usecase].astro      → /transparent-png-maker/       (English)
-  src/pages/[lang]/[usecase].astro → /es/transparent-png-maker/   (translated langs only)
+  src/pages/[lang]/[usecase].astro → /es/creador-de-png-transparente/
+                                                                 (translated langs only)
   src/components/UseCasePage.astro → shared markup for both
 
   src/pages/about.astro          → /about/                       (English)
@@ -44,7 +46,15 @@ Routes:
 
 Edge:
   worker/index.js   → crawler bypass • cookie override • assets fallback (NO geo redirect)
+  public/_redirects → 301s from retired English slugs (generated, see §3)
   wrangler.toml     → main + ASSETS binding + run_worker_first = ["/"]
+
+Astro config:
+  astro.config.mjs  → i18n { defaultLocale, locales, prefixDefaultLocale: false }
+                      Describes the URL layout src/pages/[lang]/ already produces.
+                      Enables Astro.currentLocale and the astro:i18n helpers; no
+                      `fallback`, because falling back to English would publish
+                      the same prose at 49 URLs.
 ```
 
 ## 1. No automated translation (by design)
@@ -77,7 +87,55 @@ Two properties still hold, and they're what made the pipeline safe to delete:
   all. On a miss it renders `[ES-Pending] Your Text` in `pnpm dev` and clean
   English in a production build, so partial translations are always safe to ship.
 
-## 2. Adding a language
+## 2. Translated URL slugs
+
+Use-case pages publish under a slug in the page's own language. `/es/` serves
+`quitar-fondo-de-logotipo`, not `remove-background-from-logo`.
+
+This is the one place localization reaches the URL rather than only the copy,
+and it is the highest-leverage one for non-English ranking: the slug is a match
+target, it renders in the SERP display URL, and it is what gets copied into
+links and shares. An English slug under `/es/` matches no Spanish query and
+reads as an English page to anyone scanning results.
+
+`src/data/useCases.ts` still owns the canonical slug — it keys the copy in
+`en.json` and it is the English URL. `src/i18n/slugs.ts` maps that key to a
+per-language slug:
+
+```ts
+export const USE_CASE_ROUTES = {
+  es: { "remove-background-from-logo": "quitar-fondo-de-logotipo", ... },
+  zh: { "remove-background-from-logo": "logo-quchu-beijing", ... },
+};
+```
+
+A language absent from the map keeps the English slug, so adding one is
+additive and cannot break an existing URL. Rules for a new entry:
+
+- lowercase ASCII, hyphen-separated, no trailing slash
+- no percent-encoding — non-Latin scripts romanize (`zh` uses pinyin), so the
+  URL survives copy-paste, analytics and Search Console intact
+- **a shipped slug is permanent.** Changing one needs a 301, below.
+
+Because the languages no longer share one path with a swapped prefix, three
+consumers take a per-language path map (`useCaseBasePaths`) instead of a single
+`basePath`: `Layout.astro` for canonical + hreflang, `LanguageSwitcher.astro` so
+switching language lands on that language's slug, and `sitemap.xml.ts`.
+
+## 3. Retiring a slug
+
+`scripts/gen-region-map.mjs` parses `USE_CASE_ROUTES` and writes
+`public/_redirects`, one `301` per language listed in `RENAMED_USE_CASE_LANGS`,
+mapping the English slug to the translated one. Astro copies it to the build
+root, where the ASSETS binding parses it exactly as it parses `_headers`.
+
+It has to live there rather than in the Worker: `run_worker_first` covers only
+`/` and `/api/count`, so `not_found_handling = "404-page"` would answer a
+retired URL before the Worker ever ran.
+
+Regenerate with `pnpm i18n:regionmap`; `prebuild` runs it on every build.
+
+## 4. Adding a language
 
 1. Add an entry to `src/i18n/languages.json` (code, endonym, flag, countries).
 2. Create `src/i18n/locales/<code>.json` mapping each English source string to
@@ -90,7 +148,7 @@ Step 2 is optional to get started: a language with no locale file still builds
 and renders clean English in production, and `[<CODE>-Pending] …` in `pnpm dev`.
 Translate incrementally — partial files are safe.
 
-## 2b. Translating a language (the incremental workflow)
+## 4b. Translating a language (the incremental workflow)
 
 Translation is a per-language chore run through `scripts/i18n/`, deliberately
 capped so no single sitting tries to cover all 49. The scripts do the
@@ -142,7 +200,7 @@ missing.forEach(s=>console.log('  '+JSON.stringify(s)));
 " es
 ```
 
-## 3. Edge routing (`worker/index.js`)
+## 5. Edge routing (`worker/index.js`)
 
 Order of precedence on a request to `/`:
 
@@ -181,7 +239,7 @@ Sanity-check the logic locally:
 node worker/routing.test.mjs
 ```
 
-## 4. SEO
+## 6. SEO
 
 - **Layout** emits `<link rel="alternate" hreflang="…">` for every language plus
   `hreflang="x-default"` → English root, on pages that have localized variants.
@@ -193,7 +251,7 @@ node worker/routing.test.mjs
 - hreflang clusters are **per page**, not global: `Layout` takes `hreflangLangs`
   (default: every language). A cluster of one is omitted entirely.
 
-## 5. Localized routes — coverage gating
+## 7. Localized routes — coverage gating
 
 Use-case landing pages are long-form prose, and `getDictionary` falls back to
 English on a cache miss. Generating `/<lang>/<slug>/` for an untranslated

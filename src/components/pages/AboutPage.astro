@@ -8,7 +8,7 @@ import Footer from '../Footer.astro';
 import Breadcrumb from '../Breadcrumb.astro';
 import { getDictionary, PAGE_LANGS } from '../../i18n/dictionaries';
 import { DEFAULT_LANG } from '../../i18n/config';
-import { homeHref } from '../../i18n/routes';
+import { homeHref, pageHref } from '../../i18n/routes';
 
 interface Props {
   lang?: string;
@@ -22,13 +22,14 @@ const t = dict.pages.about;
 <Layout
   title={t.title}
   description={t.description}
+  keywords={dict.meta.keywords}
   lang={lang}
   basePath="/about"
   hreflangLangs={PAGE_LANGS}
 >
   <div class="min-h-screen flex flex-col">
     <Header lang={lang} basePath="/about" availableLangs={PAGE_LANGS} />
-    <Breadcrumb current={dict.nav.about} lang={lang} />
+    <Breadcrumb path={pageHref(lang, '/about')} current={dict.nav.about} lang={lang} />
 
     <main class="flex-1">
 

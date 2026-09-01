@@ -27,6 +27,10 @@ const started = rows.filter((r) => !r.complete && r.done > 0);
 const untouched = rows.filter((r) => r.done === 0);
 const withPages = rows.filter((r) => r.hasPages);
 const withContentPages = rows.filter((r) => r.hasContentPages);
+// Languages publishing use-case pages at the English slug because slugs.ts has
+// no entry for them. Live, indexable, and missing the keyword the URL exists to
+// carry — so this is a finding, not a statistic.
+const missingSlugs = withPages.filter((r) => !r.hasSlugs);
 
 // Languages finished under the current session id, in completion order.
 const thisSession = session
@@ -61,6 +65,7 @@ if (has("--json")) {
       thisSession: thisSessionUnique.length,
     },
     thisSession: thisSessionUnique,
+    missingSlugs: missingSlugs.map((r) => r.code),
     next: queue.slice(0, 5).map((r) => r.code),
     languages: rows,
   }, null, 2));
@@ -70,7 +75,7 @@ if (has("--json")) {
 const bar = (p) => "#".repeat(Math.round(p / 5)).padEnd(20, ".");
 
 console.log(`\nTranslation status  (${perLang} strings per language: ${CORE_STRINGS.length} core + ${USE_CASE_STRINGS.length} use-case)\n`);
-console.log("code  language          done/total   %    pages  progress");
+console.log("code  language          done/total   %    pages  slugs  progress");
 for (const r of rows) {
   const flag = r.complete ? "done " : r.done === 0 ? "     " : "wip  ";
   console.log(
@@ -79,7 +84,8 @@ for (const r of rows) {
     `${r.done}/${r.total}`.padStart(9) +
     String(r.percent).padStart(5) + "%" +
     (r.hasPages ? "   yes " : "   no  ") +
-    "  " + bar(r.percent) + " " + flag,
+    (r.hasPages ? (r.hasSlugs ? "   yes " : "   NO  ") : "   -   ") +
+    " " + bar(r.percent) + " " + flag,
   );
 }
 
@@ -99,3 +105,10 @@ Overall
 
 Next up               ${queue.slice(0, 5).map((r) => `${r.code} (${langEndonym(r.code)})`).join(", ") || "nothing — all done"}
 `);
+
+if (missingSlugs.length) {
+  console.log(`Publishing English slugs   ${missingSlugs.map((r) => r.code).join(", ")}`);
+  console.log("  These languages have live use-case pages but no entry in");
+  console.log("  src/i18n/slugs.ts, so their URLs are still the English ones.");
+  console.log("  Renaming them now needs a 301 each — see LOCALIZATION.md §3.\n");
+}

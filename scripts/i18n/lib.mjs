@@ -50,6 +50,34 @@ export const CORE_STRINGS = ALL_STRINGS.filter((s) => !USE_CASE_SET.has(s));
 // use-case copy (see LOCALIZATION.md §5). These are part of CORE_STRINGS.
 export const PAGE_STRINGS = [...collectStrings(EN.pages ?? {})];
 
+// Keyword meta strings: comma-separated search terms, not prose. They need the
+// terms a native speaker actually types, so the batch file flags them and the
+// merge validator holds them to different rules than a sentence.
+export const KEYWORD_STRINGS = [
+  EN.meta?.keywords,
+  ...Object.values(EN.useCases?.items ?? {}).map((i) => i.keywords),
+].filter(Boolean);
+const KEYWORD_SET = new Set(KEYWORD_STRINGS);
+export const isKeywordString = (s) => KEYWORD_SET.has(s);
+
+// Languages with translated use-case slugs (src/i18n/slugs.ts). Parsed rather
+// than imported because that file is TypeScript; scripts/gen-region-map.mjs
+// reads it the same way. A language completing its use-case copy without an
+// entry here publishes 6 pages at English slugs, which throws away the reason
+// the pages are localized at all.
+export const SLUG_LANGS = (() => {
+  const p = path.join(I18N_DIR, "slugs.ts");
+  if (!fs.existsSync(p)) return [];
+  const block = fs
+    .readFileSync(p, "utf8")
+    .match(/export const USE_CASE_ROUTES[^=]*=\s*\{([\s\S]*?)\n\};/)?.[1];
+  if (!block) return [];
+  return [...block.matchAll(/^ {2}(\w+):\s*\{/gm)].map((m) => m[1]);
+})();
+
+export const hasSlugs = (code) =>
+  code === DEFAULT_LANG || SLUG_LANGS.includes(code);
+
 export const localePath = (code) => path.join(LOCALES_DIR, `${code}.json`);
 
 export function loadLocale(code) {
@@ -90,6 +118,7 @@ export function statusFor(code) {
     complete: missing.core.length === 0 && missing.useCases.length === 0,
     hasPages: hasUseCasePages(code, cache),
     hasContentPages: hasContentPages(code, cache),
+    hasSlugs: hasSlugs(code),
   };
 }
 

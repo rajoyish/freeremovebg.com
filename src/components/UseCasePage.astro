@@ -9,6 +9,7 @@ import Breadcrumb from './Breadcrumb.astro';
 import Tool from './Tool.astro';
 import { getDictionary, USE_CASE_LANGS } from '../i18n/dictionaries';
 import { DEFAULT_LANG } from '../i18n/config';
+import { localizedSlug, useCaseBasePaths } from '../i18n/slugs';
 import { USE_CASE_SLUGS, type UseCaseSlug } from '../data/useCases';
 
 interface Props {
@@ -23,10 +24,18 @@ const uc = dict.useCases.items[slug];
 const t = dict.useCases;
 
 const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
-const useCaseHref = (s: string) => `${prefix}/${s}/`;
+// Sibling use cases live in the same language, so they use that language's own
+// slugs — an internal link to an English slug under /es/ would 404.
+const useCaseHref = (s: UseCaseSlug) => `${prefix}/${localizedSlug(lang, s)}/`;
 const toolHref = prefix === '' ? '/' : `${prefix}/`;
 
 const related = USE_CASE_SLUGS.filter((s) => s !== slug);
+
+// This page's path in each language that publishes it. Slugs are translated,
+// so the languages no longer share one path with a swapped prefix and both
+// hreflang and the switcher need the map rather than a single basePath.
+const basePaths = useCaseBasePaths(USE_CASE_LANGS, slug);
+const basePath = `/${localizedSlug(lang, slug)}`;
 
 const faqJsonLd = {
   '@context': 'https://schema.org',
@@ -42,13 +51,15 @@ const faqJsonLd = {
 <Layout
   title={uc.title}
   description={uc.description}
+  keywords={uc.keywords}
   lang={lang}
-  basePath={`/${slug}`}
+  basePath={basePath}
+  basePaths={basePaths}
   hreflangLangs={USE_CASE_LANGS}
 >
   <div class="min-h-screen flex flex-col">
-    <Header lang={lang} basePath={`/${slug}`} availableLangs={USE_CASE_LANGS} />
-    <Breadcrumb current={uc.label} lang={lang} />
+    <Header lang={lang} basePath={basePath} basePaths={basePaths} availableLangs={USE_CASE_LANGS} />
+    <Breadcrumb current={uc.label} lang={lang} path={`${prefix}${basePath}/`} />
 
     <main class="flex-1">
 

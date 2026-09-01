@@ -12,6 +12,7 @@ import path from "node:path";
 import {
   BATCH_DIR, ALL_STRINGS, localePath, loadLocale, readJSON, writeJSON,
   knownCode, langName, statusFor, appendLedger, readSession, hasUseCasePages,
+  isKeywordString, hasSlugs,
 } from "./lib.mjs";
 
 const [code, ...flags] = process.argv.slice(2);
@@ -62,6 +63,24 @@ for (const [english, translation] of Object.entries(batch)) {
   }
   if (slots(english) !== slots(translation)) {
     errors.push(`{placeholder} missing or altered in: ${JSON.stringify(english.slice(0, 80))}`);
+    continue;
+  }
+  if (isKeywordString(english)) {
+    // A keyword list translated as prose is the common failure: one long phrase
+    // where the source had eight comma-separated terms, or the English terms
+    // copied through untouched. Neither ranks for anything.
+    const terms = translation.split(",").map((t) => t.trim()).filter(Boolean);
+    if (terms.length < 4) {
+      errors.push(
+        `keyword list has only ${terms.length} term(s) — write 6-9 comma-separated ` +
+        `search phrases, not a sentence: ${JSON.stringify(english.slice(0, 60))}`,
+      );
+      continue;
+    }
+    if (translation.trim() === english.trim()) {
+      errors.push(`keyword list left in English: ${JSON.stringify(english.slice(0, 60))}`);
+      continue;
+    }
     continue;
   }
   if (translation === english && english.split(/\s+/).length > 2) {
@@ -119,6 +138,20 @@ if (warnings.length) {
   console.log(`  ${warnings.length} left untranslated on purpose? check:`);
   warnings.slice(0, 5).forEach((w) => console.log("    " + w));
 }
-if (gainedPages) console.log(`  use-case coverage complete — 6 localized pages unlocked for /${code}/`);
+if (gainedPages) {
+  console.log(`  use-case coverage complete — 6 localized pages unlocked for /${code}/`);
+  if (!hasSlugs(code)) {
+    // Those 6 pages will publish at the English slug until slugs.ts has an
+    // entry, which throws away most of the ranking benefit of localizing them.
+    // Doing it now, before the pages are ever live, also avoids needing a 301.
+    console.log("");
+    console.log(`  NEXT: add ${code} to USE_CASE_ROUTES in src/i18n/slugs.ts.`);
+    console.log(`  Without it /${code}/ publishes English slugs`);
+    console.log(`  (/${code}/remove-background-from-logo/ rather than a ${langName(code)} one).`);
+    console.log(`  Add them in this same change — once the English-slug URLs ship,`);
+    console.log(`  renaming them needs a 301 (LOCALIZATION.md §3).`);
+    console.log("");
+  }
+}
 if (st.complete) console.log(`  ${code} is fully translated.`);
 else console.log(`  ${st.missingCore + st.missingUseCases} strings still missing; re-run extract.mjs ${code}.`);

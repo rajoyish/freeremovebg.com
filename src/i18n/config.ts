@@ -1,12 +1,23 @@
 import languagesData from "./languages.json";
 
 export interface Language {
+  /** URL path segment, e.g. 'zh' in /zh/. Also the <html lang> value. */
   code: string;
   endonym: string;
   englishName: string;
+  /** ISO 3166-1 alpha-2, used for the flag icon and the og:locale territory. */
   flag: string;
   dir: "ltr" | "rtl";
   countries: string[];
+  /**
+   * BCP-47 tag for rel="alternate" hreflang, when the bare `code` is wrong.
+   *
+   * Two of ours are: 'tl' is deprecated in favour of 'fil', and our Chinese
+   * copy is Simplified, so bare 'zh' would advertise it to Traditional-script
+   * regions as an equal match. The URL keeps the short `code` either way —
+   * only the tag Google reads changes.
+   */
+  hreflang?: string;
 }
 
 export const SITE = "https://freeremovebg.com";
@@ -35,6 +46,22 @@ export const REGION_MAP: Record<string, string> = (() => {
 })();
 
 export const LANG_COOKIE = "lang";
+
+/** The tag rel="alternate" should carry for a language. */
+export function hreflangOf(code: string): string {
+  return LANG_BY_CODE[code]?.hreflang ?? code;
+}
+
+/**
+ * og:locale for a language, as language_TERRITORY.
+ *
+ * Open Graph wants a territory, not a script, so this stays on the country
+ * behind the flag icon (pt_BR, zh_CN) rather than the hreflang tag.
+ */
+export function ogLocaleOf(code: string): string {
+  const lang = LANG_BY_CODE[code] ?? LANG_BY_CODE[DEFAULT_LANG];
+  return `${lang.code}_${lang.flag.toUpperCase()}`;
+}
 
 export function localizedUrl(code: string, path = "/"): string {
   const clean = path.replace(/^\/+/, "");

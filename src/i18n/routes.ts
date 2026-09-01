@@ -7,6 +7,8 @@
 
 import { DEFAULT_LANG } from "./config";
 import { hasPageTranslations, hasUseCaseTranslations } from "./dictionaries";
+import { localizedSlug } from "./slugs";
+import type { UseCaseSlug } from "../data/useCases";
 
 /** '' for English, '/es' for Spanish. */
 export const langPrefix = (lang: string): string =>
@@ -24,6 +26,14 @@ export const homeHref = (lang: string): string =>
 export const pageHref = (lang: string, path: string): string =>
   `${hasPageTranslations(lang) ? langPrefix(lang) : ""}${path}/`;
 
-/** Use-case landing page for a slug. */
-export const useCaseHref = (lang: string, slug: string): string =>
-  `${hasUseCaseTranslations(lang) ? langPrefix(lang) : ""}/${slug}/`;
+/**
+ * Use-case landing page for a slug.
+ *
+ * A language that has the translation gets both its prefix and its own slug
+ * (/es/quitar-fondo-de-firma/); one that doesn't gets the English page at the
+ * English slug, since that is the only version of the page that exists.
+ */
+export const useCaseHref = (lang: string, slug: UseCaseSlug): string =>
+  hasUseCaseTranslations(lang)
+    ? `${langPrefix(lang)}/${localizedSlug(lang, slug)}/`
+    : `/${slug}/`;

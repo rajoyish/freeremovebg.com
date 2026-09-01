@@ -24,13 +24,14 @@ const linkClass = 'text-link no-underline hover:underline';
 <Layout
   title={t.title}
   description={t.description}
+  keywords={dict.meta.keywords}
   lang={lang}
   basePath="/contact"
   hreflangLangs={PAGE_LANGS}
 >
   <div class="min-h-screen flex flex-col">
     <Header lang={lang} basePath="/contact" availableLangs={PAGE_LANGS} />
-    <Breadcrumb current={dict.nav.contact} lang={lang} />
+    <Breadcrumb path={pageHref(lang, '/contact')} current={dict.nav.contact} lang={lang} />
 
     <main class="flex-1">
       <section class="px-6 pt-16 pb-20">
