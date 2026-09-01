@@ -41,6 +41,18 @@ jobs:
         run: pnpm build
 
       - name: Deploy to Cloudflare Workers
+        id: deploy
+        continue-on-error: true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+
+      # The assets-upload-session endpoint returns a 503 often enough to break a
+      # deploy that had nothing wrong with it. Give it one more shot.
+      - name: Retry deploy
+        if: steps.deploy.outcome == 'failure'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
