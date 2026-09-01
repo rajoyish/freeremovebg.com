@@ -23,15 +23,12 @@ prose** (step 4).
 
 Unless the user names a different number:
 
-- **2 languages per invocation.** Finish them, report, stop.
-- **40 strings per batch.** A language is ~300 strings, so about 8 batches.
+- **2 languages per invocation.** Finish them completely, report, stop.
+- **Translate all missing strings per language.** A language is ~300 strings. Complete all of them in one go so the language can ship all its pages.
 
 If the user names languages (`/translate hi ne`) do exactly those. If they name
 a count (`/translate 5`) do that many from the queue. Never exceed the budget on
-your own initiative. If you are running low on context or the user's quota is a
-concern, finish the batch you are on, merge it, report, and stop early: a
-partially translated language is safe to ship, so stopping mid-language costs
-nothing.
+your own initiative.
 
 ## Workflow
 
@@ -53,10 +50,10 @@ partly-done languages get closed out before new ones open.
 Take the first code from the queue, or the code the user named. Confirm nothing
 else: just start.
 
-### 3. Extract a batch
+### 3. Extract strings
 
 ```bash
-node scripts/i18n/extract.mjs <code> --max 40
+node scripts/i18n/extract.mjs <code>
 ```
 
 This writes `.i18n-batches/<code>.todo.json`: a flat map of English source
@@ -261,7 +258,7 @@ pages are live at the wrong URLs.
 | `node scripts/i18n/status.mjs --start` | Mint a session id, then show status |
 | `node scripts/i18n/status.mjs --json` | Same data, machine-readable |
 | `node scripts/i18n/status.mjs --next 3` | Print the next 3 codes, space separated |
-| `node scripts/i18n/extract.mjs <code> --max 40` | Write a fill-in batch |
+| `node scripts/i18n/extract.mjs <code>` | Write a fill-in file for all missing strings |
 | `node scripts/i18n/extract.mjs <code> --scope core` | Only non-use-case strings |
 | `node scripts/i18n/merge.mjs <code>` | Validate and merge the batch |
 | `node scripts/i18n/merge.mjs <code> --prune` | Also drop keys `en.json` dropped |

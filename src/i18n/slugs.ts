@@ -40,6 +40,38 @@ export const USE_CASE_ROUTES: Record<string, UseCaseRoutes> = {
     "remove-background-from-logo": "logo-quchu-beijing",
     "transparent-png-maker": "touming-png-zhizuo",
   },
+  ar: {
+    "remove-background-from-product-photos": "izalat-khalfiyat-suwar-al-muntajat",
+    "remove-background-from-signature": "izalat-khalfiyat-al-tawqia",
+    "remove-background-from-profile-picture": "izalat-khalfiyat-al-sura-al-shakhsiya",
+    "batch-background-removal": "izalat-al-khalfiya-bil-jumla",
+    "remove-background-from-logo": "izalat-khalfiyat-al-shiar",
+    "transparent-png-maker": "sani-png-shafaf",
+  },
+  id: {
+    "remove-background-from-product-photos": "hapus-latar-belakang-foto-produk",
+    "remove-background-from-signature": "hapus-latar-belakang-tanda-tangan",
+    "remove-background-from-profile-picture": "hapus-latar-belakang-foto-profil",
+    "batch-background-removal": "penghapusan-latar-belakang-massal",
+    "remove-background-from-logo": "hapus-latar-belakang-logo",
+    "transparent-png-maker": "pembuat-png-transparan",
+  },
+  pt: {
+    "remove-background-from-product-photos": "remover-fundo-fotos-de-produtos",
+    "remove-background-from-signature": "remover-fundo-de-assinatura",
+    "remove-background-from-profile-picture": "remover-fundo-foto-de-perfil",
+    "batch-background-removal": "remocao-de-fundo-em-lote",
+    "remove-background-from-logo": "remover-fundo-de-logotipo",
+    "transparent-png-maker": "criador-de-png-transparente",
+  },
+  fr: {
+    "remove-background-from-product-photos": "supprimer-fond-photos-de-produits",
+    "remove-background-from-signature": "enlever-fond-de-signature",
+    "remove-background-from-profile-picture": "supprimer-fond-photo-de-profil",
+    "batch-background-removal": "suppression-de-fond-par-lots",
+    "remove-background-from-logo": "enlever-fond-de-logo",
+    "transparent-png-maker": "createur-de-png-transparent",
+  },
 };
 
 /** The slug `lang` publishes for a use case. English slug if untranslated. */
