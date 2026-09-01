@@ -48,6 +48,19 @@ Triggers: "ship it", "commit and pr", "deploy this", "/ship".
 
 Commits staged changes on a feature branch, pushes, and opens (or reports) a squash-merge PR against `main`. Uses conventional-commit messages and omits any `Co-Authored-By` trailer. See the Feature / Refactor Workflow above.
 
+### translate-locale
+**Invoke with:** `Skill({skill: "translate-locale"})`
+
+Triggers: "translate the site", "translate locales", "continue translating", "translate <language>", `/translate`.
+
+Translates `src/i18n/locales/*.json` one language at a time in capped batches, so a single session never tries to cover all 49. Claude writes the translations directly; there is no translation API in this project and none should be added (`LOCALIZATION.md` §1). Each run extracts a batch, merges it through a validator that rejects bad keys and drifted HTML, and reports what got finished this session against what remains.
+
+```bash
+pnpm i18n:status                          # coverage table, session count, queue
+node scripts/i18n/extract.mjs es --max 40 # write a fill-in batch
+node scripts/i18n/merge.mjs es            # validate and merge it
+```
+
 ### tailwind-4-docs
 **Invoke with:** `Skill({skill: "tailwind-4-docs"})`
 

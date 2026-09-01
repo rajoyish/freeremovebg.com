@@ -39,3 +39,8 @@ test-results/
 
 # Playwright MCP artifacts (snapshots, console logs)
 .playwright-mcp/
+
+# i18n translation workflow: fill-in batches and the session id are scratch.
+# The translations themselves live in src/i18n/locales/ and are committed.
+.i18n-batches/
+.i18n-session

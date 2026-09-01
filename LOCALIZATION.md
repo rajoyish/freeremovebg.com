@@ -82,6 +82,39 @@ Step 2 is optional to get started: a language with no locale file still builds
 and renders clean English in production, and `[<CODE>-Pending] …` in `pnpm dev`.
 Translate incrementally — partial files are safe.
 
+## 2b. Translating a language (the incremental workflow)
+
+Translation is a per-language chore run through `scripts/i18n/`, deliberately
+capped so no single sitting tries to cover all 49. The scripts do the
+bookkeeping; a human or an LLM does the translating.
+
+```bash
+pnpm i18n:status --start                    # queue + coverage, opens a session
+node scripts/i18n/extract.mjs es --max 40   # -> .i18n-batches/es.todo.json
+#  fill in the empty values
+node scripts/i18n/merge.mjs es              # validate, merge, log, delete batch
+```
+
+`extract` writes a flat `{ "English source": "" }` batch. `merge` refuses the
+**whole** batch, writing nothing, if any key is not an `en.json` source string,
+any value is empty, any HTML tag sequence drifted from the source, or a
+`[XX-Pending]` placeholder survived. That all-or-nothing behaviour is the point:
+a locale file can never half-absorb a bad batch.
+
+On success `merge` appends to `src/i18n/translation-log.json`, which records
+what was translated when and under which session. `status.mjs` reads it back to
+report how many languages a given sitting finished against how many remain.
+
+Batches and the session id (`.i18n-batches/`, `.i18n-session`) are gitignored
+scratch. The translations themselves land in `src/i18n/locales/<code>.json` and
+are committed like any other source file.
+
+Claude Code drives this through the `translate-locale` skill
+(`.claude/skills/translate-locale/`), which carries the translation rules: keys
+are byte-for-byte sacred, HTML tags survive, `FreeRemoveBG` never translates,
+and coverage gating means you finish one language rather than half-finishing
+two.
+
 To list what's still missing for a language:
 
 ```bash
@@ -164,8 +197,9 @@ The practical effect: fill in a language's `useCases` strings → its pages appe
 on the next build. Nothing to wire up per language, and no way to accidentally
 ship 294 pages of untranslated English.
 
-Today **no** language has the use-case strings, so these pages are English-only
-(`USE_CASE_LANGS === ['en']`) — a deliberate, correct state, not a gap.
+As of this writing no language has the full use-case set, so these pages are
+English-only (`USE_CASE_LANGS === ['en']`). That is a deliberate, correct state,
+not a gap. `pnpm i18n:status` shows the live count under `pages`.
 
 Slugs stay English in every language (`/es/transparent-png-maker/`): they're the
 key tying copy to a route, and localizing them would fork the URL space.
