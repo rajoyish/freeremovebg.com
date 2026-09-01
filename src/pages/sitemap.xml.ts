@@ -1,7 +1,8 @@
 import type { APIRoute } from "astro";
-import { DEFAULT_LANG, LANGUAGES, SITE } from "../i18n/config";
-import { USE_CASE_SLUGS } from "../data/useCases";
+import { DEFAULT_LANG, LANGUAGES, SITE, hreflangOf } from "../i18n/config";
+import { USE_CASE_SLUGS, type UseCaseSlug } from "../data/useCases";
 import { PAGE_LANGS, USE_CASE_LANGS } from "../i18n/dictionaries";
+import { localizedSlug } from "../i18n/slugs";
 
 // Prerendered at build time into dist/sitemap.xml. Every deploy rebuilds the
 // site, so the build date is an honest <lastmod> for all URLs.
@@ -13,18 +14,24 @@ const homeUrl = (code: string) =>
 // The full hreflang cluster, shared by every localized home page. Google
 // requires each page in the cluster to list all alternates, including itself.
 const HOME_ALTERNATES = [
-  ...LANGUAGES.map((l) => ({ hreflang: l.code, href: homeUrl(l.code) })),
+  ...LANGUAGES.map((l) => ({ hreflang: hreflangOf(l.code), href: homeUrl(l.code) })),
   { hreflang: "x-default", href: homeUrl(DEFAULT_LANG) },
 ];
 
-const useCaseUrl = (code: string, slug: string) =>
-  code === DEFAULT_LANG ? `${SITE}/${slug}/` : `${SITE}/${code}/${slug}/`;
+// Each language publishes the use case under its own slug, so the URL is built
+// from localizedSlug rather than by prefixing the English one.
+const useCaseUrl = (code: string, slug: UseCaseSlug) => {
+  const localized = localizedSlug(code, slug);
+  return code === DEFAULT_LANG
+    ? `${SITE}/${localized}/`
+    : `${SITE}/${code}/${localized}/`;
+};
 
 // A use-case page's cluster spans only the languages it's translated into —
 // advertising a URL that was never generated is an hreflang error.
-const useCaseAlternates = (slug: string) => [
+const useCaseAlternates = (slug: UseCaseSlug) => [
   ...USE_CASE_LANGS.map((code) => ({
-    hreflang: code,
+    hreflang: hreflangOf(code),
     href: useCaseUrl(code, slug),
   })),
   { hreflang: "x-default", href: useCaseUrl(DEFAULT_LANG, slug) },
@@ -43,7 +50,7 @@ const staticUrl = (code: string, path: string) =>
 // Like the use-case cluster: only the languages the page was generated in.
 const staticAlternates = (path: string) => [
   ...PAGE_LANGS.map((code) => ({
-    hreflang: code,
+    hreflang: hreflangOf(code),
     href: staticUrl(code, path),
   })),
   { hreflang: "x-default", href: staticUrl(DEFAULT_LANG, path) },

@@ -1,7 +1,8 @@
 {
   "meta": {
     "title": "Free Remove BG: Free AI Background Remover Online",
-    "description": "Free Remove BG is a free AI background remover. Remove bg from image, GIF and batches online in HD. 100% private, no sign-up, unlimited downloads."
+    "description": "Free Remove BG is a free AI background remover. Remove bg from image, GIF and batches online in HD. 100% private, no sign-up, unlimited downloads.",
+    "keywords": "free remove bg, remove bg, remove background from image, background remover, free ai background remover, remove bg online, transparent png, remove image background free"
   },
   "nav": {
     "home": "Home",
@@ -323,6 +324,7 @@
         "label": "Product Photos",
         "title": "Remove Background from Product Photos Free (Batch, HD)",
         "description": "Remove the background from product photos free, in batches, at full resolution. Runs in your browser — perfect for Etsy, Amazon, Shopify and eBay listings.",
+        "keywords": "remove background from product photos, product photo background remover, white background product photo, ecommerce product image background removal, transparent product photo",
         "h1": "Remove Background from Product Photos",
         "intro": "Turn phone snapshots into clean, marketplace-ready product images. Drop your photos below — the AI cuts out each product on a transparent background, in HD, without uploading anything to a server.",
         "sections": [
@@ -358,6 +360,7 @@
         "label": "Signatures",
         "title": "Remove Background from Signature Free (Private, No Upload)",
         "description": "Turn a photo of your signature into a transparent PNG stamp for Word, PDFs and email — processed locally in your browser, so your signature is never uploaded.",
+        "keywords": "remove background from signature, transparent signature png, signature background remover, scanned signature transparent, digital signature background removal",
         "h1": "Remove Background from Your Signature",
         "intro": "Sign a piece of white paper, photograph it, and drop it below. You get a transparent PNG signature you can place on contracts, PDFs and documents — and because everything runs in your browser, your signature never leaves your device.",
         "sections": [
@@ -393,6 +396,7 @@
         "label": "Profile Pictures",
         "title": "Remove Background from Profile Picture Free (LinkedIn, CV)",
         "description": "Make a clean profile picture for LinkedIn, your CV or social media. AI portrait cutout in your browser — free, HD, no sign-up, and your photo is never uploaded.",
+        "keywords": "remove background from profile picture, profile photo background remover, transparent profile picture, headshot background removal, linkedin profile photo background",
         "h1": "Remove Background from Your Profile Picture",
         "intro": "A cluttered background is the fastest way to make a good headshot look unprofessional. Drop your photo below, let the portrait AI cut you out cleanly — hair included — and place yourself on any backdrop you like.",
         "sections": [
@@ -428,6 +432,7 @@
         "label": "Batch Removal",
         "title": "Batch Background Removal Free: Multiple Images at Once",
         "description": "Remove backgrounds from multiple images at once, free and unlimited. Queue dozens of photos, get HD transparent PNGs, and download everything as one ZIP.",
+        "keywords": "batch background removal, remove background from multiple images, bulk background remover, batch transparent png, mass image background removal",
         "h1": "Batch Background Removal",
         "intro": "Why remove backgrounds one photo at a time? Drop an entire folder below — every image is queued, cut out in HD, and bundled into a single ZIP download. Free, unlimited, and processed entirely on your device.",
         "sections": [
@@ -463,6 +468,7 @@
         "label": "Logos",
         "title": "Remove Background from Logo Free: Transparent Logo PNG",
         "description": "Remove the white background from a logo and get a clean transparent PNG for websites, watermarks and merch. Free, HD, in-browser — no sign-up, no watermark.",
+        "keywords": "remove background from logo, transparent logo png, logo background remover, make logo background transparent, logo white background removal",
         "h1": "Remove Background from a Logo",
         "intro": "Stuck with a logo trapped in a white box? Drop it below and get a transparent PNG that sits cleanly on any website, slide deck, invoice or product mockup — at full resolution, for free.",
         "sections": [
@@ -498,6 +504,7 @@
         "label": "Transparent PNG",
         "title": "Transparent PNG Maker: Make Any Image Background Transparent",
         "description": "Make the background of any image transparent and download it as an HD PNG. Free AI transparent PNG maker that runs in your browser — no upload, no watermark.",
+        "keywords": "transparent png maker, make image background transparent, transparent background maker, png transparency tool, create transparent png online",
         "h1": "Transparent PNG Maker",
         "intro": "Convert any JPG, WebP or photo into a transparent PNG. Drop an image below — the AI erases the background and hands you a clean, full-resolution PNG with real alpha transparency.",
         "sections": [

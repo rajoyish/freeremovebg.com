@@ -9,11 +9,17 @@ interface Props {
   basePath?: string;
   /** Languages the current page exists in; passed through to the switcher. */
   availableLangs?: string[];
+  /**
+   * Per-language override of `basePath` for pages with translated slugs, so
+   * switching language lands on that language's URL rather than a 404.
+   */
+  basePaths?: Record<string, string>;
 }
 
 const {
   lang = DEFAULT_LANG,
   basePath = '/',
+  basePaths = {},
   availableLangs = LANGUAGES.map((l) => l.code),
 } = Astro.props;
 const dict = getDictionary(lang);
@@ -69,6 +75,7 @@ const switcherPath = currentPath === '/' ? '/' : `${currentPath}/`;
         <LanguageSwitcher
           lang={lang}
           pathname={switcherPath}
+          paths={basePaths}
           labels={dict.switcher}
           availableLangs={availableLangs}
         />

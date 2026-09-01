@@ -18,12 +18,19 @@ interface Props {
    * Defaults to every language (the home page).
    */
   availableLangs?: string[];
+  /**
+   * Per-language path for the current page, keyed by code and without the
+   * language prefix, for pages whose slug is translated (src/i18n/slugs.ts).
+   * Anything not listed keeps the path stripped from `pathname`.
+   */
+  paths?: Record<string, string>;
 }
 
 const {
   lang,
   pathname = "/",
   labels,
+  paths = {},
   availableLangs = LANGUAGES.map((l) => l.code),
 } = Astro.props;
 const active = LANG_BY_CODE[lang] ?? LANG_BY_CODE[DEFAULT_LANG];
@@ -59,6 +66,7 @@ const catalogue = LANGUAGES.map((l) => ({
   data-region-map={JSON.stringify(REGION_MAP)}
   data-catalogue={JSON.stringify(catalogue)}
   data-available-langs={JSON.stringify(availableLangs)}
+  data-paths={JSON.stringify(paths)}
 >
   <button
     type="button"
@@ -159,6 +167,7 @@ const catalogue = LANGUAGES.map((l) => ({
     const suggestedLabel = root.dataset.suggestedLabel || "Suggested for your region";
     const regionMap: Record<string, string> = JSON.parse(root.dataset.regionMap || "{}");
     const availableLangs: string[] = JSON.parse(root.dataset.availableLangs || "[]");
+    const paths: Record<string, string> = JSON.parse(root.dataset.paths || "{}");
 
     const byCode = (code: string): LangEntry | undefined =>
       catalogue.find((l) => l.code === code);
@@ -185,11 +194,14 @@ const catalogue = LANGUAGES.map((l) => ({
 
     function routeFor(code: string): string {
       // This page may not exist in the chosen language — send those visitors to
-      // its home page rather than a 404.
+      // its home page rather than a 404. Where it does exist, use that
+      // language's own path: with translated slugs the URL differs by more than
+      // the prefix, so reusing this page's path would 404 too.
+      const target = paths[code] ?? basePath;
       const clean =
-        basePath === "/" || !availableLangs.includes(code)
+        target === "/" || !availableLangs.includes(code)
           ? ""
-          : basePath.replace(/^\/+/, "");
+          : target.replace(/^\/+/, "").replace(/\/*$/, "/");
       return code === defaultLang ? `/${clean}` : `/${code}/${clean}`;
     }
 

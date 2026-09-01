@@ -5,9 +5,11 @@ import { getDictionary } from '../i18n/dictionaries';
 interface Props {
   current: string;
   lang?: string;
+  /** Path of the page itself, for the trail's second `item`. */
+  path?: string;
 }
 
-const { current, lang = DEFAULT_LANG } = Astro.props;
+const { current, lang = DEFAULT_LANG, path } = Astro.props;
 
 const dict = getDictionary(lang);
 const homeLabel = dict.nav.home;
@@ -18,7 +20,14 @@ const jsonLd = {
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: homeLabel, item: `${SITE}${homeHref}` },
-    { '@type': 'ListItem', position: 2, name: current },
+    // Naming the URL as well as the label lets Google render the localized
+    // trail under the result instead of falling back to the bare domain.
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: current,
+      ...(path ? { item: `${SITE}${path}` } : {}),
+    },
   ],
 };
 ---

@@ -11,6 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   BATCH_DIR, missingFor, knownCode, langName, langEndonym, langDir, statusFor,
+  isKeywordString,
 } from "./lib.mjs";
 
 const [code, ...flags] = process.argv.slice(2);
@@ -43,6 +44,8 @@ if (pool.length === 0) {
 }
 
 const batch = pool.slice(0, max);
+const keywordKeys = batch.filter(isKeywordString);
+
 const todo = {
   __meta: {
     code,
@@ -56,6 +59,20 @@ const todo = {
     stillMissingAfter: pool.length - batch.length,
   },
 };
+
+// Keyword meta is not prose. Translating the English list word by word yields
+// terms nobody searches for; these values want the phrases a native speaker
+// actually types, which may share no vocabulary with the English.
+if (keywordKeys.length) {
+  todo.__meta.keywordStrings = keywordKeys;
+  todo.__meta.keywordInstructions =
+    "The keys listed in keywordStrings are comma-separated SEO keyword lists, not sentences. " +
+    "Do not translate them term by term. Write the search phrases a native speaker of this " +
+    "language actually types for this tool, comma-separated, lowercase, 6-9 terms. Include the " +
+    "local spelling variants people really use. Latin-script languages: prefer unaccented forms, " +
+    "since that is how most people type a query.";
+}
+
 for (const s of batch) todo[s] = "";
 
 fs.mkdirSync(BATCH_DIR, { recursive: true });
@@ -66,6 +83,9 @@ const st = statusFor(code);
 console.log(`${code} (${langName(code)} / ${langEndonym(code)}, ${langDir(code)})`);
 console.log(`  currently ${st.done}/${st.total} (${st.percent}%)`);
 console.log(`  batch: ${batch.length} strings -> ${path.relative(process.cwd(), out)}`);
+if (keywordKeys.length) {
+  console.log(`  ${keywordKeys.length} of these are keyword lists — see __meta.keywordInstructions.`);
+}
 if (pool.length > batch.length) {
   console.log(`  ${pool.length - batch.length} more remain after this batch; re-run extract to get them.`);
 }

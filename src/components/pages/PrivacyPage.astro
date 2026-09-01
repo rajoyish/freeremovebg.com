@@ -32,13 +32,14 @@ const prose = '[&_h2]:text-[1.3rem] [&_h2]:font-semibold [&_h2]:text-ink [&_h2]:
 <Layout
   title={t.title}
   description={t.description}
+  keywords={dict.meta.keywords}
   lang={lang}
   basePath="/privacy-policy"
   hreflangLangs={PAGE_LANGS}
 >
   <div class="min-h-screen flex flex-col">
     <Header lang={lang} basePath="/privacy-policy" availableLangs={PAGE_LANGS} />
-    <Breadcrumb current={dict.nav.privacy} lang={lang} />
+    <Breadcrumb path={pageHref(lang, '/privacy-policy')} current={dict.nav.privacy} lang={lang} />
 
     <main class="flex-1">
       <section class="px-6 pt-16 pb-20">

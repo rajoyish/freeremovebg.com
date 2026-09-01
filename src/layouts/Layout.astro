@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { SITE, LANGUAGES, DEFAULT_LANG, LANG_BY_CODE } from '../i18n/config';
+import { SITE, LANGUAGES, DEFAULT_LANG, LANG_BY_CODE, hreflangOf, ogLocaleOf } from '../i18n/config';
 import { getDictionary } from '../i18n/dictionaries';
 import AdSense from '../components/AdSense.astro';
 
@@ -20,6 +20,13 @@ interface Props {
 	 * own list — hreflang must never advertise a URL that 404s.
 	 */
 	hreflangLangs?: string[];
+	/**
+	 * Per-language override of `basePath`, keyed by language code, for pages
+	 * whose slug is itself translated (see src/i18n/slugs.ts). Without it
+	 * hreflang would advertise /es/remove-background-from-logo/ — a URL that was
+	 * never generated — instead of /es/quitar-fondo-de-logotipo/.
+	 */
+	basePaths?: Record<string, string>;
 }
 
 const {
@@ -28,6 +35,7 @@ const {
 	keywords = 'free remove bg, remove bg, free ai bg remove, remove bg app image, remove bg free, remove bg from image, remove bg from gif, remove bg ai, remove bg online, remove bg background, remove bg gif, remove bg hd, remove bg high quality, background remove bg, multiple image bg remove, batch bg remove, bg remove ai, remove bg ms word, remove bg ppt, remove bg canva, remove bg web, remove bg offline',
 	lang = DEFAULT_LANG,
 	basePath = '/',
+	basePaths = {},
 	localized = true,
 	hreflangLangs = LANGUAGES.map((l) => l.code),
 	canonical: providedCanonical,
@@ -39,7 +47,7 @@ const {
 // pagePath('en') → '/about/', pagePath('fr') → '/fr/about/'.
 const pagePath = (code: string) => {
   const langPrefix = code === DEFAULT_LANG ? '' : `/${code}`;
-  let p = basePath || '/';
+  let p = basePaths[code] || basePath || '/';
   if (p === '/') {
     return langPrefix ? `${langPrefix}/` : '/';
   }
@@ -61,7 +69,7 @@ const activeLang = LANG_BY_CODE[lang] ?? LANG_BY_CODE[DEFAULT_LANG];
 const hreflangAlternates = localized && hreflangLangs.length > 1
 	? [
 			...hreflangLangs.map((code) => ({
-				hreflang: code,
+				hreflang: hreflangOf(code),
 				href: new URL(pagePath(code), Astro.site).href,
 			})),
 			{
@@ -70,7 +78,14 @@ const hreflangAlternates = localized && hreflangLangs.length > 1
 			},
 		]
 	: [];
-const ogLocale = `${lang}_${activeLang.flag.toUpperCase()}`;
+const ogLocale = ogLocaleOf(lang);
+
+// Open Graph's counterpart to hreflang: the other locales this same page is
+// published in. Scoped to `hreflangLangs` for the same reason — never name a
+// locale whose URL does not exist.
+const ogLocaleAlternates = localized
+	? hreflangLangs.filter((code) => code !== lang).map(ogLocaleOf)
+	: [];
 
 // Structured data speaks the page's language: the description is already the
 // localized meta description, and the feature list reuses the translated footer
@@ -135,6 +150,9 @@ const jsonLd = {
 		<meta property="og:url" content={canonicalHref} />
 		<meta property="og:site_name" content="Free Remove BG" />
 		<meta property="og:locale" content={ogLocale} />
+		{ogLocaleAlternates.map((locale) => (
+			<meta property="og:locale:alternate" content={locale} />
+		))}
 		<meta property="og:image" content={ogImage} />
 		<meta property="og:image:alt" content="Free Remove BG - free AI background remover" />
 

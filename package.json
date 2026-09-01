@@ -23,7 +23,7 @@
     "@huggingface/transformers": "^4.2.0",
     "@imgly/background-removal": "^1.7.0",
     "@tailwindcss/vite": "^4.3.0",
-    "astro": "^7.0.9",
+    "astro": "^7.2.10",
     "flag-icons": "^7.5.0",
     "glightbox": "^3.3.1",
     "img-comparison-slider": "^8.0.7",
@@ -33,7 +33,7 @@
   },
   "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485",
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
+    "@astrojs/check": "^0.9.10",
     "typescript": "^6.0.3",
     "wrangler": "^4.96.0"
   }

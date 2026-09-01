@@ -3,19 +3,28 @@ import UseCasePage from '../../components/UseCasePage.astro';
 import { USE_CASE_SLUGS, type UseCaseSlug } from '../../data/useCases';
 import { USE_CASE_LANGS } from '../../i18n/dictionaries';
 import { DEFAULT_LANG } from '../../i18n/config';
+import { localizedSlug } from '../../i18n/slugs';
 
 // One page per (translated language × use case). USE_CASE_LANGS only contains
 // languages whose locale cache actually holds the use-case copy, so a language
 // that hasn't been translated yet simply has no localized pages rather than
 // duplicating the English prose under a /<lang>/ URL.
+//
+// The `usecase` param is the *localized* slug, so /es/ publishes
+// quitar-fondo-de-firma rather than remove-background-from-signature. The
+// canonical English slug rides along in props — it is the dictionary key, and
+// resolving it here keeps the reverse lookup out of the page body.
 export function getStaticPaths() {
   return USE_CASE_LANGS.filter((lang) => lang !== DEFAULT_LANG).flatMap((lang) =>
-    USE_CASE_SLUGS.map((slug) => ({ params: { lang, usecase: slug } })),
+    USE_CASE_SLUGS.map((slug) => ({
+      params: { lang, usecase: localizedSlug(lang, slug) },
+      props: { slug },
+    })),
   );
 }
 
 const { lang } = Astro.params;
-const slug = Astro.params.usecase as UseCaseSlug;
+const { slug } = Astro.props as { slug: UseCaseSlug };
 ---
 
 <UseCasePage slug={slug} lang={lang} />
