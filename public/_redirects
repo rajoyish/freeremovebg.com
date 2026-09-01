@@ -5,7 +5,11 @@
 # Worker itself cannot serve these: run_worker_first only covers "/" and
 # "/api/count", so an unmatched asset elsewhere hits the 404 page without ever
 # invoking it.
-#
+
+# @astrojs/sitemap writes sitemap-index.xml, but /sitemap.xml is the URL that
+# was submitted to Search Console and linked from robots.txt for months.
+/sitemap.xml /sitemap-index.xml 301
+
 # Localized use-case pages moved from the English slug to a translated one
 # (src/i18n/slugs.ts). These URLs were live and indexed, so each gets a 301 and
 # its ranking follows the page instead of dying at a 404.
