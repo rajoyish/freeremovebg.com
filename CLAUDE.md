@@ -53,11 +53,11 @@ Commits staged changes on a feature branch, pushes, and opens (or reports) a squ
 
 Triggers: "translate the site", "translate locales", "continue translating", "translate <language>", `/translate`.
 
-Translates `src/i18n/locales/*.json` one language at a time in capped batches, so a single session never tries to cover all 49. Claude writes the translations directly; there is no translation API in this project and none should be added (`LOCALIZATION.md` §1). Each run extracts a batch, merges it through a validator that rejects bad keys and drifted HTML, and reports what got finished this session against what remains.
+Translates `src/i18n/locales/*.json` one language at a time. Claude writes the translations directly; there is no translation API in this project and none should be added (`LOCALIZATION.md` §1). Each run extracts all missing strings for the language, merges it through a validator that rejects bad keys and drifted HTML, and reports what got finished this session against what remains.
 
 ```bash
 pnpm i18n:status                          # coverage table, session count, queue
-node scripts/i18n/extract.mjs es --max 40 # write a fill-in batch
+node scripts/i18n/extract.mjs es          # write a fill-in batch for all missing strings
 node scripts/i18n/merge.mjs es            # validate and merge it
 ```
 
