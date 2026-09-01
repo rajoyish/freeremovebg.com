@@ -1,0 +1,89 @@
+---
+// Shared markup for the Contact page. Copy lives in en.json → pages.contact.
+import Layout from '../../layouts/Layout.astro';
+import Header from '../Header.astro';
+import Footer from '../Footer.astro';
+import Breadcrumb from '../Breadcrumb.astro';
+import LinkedText from '../LinkedText.astro';
+import { getDictionary, PAGE_LANGS } from '../../i18n/dictionaries';
+import { DEFAULT_LANG } from '../../i18n/config';
+import { pageHref } from '../../i18n/routes';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = DEFAULT_LANG } = Astro.props;
+const dict = getDictionary(lang);
+const t = dict.pages.contact;
+
+const EMAIL = 'hello@freeremovebg.com';
+const linkClass = 'text-link no-underline hover:underline';
+---
+
+<Layout
+  title={t.title}
+  description={t.description}
+  lang={lang}
+  basePath="/contact"
+  hreflangLangs={PAGE_LANGS}
+>
+  <div class="min-h-screen flex flex-col">
+    <Header lang={lang} basePath="/contact" availableLangs={PAGE_LANGS} />
+    <Breadcrumb current={dict.nav.contact} lang={lang} />
+
+    <main class="flex-1">
+      <section class="px-6 pt-16 pb-20">
+        <div class="max-w-[640px] mx-auto">
+          <h1 class="text-[clamp(2rem,5vw,3rem)] font-semibold tracking-[-1.5px] leading-[1.1] mt-0 mb-4 text-ink">{t.h1}</h1>
+          <p class="text-base text-body leading-[1.8] mt-0 mb-10">
+            {t.intro}
+          </p>
+
+          <form
+            class="flex flex-col gap-5"
+            action={`https://formsubmit.co/${EMAIL}`}
+            method="POST">
+            <div class="flex flex-col gap-2">
+              <label for="name" class="text-sm font-medium text-ink">{t.nameLabel}</label>
+              <input
+                id="name" name="name" type="text" required autocomplete="name"
+                class="w-full px-4 py-2.5 bg-canvas border border-hairline rounded-md text-sm text-ink placeholder:text-mute transition-colors focus:border-ink focus:outline-none"
+                placeholder={t.namePlaceholder} />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="email" class="text-sm font-medium text-ink">{t.emailLabel}</label>
+              <input
+                id="email" name="email" type="email" required autocomplete="email"
+                class="w-full px-4 py-2.5 bg-canvas border border-hairline rounded-md text-sm text-ink placeholder:text-mute transition-colors focus:border-ink focus:outline-none"
+                placeholder="you@example.com" />
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <label for="message" class="text-sm font-medium text-ink">{t.messageLabel}</label>
+              <textarea
+                id="message" name="message" rows="6" required
+                class="w-full px-4 py-2.5 bg-canvas border border-hairline rounded-md text-sm text-ink placeholder:text-mute transition-colors focus:border-ink focus:outline-none resize-y"
+                placeholder={t.messagePlaceholder}></textarea>
+            </div>
+
+            <button
+              type="submit"
+              class="self-start px-6 py-2.5 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85]">
+              {t.submit}
+            </button>
+          </form>
+
+          <p class="text-sm text-mute leading-relaxed mt-10 m-0">
+            <LinkedText text={t.emailNote} href={`mailto:${EMAIL}`} label={EMAIL} linkClass={linkClass} />
+            {' '}
+            <LinkedText text={t.privacyNote} href={pageHref(lang, '/privacy-policy')} label={dict.nav.privacy} linkClass={linkClass} />
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <Footer lang={lang} />
+  </div>
+</Layout>

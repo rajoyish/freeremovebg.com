@@ -1,6 +1,7 @@
 ---
-import { getDictionary, hasUseCaseTranslations } from '../i18n/dictionaries';
+import { getDictionary } from '../i18n/dictionaries';
 import { DEFAULT_LANG } from '../i18n/config';
+import { homeHref, pageHref, useCaseHref } from '../i18n/routes';
 import { USE_CASE_SLUGS } from '../data/useCases';
 
 interface Props {
@@ -12,18 +13,9 @@ const dict = getDictionary(lang);
 const t = dict.footer;
 const nav = dict.nav;
 
-const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
-// trailingSlash: 'always' — non-root links must end in '/' or they 404 in dev
-// and cost a 301 redirect in production.
-const href = (p: string) => {
-  if (p === '/') return prefix === '' ? '/' : `${prefix}/`;
-  return p.endsWith('/') ? p : `${p}/`;
-};
-
-// Use-case pages exist only in languages whose copy is translated; everyone
-// else links to the English original rather than a URL that doesn't exist.
-const useCasePrefix = hasUseCaseTranslations(lang) ? prefix : '';
-const useCaseHref = (slug: string) => `${useCasePrefix}/${slug}/`;
+// Every link keeps the language prefix where that language has the page, and
+// falls back to the English original where it doesn't.
+const href = (p: string) => (p === '/' ? homeHref(lang) : pageHref(lang, p));
 ---
 
 <footer class="bg-[#0a0a0a] border-t border-[#2a2a2a] mt-auto">
@@ -53,7 +45,7 @@ const useCaseHref = (slug: string) => `${useCasePrefix}/${slug}/`;
         <ul class="space-y-2 text-sm">
           {USE_CASE_SLUGS.map((slug) => (
             <li>
-              <a href={useCaseHref(slug)} class="text-[#a3a3a3] no-underline hover:text-[#ededed] transition-colors">{dict.useCases.items[slug].label}</a>
+              <a href={useCaseHref(lang, slug)} class="text-[#a3a3a3] no-underline hover:text-[#ededed] transition-colors">{dict.useCases.items[slug].label}</a>
             </li>
           ))}
         </ul>

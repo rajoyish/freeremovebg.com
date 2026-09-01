@@ -17,7 +17,7 @@ Work through a small budget, report progress, and stop.
 Unless the user names a different number:
 
 - **2 languages per invocation.** Finish them, report, stop.
-- **40 strings per batch.** A language is ~108 strings, so about 3 batches.
+- **40 strings per batch.** A language is ~300 strings, so about 8 batches.
 
 If the user names languages (`/translate hi ne`) do exactly those. If they name
 a count (`/translate 5`) do that many from the queue. Never exceed the budget on
@@ -68,6 +68,10 @@ Read the batch file, then rewrite it with every value filled in. Rules:
   `<p>`, `<strong>` and `&rarr;`. Translate the text around the markup; the tag
   sequence must come out identical. The merge validator rejects the batch
   otherwise.
+- **Keep every `{link}` placeholder.** A few sentences on the contact, privacy
+  and terms pages carry one; it marks where an inline link goes. Move it to
+  wherever the sentence needs it, but do not drop it — the validator rejects the
+  batch if it disappears.
 - **`FreeRemoveBG` never translates.** Neither do format names (PNG, JPG, GIF,
   WebP, HD) or the slug words inside URLs.
 - **Translate for the market, not the dictionary.** This is landing-page copy
@@ -125,6 +129,17 @@ expected. Do not build after every language; once per invocation is enough.
 
 ## Coverage gating, and why a language is either 6 pages or 0
 
+The same all-or-nothing rule applies twice, over two string sets:
+
+| Gate | Strings | Unlocks |
+|---|---|---|
+| `hasUseCaseTranslations` / `USE_CASE_LANGS` | everything under `en.useCases` | `/<lang>/<slug>/` × 6 |
+| `hasPageTranslations` / `PAGE_LANGS` | everything under `en.pages` | `/<lang>/about/`, `/contact/`, `/privacy-policy/`, `/terms/` |
+
+Until a language clears a gate, its header and footer link to the English
+originals for those pages, so nothing 404s.
+
+
 `hasUseCaseTranslations()` in `src/i18n/dictionaries.ts` requires **every**
 string under `en.useCases` before a language gets its `/<lang>/<slug>/` routes.
 This is deliberate: `getDictionary` falls back to English on a miss, so
@@ -145,7 +160,7 @@ End every invocation with this, filled in from `status.mjs`:
 
 ```
 Translated this session
-  <code> <Language>   108 strings   complete   +6 pages
+  <code> <Language>   112 strings   complete   +6 pages
   <code> <Language>    40 strings   57% -> 71%
 
 Remaining
@@ -154,6 +169,7 @@ Remaining
   remaining      N
   strings left   N
   localized use-case pages live   N
+  localized content pages live    N
 
 Next up  <codes from the queue>
 ```

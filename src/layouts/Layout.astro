@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { SITE, LANGUAGES, DEFAULT_LANG, LANG_BY_CODE } from '../i18n/config';
+import { getDictionary } from '../i18n/dictionaries';
 import AdSense from '../components/AdSense.astro';
 
 interface Props {
@@ -71,12 +72,16 @@ const hreflangAlternates = localized && hreflangLangs.length > 1
 	: [];
 const ogLocale = `${lang}_${activeLang.flag.toUpperCase()}`;
 
+// Structured data speaks the page's language: the description is already the
+// localized meta description, and the feature list reuses the translated footer
+// copy rather than a second, English-only list.
 const jsonLd = {
 	'@context': 'https://schema.org',
 	'@type': 'WebApplication',
 	name: 'Free Remove BG',
-	url: SITE,
+	url: new URL(pagePath(lang), Astro.site).href,
 	description,
+	inLanguage: lang,
 	applicationCategory: 'MultimediaApplication',
 	operatingSystem: 'Any (web browser)',
 	browserRequirements: 'Requires a modern web browser with JavaScript.',
@@ -85,14 +90,7 @@ const jsonLd = {
 		price: '0',
 		priceCurrency: 'USD',
 	},
-	featureList: [
-		'AI background removal',
-		'Remove bg from image, GIF, JPG, PNG and WebP',
-		'Batch / multiple image background removal',
-		'HD transparent PNG downloads',
-		'100% private, on-device processing',
-		'Works offline after first load',
-	],
+	featureList: getDictionary(lang).footer.features,
 };
 ---
 

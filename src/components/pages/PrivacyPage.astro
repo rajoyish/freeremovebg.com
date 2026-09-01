@@ -1,0 +1,79 @@
+---
+// Shared markup for the Privacy Policy. Copy lives in en.json → pages.privacy.
+import Layout from '../../layouts/Layout.astro';
+import Header from '../Header.astro';
+import Footer from '../Footer.astro';
+import Breadcrumb from '../Breadcrumb.astro';
+import LinkedText from '../LinkedText.astro';
+import { getDictionary, PAGE_LANGS } from '../../i18n/dictionaries';
+import { DEFAULT_LANG } from '../../i18n/config';
+import { pageHref } from '../../i18n/routes';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = DEFAULT_LANG } = Astro.props;
+const dict = getDictionary(lang);
+const t = dict.pages.privacy;
+
+// One source of truth for the date; rendered in the reader's language.
+const UPDATED = new Date('2026-06-02T00:00:00Z');
+const updated = new Intl.DateTimeFormat(lang, {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+}).format(UPDATED);
+
+const prose = '[&_h2]:text-[1.3rem] [&_h2]:font-semibold [&_h2]:text-ink [&_h2]:mt-10 [&_h2]:mb-4 [&_p]:text-base [&_p]:text-body [&_p]:leading-[1.8] [&_p]:m-0 [&_p]:mb-4 [&_ul]:text-base [&_ul]:text-body [&_ul]:leading-[1.8] [&_ul]:my-4 [&_ul]:pl-6 [&_li]:mb-2 [&_ul]:list-disc [&_a]:text-link [&_a]:no-underline hover:[&_a]:underline';
+---
+
+<Layout
+  title={t.title}
+  description={t.description}
+  lang={lang}
+  basePath="/privacy-policy"
+  hreflangLangs={PAGE_LANGS}
+>
+  <div class="min-h-screen flex flex-col">
+    <Header lang={lang} basePath="/privacy-policy" availableLangs={PAGE_LANGS} />
+    <Breadcrumb current={dict.nav.privacy} lang={lang} />
+
+    <main class="flex-1">
+      <section class="px-6 pt-16 pb-20">
+        <article class="max-w-[760px] mx-auto">
+          <h1 class="text-[clamp(2rem,5vw,3rem)] font-semibold tracking-[-1.5px] leading-[1.1] mt-0 mb-3 text-ink">{t.h1}</h1>
+          <p class="text-sm text-mute m-0 mb-10">{t.updatedLabel} {updated}</p>
+
+          <div class={prose}>
+            <p>{t.intro}</p>
+
+            <h2>{t.imagesHeading}</h2>
+            <p>{t.imagesBody}</p>
+
+            <h2>{t.collectHeading}</h2>
+            <p>{t.collectBody}</p>
+
+            <h2>{t.analyticsHeading}</h2>
+            <p>{t.analyticsBody}</p>
+
+            <h2>{t.thirdPartyHeading}</h2>
+            <p>{t.thirdPartyBody}</p>
+
+            <h2>{t.childrenHeading}</h2>
+            <p>{t.childrenBody}</p>
+
+            <h2>{t.changesHeading}</h2>
+            <p>{t.changesBody}</p>
+
+            <h2>{t.contactHeading}</h2>
+            <p><LinkedText text={t.contactBody} href={pageHref(lang, '/contact')} label={t.contactLink} /></p>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <Footer lang={lang} />
+  </div>
+</Layout>

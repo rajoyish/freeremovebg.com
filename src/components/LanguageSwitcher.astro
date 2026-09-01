@@ -12,9 +12,20 @@ interface Props {
   lang: string;
   pathname?: string;
   labels: { label: string; searchPlaceholder: string; noResults: string; suggested?: string };
+  /**
+   * Languages this page exists in. Picking a language outside the list lands on
+   * that language's home page instead of a URL that was never generated.
+   * Defaults to every language (the home page).
+   */
+  availableLangs?: string[];
 }
 
-const { lang, pathname = "/", labels } = Astro.props;
+const {
+  lang,
+  pathname = "/",
+  labels,
+  availableLangs = LANGUAGES.map((l) => l.code),
+} = Astro.props;
 const active = LANG_BY_CODE[lang] ?? LANG_BY_CODE[DEFAULT_LANG];
 
 const suggestedLabel = labels.suggested ?? "Suggested for your region";
@@ -47,6 +58,7 @@ const catalogue = LANGUAGES.map((l) => ({
   data-suggested-label={suggestedLabel}
   data-region-map={JSON.stringify(REGION_MAP)}
   data-catalogue={JSON.stringify(catalogue)}
+  data-available-langs={JSON.stringify(availableLangs)}
 >
   <button
     type="button"
@@ -146,6 +158,7 @@ const catalogue = LANGUAGES.map((l) => ({
     const activeLang = root.dataset.activeLang || defaultLang;
     const suggestedLabel = root.dataset.suggestedLabel || "Suggested for your region";
     const regionMap: Record<string, string> = JSON.parse(root.dataset.regionMap || "{}");
+    const availableLangs: string[] = JSON.parse(root.dataset.availableLangs || "[]");
 
     const byCode = (code: string): LangEntry | undefined =>
       catalogue.find((l) => l.code === code);
@@ -171,7 +184,12 @@ const catalogue = LANGUAGES.map((l) => ({
     }
 
     function routeFor(code: string): string {
-      const clean = basePath === "/" ? "" : basePath.replace(/^\/+/, "");
+      // This page may not exist in the chosen language — send those visitors to
+      // its home page rather than a 404.
+      const clean =
+        basePath === "/" || !availableLangs.includes(code)
+          ? ""
+          : basePath.replace(/^\/+/, "");
       return code === defaultLang ? `/${clean}` : `/${code}/${clean}`;
     }
 

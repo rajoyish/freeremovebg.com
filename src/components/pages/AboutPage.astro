@@ -1,0 +1,88 @@
+---
+// Shared markup for the About page, dictionary-driven so the English route
+// (/about) and the localized route (/[lang]/about) render from one source.
+// Copy lives in en.json → pages.about.
+import Layout from '../../layouts/Layout.astro';
+import Header from '../Header.astro';
+import Footer from '../Footer.astro';
+import Breadcrumb from '../Breadcrumb.astro';
+import { getDictionary, PAGE_LANGS } from '../../i18n/dictionaries';
+import { DEFAULT_LANG } from '../../i18n/config';
+import { homeHref } from '../../i18n/routes';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = DEFAULT_LANG } = Astro.props;
+const dict = getDictionary(lang);
+const t = dict.pages.about;
+---
+
+<Layout
+  title={t.title}
+  description={t.description}
+  lang={lang}
+  basePath="/about"
+  hreflangLangs={PAGE_LANGS}
+>
+  <div class="min-h-screen flex flex-col">
+    <Header lang={lang} basePath="/about" availableLangs={PAGE_LANGS} />
+    <Breadcrumb current={dict.nav.about} lang={lang} />
+
+    <main class="flex-1">
+
+      <section class="px-6 pt-16 pb-8 text-center">
+        <div class="max-w-[760px] mx-auto">
+          <h1 class="text-[clamp(2rem,5vw,3.25rem)] font-semibold tracking-[-2px] leading-[1.1] mt-0 mb-5 text-ink">
+            {t.h1}
+          </h1>
+          <p class="text-lg text-body leading-[1.7] mt-0 mb-0 max-w-[600px] mx-auto">
+            {t.intro}
+          </p>
+        </div>
+      </section>
+
+      <section class="px-6 py-16">
+        <article class="max-w-[760px] mx-auto">
+          {t.sections.map((section, i) => (
+            <div class:list={['reveal', i > 0 && 'mt-12']} data-reveal>
+              <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-5">{section.heading}</h2>
+              <p class="text-base text-body leading-[1.8] m-0">{section.body}</p>
+            </div>
+          ))}
+
+          <div class="reveal mt-14 text-center" data-reveal>
+            <a href={homeHref(lang)}
+              class="inline-flex items-center gap-2 px-6 py-3 bg-ink text-on-primary rounded-pill text-sm font-medium no-underline transition-opacity hover:opacity-[0.85]">
+              {t.cta}
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+        </article>
+      </section>
+
+    </main>
+
+    <Footer lang={lang} />
+  </div>
+</Layout>
+
+<script>
+  const revealEls = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+    revealEls.forEach(el => el.classList.add('is-visible'));
+  } else {
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+    revealEls.forEach(el => observer.observe(el));
+  }
+</script>

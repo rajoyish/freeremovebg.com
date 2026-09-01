@@ -1,24 +1,28 @@
 ---
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import { getDictionary } from '../i18n/dictionaries';
-import { DEFAULT_LANG } from '../i18n/config';
+import { DEFAULT_LANG, LANGUAGES } from '../i18n/config';
+import { homeHref, pageHref } from '../i18n/routes';
 
 interface Props {
   lang?: string;
   basePath?: string;
+  /** Languages the current page exists in; passed through to the switcher. */
+  availableLangs?: string[];
 }
 
-const { lang = DEFAULT_LANG, basePath = '/' } = Astro.props;
+const {
+  lang = DEFAULT_LANG,
+  basePath = '/',
+  availableLangs = LANGUAGES.map((l) => l.code),
+} = Astro.props;
 const dict = getDictionary(lang);
 const t = dict.nav;
 
-const prefix = lang === DEFAULT_LANG ? '' : `/${lang}`;
-// trailingSlash: 'always' — non-root links must end in '/' or they 404 in dev
-// and cost a 301 redirect in production.
-const href = (p: string) => {
-  if (p === '/') return prefix === '' ? '/' : `${prefix}/`;
-  return p.endsWith('/') ? p : `${p}/`;
-};
+// Nav links keep the visitor in their language wherever that language has the
+// page, so a chosen language survives navigation instead of resetting to
+// English on the first click.
+const href = (p: string) => (p === '/' ? homeHref(lang) : pageHref(lang, p));
 
 const currentPath = (basePath.replace(/\/$/, '') || '/');
 
@@ -35,7 +39,7 @@ function isActive(path: string) {
   return currentPath === path || currentPath === path + '/';
 }
 
-const switcherPath = href(currentPath);
+const switcherPath = currentPath === '/' ? '/' : `${currentPath}/`;
 ---
 
 <header class="sticky top-0 z-50 border-b border-hairline bg-canvas/80 backdrop-blur-sm">
@@ -66,6 +70,7 @@ const switcherPath = href(currentPath);
           lang={lang}
           pathname={switcherPath}
           labels={dict.switcher}
+          availableLangs={availableLangs}
         />
 
         <button

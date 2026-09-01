@@ -6,6 +6,9 @@ import { dirname, resolve } from "node:path";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 
+// Must match DEFAULT_LANG and LANG_COOKIE in src/i18n/config.ts. Both are
+// emitted into worker/region-map.js so the Worker and the browser agree on the
+// cookie the language switcher writes.
 const DEFAULT_LANG = "en";
 const LANG_COOKIE = "lang";
 

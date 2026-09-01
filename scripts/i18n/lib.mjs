@@ -46,6 +46,9 @@ export const ALL_STRINGS = [...collectStrings(EN)];
 export const USE_CASE_STRINGS = [...collectStrings(EN.useCases ?? {})];
 const USE_CASE_SET = new Set(USE_CASE_STRINGS);
 export const CORE_STRINGS = ALL_STRINGS.filter((s) => !USE_CASE_SET.has(s));
+// about / contact / privacy-policy / terms — gated as one set, like the
+// use-case copy (see LOCALIZATION.md §5). These are part of CORE_STRINGS.
+export const PAGE_STRINGS = [...collectStrings(EN.pages ?? {})];
 
 export const localePath = (code) => path.join(LOCALES_DIR, `${code}.json`);
 
@@ -68,6 +71,10 @@ export function missingFor(code, cache = loadLocale(code)) {
 export const hasUseCasePages = (code, cache = loadLocale(code)) =>
   code === DEFAULT_LANG || USE_CASE_STRINGS.every((s) => isFilled(cache, s));
 
+/** True when `code` has every `pages` string, which unlocks about/contact/… */
+export const hasContentPages = (code, cache = loadLocale(code)) =>
+  code === DEFAULT_LANG || PAGE_STRINGS.every((s) => isFilled(cache, s));
+
 export function statusFor(code) {
   const cache = loadLocale(code);
   const missing = missingFor(code, cache);
@@ -82,6 +89,7 @@ export function statusFor(code) {
     percent: Math.round((done / total) * 100),
     complete: missing.core.length === 0 && missing.useCases.length === 0,
     hasPages: hasUseCasePages(code, cache),
+    hasContentPages: hasContentPages(code, cache),
   };
 }
 
