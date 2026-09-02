@@ -104,6 +104,22 @@ export const USE_CASE_ROUTES: Record<string, UseCaseRoutes> = {
     "remove-background-from-logo": "logo-background-hataye",
     "transparent-png-maker": "transparent-png-banaye",
   },
+  ko: {
+    "remove-background-from-product-photos": "jepeum-sajin-baegyeong-jegeo",
+    "remove-background-from-signature": "seomyeong-baegyeong-jegeo",
+    "remove-background-from-profile-picture": "peuropil-sajin-baegyeong-jegeo",
+    "batch-background-removal": "ilgwal-baegyeong-jegeo",
+    "remove-background-from-logo": "rogo-baegyeong-jegeo",
+    "transparent-png-maker": "tumyeong-png-meikeo",
+  },
+  tr: {
+    "remove-background-from-product-photos": "urun-fotografi-arka-plan-silme",
+    "remove-background-from-signature": "imzadan-arka-plan-silme",
+    "remove-background-from-profile-picture": "profil-resmi-arka-plan-silme",
+    "batch-background-removal": "toplu-arka-plan-kaldirma",
+    "remove-background-from-logo": "logodan-arka-plan-silme",
+    "transparent-png-maker": "seffaf-png-olusturucu",
+  },
 };
 
 /** The slug `lang` publishes for a use case. English slug if untranslated. */
