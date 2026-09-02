@@ -88,6 +88,22 @@ export const USE_CASE_ROUTES: Record<string, UseCaseRoutes> = {
     "remove-background-from-logo": "udalit-fon-s-logotipa",
     "transparent-png-maker": "sozdat-prozrachnyy-png",
   },
+  de: {
+    "remove-background-from-product-photos": "hintergrund-von-produktfotos-entfernen",
+    "remove-background-from-signature": "hintergrund-von-unterschrift-entfernen",
+    "remove-background-from-profile-picture": "hintergrund-von-profilbild-entfernen",
+    "batch-background-removal": "stapelverarbeitung-hintergrund-entfernen",
+    "remove-background-from-logo": "hintergrund-von-logo-entfernen",
+    "transparent-png-maker": "transparentes-png-erstellen",
+  },
+  hi: {
+    "remove-background-from-product-photos": "product-photo-background-hataye",
+    "remove-background-from-signature": "signature-background-hataye",
+    "remove-background-from-profile-picture": "profile-photo-background-hataye",
+    "batch-background-removal": "ek-saath-background-hataye",
+    "remove-background-from-logo": "logo-background-hataye",
+    "transparent-png-maker": "transparent-png-banaye",
+  },
 };
 
 /** The slug `lang` publishes for a use case. English slug if untranslated. */
