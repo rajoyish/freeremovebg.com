@@ -120,6 +120,38 @@ export const USE_CASE_ROUTES: Record<string, UseCaseRoutes> = {
     "remove-background-from-logo": "logodan-arka-plan-silme",
     "transparent-png-maker": "seffaf-png-olusturucu",
   },
+  it: {
+    "remove-background-from-product-photos": "rimuovi-sfondo-foto-prodotti",
+    "remove-background-from-signature": "rimuovi-sfondo-firma",
+    "remove-background-from-profile-picture": "rimuovi-sfondo-foto-profilo",
+    "batch-background-removal": "rimozione-sfondo-batch",
+    "remove-background-from-logo": "rimuovi-sfondo-logo",
+    "transparent-png-maker": "creatore-png-trasparente",
+  },
+  vi: {
+    "remove-background-from-product-photos": "xoa-phong-nen-anh-san-pham",
+    "remove-background-from-signature": "xoa-phong-nen-chu-ky",
+    "remove-background-from-profile-picture": "xoa-phong-nen-anh-ho-so",
+    "batch-background-removal": "xoa-phong-nen-hang-loat",
+    "remove-background-from-logo": "xoa-phong-nen-logo",
+    "transparent-png-maker": "tao-png-trong-suot",
+  },
+  pl: {
+    "remove-background-from-product-photos": "usuwanie-tla-ze-zdjec-produktow",
+    "remove-background-from-signature": "usuwanie-tla-z-podpisu",
+    "remove-background-from-profile-picture": "usuwanie-tla-ze-zdjecia-profilowego",
+    "batch-background-removal": "grupowe-usuwanie-tla",
+    "remove-background-from-logo": "usuwanie-tla-z-logo",
+    "transparent-png-maker": "generator-przezroczystych-png",
+  },
+  th: {
+    "remove-background-from-product-photos": "lop-phuen-lang-sinkha",
+    "remove-background-from-signature": "lop-phuen-lang-laisen",
+    "remove-background-from-profile-picture": "lop-phuen-lang-rup-profile",
+    "batch-background-removal": "lop-phuen-lang-lai-rup",
+    "remove-background-from-logo": "lop-phuen-lang-logo",
+    "transparent-png-maker": "tham-phuen-lang-sai",
+  },
 };
 
 /** The slug `lang` publishes for a use case. English slug if untranslated. */
