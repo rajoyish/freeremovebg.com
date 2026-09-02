@@ -169,6 +169,26 @@
       "done": 308,
       "total": 308,
       "complete": true
+    },
+    {
+      "code": "ja",
+      "session": "20260902T032654Z",
+      "at": "2026-09-02T03:35:20.765Z",
+      "added": 178,
+      "updated": 0,
+      "done": 308,
+      "total": 308,
+      "complete": true
+    },
+    {
+      "code": "ru",
+      "session": "20260902T032654Z",
+      "at": "2026-09-02T03:46:11.570Z",
+      "added": 178,
+      "updated": 0,
+      "done": 308,
+      "total": 308,
+      "complete": true
     }
   ]
 }
