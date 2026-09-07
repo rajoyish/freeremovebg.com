@@ -168,6 +168,38 @@ export const USE_CASE_ROUTES: Record<string, UseCaseRoutes> = {
     "remove-background-from-logo": "hazf-pas-zamineh-logo",
     "transparent-png-maker": "sakht-aks-bedoon-pas-zamineh",
   },
+  uk: {
+    "remove-background-from-product-photos": "vydalyty-fon-foto-tovariv",
+    "remove-background-from-signature": "vydalyty-fon-pidpysu",
+    "remove-background-from-profile-picture": "vydalyty-fon-foto-profilyu",
+    "batch-background-removal": "paketne-vydalennya-fonu",
+    "remove-background-from-logo": "vydalyty-fon-logotypa",
+    "transparent-png-maker": "stvoryuvach-prozorykh-png",
+  },
+  tl: {
+    "remove-background-from-product-photos": "alisin-background-larawan-produkto",
+    "remove-background-from-signature": "alisin-background-lagda",
+    "remove-background-from-profile-picture": "alisin-background-profile-picture",
+    "batch-background-removal": "maramihang-pag-alis-background",
+    "remove-background-from-logo": "alisin-background-logo",
+    "transparent-png-maker": "gumagawa-transparent-png",
+  },
+  ro: {
+    "remove-background-from-product-photos": "eliminare-fundal-fotografii-produs",
+    "remove-background-from-signature": "eliminare-fundal-semnatura",
+    "remove-background-from-profile-picture": "eliminare-fundal-poza-profil",
+    "batch-background-removal": "eliminare-fundal-in-lot",
+    "remove-background-from-logo": "eliminare-fundal-logo",
+    "transparent-png-maker": "creator-png-transparent",
+  },
+  el: {
+    "remove-background-from-product-photos": "afairesi-fontou-proionton",
+    "remove-background-from-signature": "afairesi-fontou-ypografis",
+    "remove-background-from-profile-picture": "afairesi-fontou-profil",
+    "batch-background-removal": "omadiki-afairesi-fontou",
+    "remove-background-from-logo": "afairesi-fontou-logotypou",
+    "transparent-png-maker": "dimiourgos-diafanous-png",
+  },
 };
 
 /** The slug `lang` publishes for a use case. English slug if untranslated. */
