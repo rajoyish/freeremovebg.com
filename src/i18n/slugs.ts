@@ -152,6 +152,22 @@ export const USE_CASE_ROUTES: Record<string, UseCaseRoutes> = {
     "remove-background-from-logo": "lop-phuen-lang-logo",
     "transparent-png-maker": "tham-phuen-lang-sai",
   },
+  nl: {
+    "remove-background-from-product-photos": "achtergrond-verwijderen-productfoto",
+    "remove-background-from-signature": "achtergrond-verwijderen-handtekening",
+    "remove-background-from-profile-picture": "achtergrond-verwijderen-profielfoto",
+    "batch-background-removal": "achtergronden-verwijderen-batch",
+    "remove-background-from-logo": "achtergrond-verwijderen-logo",
+    "transparent-png-maker": "transparante-png-maken",
+  },
+  fa: {
+    "remove-background-from-product-photos": "hazf-pas-zamineh-aks-mahsool",
+    "remove-background-from-signature": "hazf-pas-zamineh-emza",
+    "remove-background-from-profile-picture": "hazf-pas-zamineh-aks-profile",
+    "batch-background-removal": "hazf-pas-zamineh-goroohi",
+    "remove-background-from-logo": "hazf-pas-zamineh-logo",
+    "transparent-png-maker": "sakht-aks-bedoon-pas-zamineh",
+  },
 };
 
 /** The slug `lang` publishes for a use case. English slug if untranslated. */
