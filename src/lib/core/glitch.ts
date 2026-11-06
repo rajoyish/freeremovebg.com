@@ -9,7 +9,7 @@ export async function isGlitched(blob: Blob): Promise<boolean> {
     const h = img.naturalHeight;
     if (w < 48 || h < 48) return false;
 
-    const scale = Math.min(1, 256 / w);
+    const scale = Math.min(1, 256 / Math.max(w, h));
     const gw = Math.max(1, Math.round(w * scale));
     const gh = Math.max(1, Math.round(h * scale));
     canvas = document.createElement('canvas');

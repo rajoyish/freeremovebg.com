@@ -1,3 +1,5 @@
+import { needsLowMemoryProcessing } from '../core/processingPolicy';
+
 export type ThumbStatus = 'queued' | 'analysing' | 'processing' | 'done' | 'error';
 
 export interface ToolI18n {
@@ -50,13 +52,17 @@ export class ThumbsView {
     wrap.className = 'relative aspect-square rounded-md overflow-hidden bg-canvas-soft-2';
 
     const img = document.createElement('img');
-    const objUrl = URL.createObjectURL(item.file);
-    img.src = objUrl;
+    // Mobile batches wait for the queue's bounded preview. Decoding all camera
+    // originals here can exhaust memory before the first inference finishes.
+    if (!needsLowMemoryProcessing()) {
+      const objUrl = URL.createObjectURL(item.file);
+      const revokeThumb = () => URL.revokeObjectURL(objUrl);
+      img.onload = revokeThumb;
+      img.onerror = revokeThumb;
+      img.src = objUrl;
+    }
     img.alt = item.file.name;
     img.className = 'w-full h-full object-cover block';
-    const revokeThumb = () => URL.revokeObjectURL(objUrl);
-    img.onload = revokeThumb;
-    img.onerror = revokeThumb;
 
     const overlay = document.createElement('div');
     overlay.id = `thumb-overlay-${item.id}`;
@@ -86,6 +92,16 @@ export class ThumbsView {
     wrap.appendChild(overlay);
     wrap.appendChild(removeBtn);
     return wrap;
+  }
+
+  setPreview(id: string, url: string) {
+    if (!needsLowMemoryProcessing()) return;
+    const img = document.getElementById(`thumb-${id}`)?.querySelector('img');
+    if (img) {
+      img.onload = null;
+      img.onerror = null;
+      img.src = url;
+    }
   }
 
   setStatus(id: string, status: ThumbStatus) {

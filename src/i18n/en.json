@@ -34,6 +34,7 @@
     "hintAuto": "Analyses your image and automatically selects the best engine for the result",
     "hintPortrait": "Optimised for sharp edges on hair, skin and fine detail in people",
     "hintGeneral": "Optimised for logos, products, objects, animals and flat graphics",
+    "mobileHint": "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.",
     "dropTitle": "Drop images here or click to upload",
     "dropSubtitle": "Supports JPG, PNG, WebP, GIF, BMP, AVIF and more · Multiple files supported",
     "browse": "Browse Files",

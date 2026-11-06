@@ -7,13 +7,16 @@ interface ProgressViewElements {
 }
 
 export class ProgressView {
+  private hideTimer: ReturnType<typeof setTimeout> | undefined;
   constructor(private els: ProgressViewElements) {}
 
   show() {
+    clearTimeout(this.hideTimer);
     this.els.progressState.classList.remove('hidden');
   }
 
   hide() {
+    clearTimeout(this.hideTimer);
     this.els.progressState.classList.add('hidden');
   }
 
@@ -26,6 +29,7 @@ export class ProgressView {
   }
 
   scheduleHide(delayMs = 2000) {
-    setTimeout(() => this.hide(), delayMs);
+    clearTimeout(this.hideTimer);
+    this.hideTimer = setTimeout(() => this.hide(), delayMs);
   }
 }

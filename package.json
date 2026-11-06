@@ -6,6 +6,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
+    "test": "node --experimental-vm-modules --test tests/*.test.mjs worker/*.test.mjs",
     "dev": "astro dev",
     "prebuild": "node scripts/gen-region-map.mjs",
     "build": "astro build",
