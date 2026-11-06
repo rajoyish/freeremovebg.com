@@ -421,5 +421,8 @@
   "Better page speed scores": "Кращі оцінки швидкості сторінок",
   "Freeing up storage space": "Звільнення місця на диску",
   "Images Converted Worldwide": "Зображень конвертовано у всьому світі",
-  "Images Optimized Worldwide": "Зображень стиснено у всьому світі"
+  "Images Optimized Worldwide": "Зображень стиснено у всьому світі",
+  "Convert": "Конвертувати",
+  "Optimize": "Оптимізувати",
+  "Optimize all": "Оптимізувати всі"
 }

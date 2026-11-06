@@ -421,5 +421,8 @@
   "Better page speed scores": "Καλύτερες βαθμολογίες ταχύτητας",
   "Freeing up storage space": "Ελευθέρωση αποθηκευτικού χώρου",
   "Images Converted Worldwide": "Εικόνες που μετατράπηκαν παγκοσμίως",
-  "Images Optimized Worldwide": "Εικόνες που συμπιέστηκαν παγκοσμίως"
+  "Images Optimized Worldwide": "Εικόνες που συμπιέστηκαν παγκοσμίως",
+  "Convert": "Μετατροπή",
+  "Optimize": "Βελτιστοποίηση",
+  "Optimize all": "Βελτιστοποίηση όλων"
 }

@@ -421,5 +421,8 @@
   "Better page speed scores": "Paremad lehe kiiruse tulemused",
   "Freeing up storage space": "Salvestusruumi vabastamine",
   "Images Converted Worldwide": "Teisendatud pilte üle maailma",
-  "Images Optimized Worldwide": "Optimeeritud pilte üle maailma"
+  "Images Optimized Worldwide": "Optimeeritud pilte üle maailma",
+  "Convert": "Teisenda",
+  "Optimize": "Optimeeri",
+  "Optimize all": "Optimeeri kõik"
 }

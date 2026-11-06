@@ -421,5 +421,8 @@
   "Better page speed scores": "더 나은 페이지 속도 점수",
   "Freeing up storage space": "저장 공간 확보",
   "Images Converted Worldwide": "전 세계에서 변환된 이미지",
-  "Images Optimized Worldwide": "전 세계에서 압축된 이미지"
+  "Images Optimized Worldwide": "전 세계에서 압축된 이미지",
+  "Convert": "변환",
+  "Optimize": "최적화",
+  "Optimize all": "모두 최적화"
 }

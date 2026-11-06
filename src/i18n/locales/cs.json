@@ -421,5 +421,8 @@
   "Better page speed scores": "Lepší skóre rychlosti stránek",
   "Freeing up storage space": "Uvolnění místa v úložišti",
   "Images Converted Worldwide": "Převedeno obrázků po celém světě",
-  "Images Optimized Worldwide": "Optimalizováno obrázků po celém světě"
+  "Images Optimized Worldwide": "Optimalizováno obrázků po celém světě",
+  "Convert": "Převést",
+  "Optimize": "Optimalizovat",
+  "Optimize all": "Optimalizovat vše"
 }

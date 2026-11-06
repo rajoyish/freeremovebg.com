@@ -421,5 +421,8 @@
   "Better page speed scores": "Paremmat sivunopeuspisteet",
   "Freeing up storage space": "Tallennustilan vapauttaminen",
   "Images Converted Worldwide": "Kuvia muunnettu maailmanlaajuisesti",
-  "Images Optimized Worldwide": "Kuvia optimoitu maailmanlaajuisesti"
+  "Images Optimized Worldwide": "Kuvia optimoitu maailmanlaajuisesti",
+  "Convert": "Muunna",
+  "Optimize": "Optimoi",
+  "Optimize all": "Optimoi kaikki"
 }
