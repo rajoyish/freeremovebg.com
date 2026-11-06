@@ -13,3 +13,12 @@ approval_mode = "approve"
 
 [mcp_servers.playwright.tools.browser_run_code_unsafe]
 approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_resize]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_evaluate]
+approval_mode = "approve"
+
+[mcp_servers.playwright.tools.browser_click]
+approval_mode = "approve"
