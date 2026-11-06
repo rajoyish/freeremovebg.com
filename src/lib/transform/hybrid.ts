@@ -6,7 +6,7 @@
 // next batch does not pay for a failing upload per image. Failures are never
 // shown to the visitor: they just get the result from the local engine.
 
-import { EdgeError, transformAtEdge, type EdgeOptions } from './edge';
+import { EdgeError, fetchEdgeStatus, transformAtEdge, type EdgeOptions, type EdgeStatus } from './edge';
 
 export { EdgeError };
 import { encodeLocally, probeDimensions } from './local';
@@ -30,6 +30,7 @@ interface Deps {
   edge: (file: File, opts: EdgeOptions) => Promise<Blob>;
   local: (file: File, opts: HybridOptions) => Promise<Blob>;
   probe: (file: Blob) => Promise<Size>;
+  status: () => Promise<EdgeStatus>;
   storage: Pick<Storage, 'getItem' | 'setItem'> | null;
   now: () => number;
 }
@@ -70,12 +71,14 @@ export function edgeEligible(file: File, format: OutputFormat, size: Size): bool
 export class HybridProcessor {
   private deps: Deps;
   private edgeOff = false;
+  private statusCheck: Promise<void> | null = null;
 
   constructor(deps: Partial<Deps> = {}) {
     this.deps = {
       edge: (file, opts) => transformAtEdge(file, opts),
       local: encodeLocally,
       probe: probeDimensions,
+      status: () => fetchEdgeStatus(),
       storage: sessionStore(),
       now: Date.now,
       ...deps,
@@ -98,7 +101,26 @@ export class HybridProcessor {
     try { this.deps.storage?.setItem(OFF_KEY, String(this.deps.now() + OFF_FOR_MS)); } catch {}
   }
 
+  /**
+   * Ask the worker once whether this month's free-tier budget is still open
+   * (worker/edgeBudget.js). If it is not, every image goes straight to the
+   * device and nothing is uploaded. Call it before planning a batch so the
+   * concurrency matches the engine that will actually run.
+   */
+  ready(): Promise<void> {
+    if (this.edgeOff) return Promise.resolve();
+    return (this.statusCheck ??= this.deps.status().then(
+      (status) => {
+        if (!status.available) {
+          this.disableEdge(status.resumeAt ? `monthly budget used, resumes ${status.resumeAt}` : 'edge unavailable');
+        }
+      },
+      () => this.disableEdge('edge status check failed'),
+    ));
+  }
+
   async process(file: File, opts: HybridOptions): Promise<HybridResult> {
+    if (!this.edgeOff) await this.ready();
     if (!this.edgeOff) {
       const size = await this.deps.probe(file);
       if (edgeEligible(file, opts.format, size)) {

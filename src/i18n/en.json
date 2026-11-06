@@ -225,7 +225,9 @@
       "Logos, graphics & design assets",
       "Transparent stickers & cutouts"
     ],
-    "rights": "All rights reserved."
+    "rights": "All rights reserved.",
+    "toolsHeading": "Free Tools",
+    "removeBg": "Background Remover"
   },
   "pages": {
     "about": {
@@ -549,6 +551,7 @@
     "h1": "Convert any image to WebP, AVIF, JPEG or PNG",
     "intro": "Drop in one image, choose the format you need and download the result. It works with JPEG, PNG, WebP, GIF, AVIF, HEIC and BMP files.",
     "badge": "Free, no sign-up, no watermark",
+    "counterLabel": "Images Processed by Our Free Tools",
     "dropTitle": "Drop an image to convert",
     "dropSubtitle": "or paste it from your clipboard",
     "browse": "Choose image",
@@ -598,7 +601,24 @@
         "title": "PNG",
         "body": "Lossless, so nothing is thrown away. Use it for logos, screenshots and cutouts with transparent backgrounds, where exact pixels matter more than file size."
       }
-    ]
+    ],
+    "footer": {
+      "aboutBody": "A free image converter for WebP, AVIF, JPEG and PNG. Images are converted on Cloudflare's network or in your browser, and uploaded files are deleted as soon as you have the result.",
+      "features": [
+        "Convert to WebP, AVIF, JPEG or PNG",
+        "Adjustable Quality for Lossy Formats",
+        "Opens HEIC, GIF, BMP and More",
+        "Keeps Transparency in WebP and PNG",
+        "No Sign-Up or Watermarks",
+        "Files Deleted After Conversion"
+      ],
+      "greatFor": [
+        "Faster-loading websites",
+        "iPhone HEIC photos",
+        "Email and chat attachments",
+        "Logos that need transparency"
+      ]
+    }
   },
   "optimizer": {
     "title": "Bulk Image Optimizer: Compress JPG, PNG & WebP Online | FreeRemoveBG",
@@ -607,6 +627,7 @@
     "h1": "Compress a batch of images in one go",
     "intro": "Add as many images as you like, choose one quality setting for all of them and download the smaller files individually or as a single ZIP.",
     "badge": "Free, unlimited files, no sign-up",
+    "counterLabel": "Images Processed by Our Free Tools",
     "settingsHeading": "Settings",
     "qualityLabel": "Quality",
     "qualityHint": "75–85 suits most web images. Lower means smaller files.",
@@ -654,6 +675,23 @@
         "title": "Keep PNG for flat graphics",
         "body": "Screenshots, logos and diagrams compress well as PNG. Photos saved as PNG are usually much larger than they need to be."
       }
-    ]
+    ],
+    "footer": {
+      "aboutBody": "A free bulk image compressor. Set one quality level for a whole batch, switch formats if you like and download everything as a ZIP, with no account and no file limit.",
+      "features": [
+        "Compress Unlimited Images at Once",
+        "One Quality Setting for the Batch",
+        "Optional WebP or AVIF Output",
+        "Never Returns a Larger File",
+        "Batch Processing with ZIP Export",
+        "No Sign-Up or Watermarks"
+      ],
+      "greatFor": [
+        "Website and blog images",
+        "Online store catalogs",
+        "Better page speed scores",
+        "Freeing up storage space"
+      ]
+    }
   }
 }

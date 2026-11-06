@@ -1,5 +1,6 @@
 import { supportedCodes, defaultLang, langCookie } from "./region-map.js";
-import { handleUpload, UPLOAD_PATH } from "./upload.js";
+import { handleEdgeStatus, handleUpload, STATUS_PATH, UPLOAD_PATH } from "./upload.js";
+import { addToolCount, readSiteTotal, readToolCount, toolOf } from "./toolCounts.js";
 
 const CRAWLER_UA = [
   "googlebot",
@@ -66,6 +67,10 @@ export default {
       return handleUpload(request, env);
     }
 
+    if (pathname === STATUS_PATH) {
+      return handleEdgeStatus(request, env);
+    }
+
     const isNavigation =
       (request.method === "GET" || request.method === "HEAD") &&
       !/\.[a-z0-9]+$/i.test(pathname);
@@ -107,6 +112,7 @@ function redirectTo(url, lang) {
 
 // ---------------------------------------------------------------------------
 // Global cutout counter — GET/POST /api/count backed by Cloudflare D1.
+// `tool=convert|optimize` selects a per-tool total instead (toolCounts.js).
 // ---------------------------------------------------------------------------
 
 const COUNTER_ALLOWED_ORIGINS = [
@@ -168,6 +174,30 @@ async function handleCount(request, env) {
 
   if (request.method === "GET") {
     // Same-origin GETs send a null Origin — allow those and allowlisted origins.
+    const params = new URL(request.url).searchParams;
+    if (params.get("scope") === "all") {
+      let count = 0;
+      try {
+        count = await readSiteTotal(env.DB);
+      } catch {
+        count = 0;
+      }
+      return jsonResponse({ count }, 200, origin, {
+        "Cache-Control": "public, max-age=60",
+      });
+    }
+    const tool = toolOf(params.get("tool"));
+    if (tool) {
+      let count = 0;
+      try {
+        count = await readToolCount(env.DB, tool);
+      } catch {
+        count = 0;
+      }
+      return jsonResponse({ count }, 200, origin, {
+        "Cache-Control": "public, max-age=60",
+      });
+    }
     let count = 0;
     try {
       const row = await env.DB.prepare(
@@ -219,6 +249,15 @@ async function handleCount(request, env) {
       console.warn(
         "TURNSTILE_SECRET_KEY not set — skipping bot verification on /api/count"
       );
+    }
+
+    const tool = toolOf(payload?.tool);
+    if (tool) {
+      try {
+        return jsonResponse({ count: await addToolCount(env.DB, tool, inc) }, 200, origin);
+      } catch {
+        return jsonResponse({ error: "db_error" }, 500, origin);
+      }
     }
 
     try {

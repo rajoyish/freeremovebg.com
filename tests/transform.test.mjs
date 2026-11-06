@@ -107,6 +107,7 @@ function fakeStorage() {
 }
 
 const webp = (body) => new Blob([body], { type: 'image/webp' });
+const open = async () => ({ available: true, resumeAt: null });
 
 test('hybrid uses the edge first and never sends PNG there', async () => {
   const { HybridProcessor } = await load('../src/lib/transform/hybrid.ts');
@@ -115,6 +116,7 @@ test('hybrid uses the edge first and never sends PNG there', async () => {
     edge: async () => webp('edge'),
     local: async (file) => { local.push(file.name); return webp('local'); },
     probe: async () => ({ width: 800, height: 600 }),
+    status: open,
     storage: fakeStorage(),
   });
   assert.equal((await p.process(jpeg(), { format: 'webp', quality: 80 })).engine, 'edge');
@@ -133,6 +135,7 @@ test('a 9422 midway through a batch routes every remaining image locally', async
     },
     local: async () => webp('l'),
     probe: async () => ({ width: 100, height: 100 }),
+    status: open,
     storage,
     now: () => 1_000,
   });
@@ -152,7 +155,7 @@ test('a 9422 midway through a batch routes every remaining image locally', async
 test('unexpected errors disable the edge; per-image errors do not', async () => {
   const { HybridProcessor, EdgeError } = await load('../src/lib/transform/hybrid.ts');
   const make = (edge) => new HybridProcessor({
-    edge, local: async () => webp('l'), probe: async () => null, storage: fakeStorage(),
+    edge, local: async () => webp('l'), probe: async () => null, status: open, storage: fakeStorage(),
   });
 
   const perImage = make(async (file) => {
@@ -180,4 +183,71 @@ test('edge eligibility respects format, input type and size limits', async () =>
   assert.equal(edgeEligible(new File(['x'], 'a.bmp', { type: 'image/bmp' }), 'webp', null), false);
   assert.equal(edgeEligible(new File(['x'], 'a.heic', { type: '' }), 'jpeg', null), true);
   assert.equal(edgeEligible(jpeg('big.jpg', 26 * 1024 * 1024), 'webp', null), false);
+});
+
+test('a closed monthly budget sends everything to the device without uploading', async () => {
+  const { HybridProcessor } = await load('../src/lib/transform/hybrid.ts');
+  let statusCalls = 0;
+  const storage = fakeStorage();
+  const p = new HybridProcessor({
+    edge: async () => assert.fail('edge must not be used once the month is closed'),
+    local: async () => webp('l'),
+    probe: async () => ({ width: 10, height: 10 }),
+    status: async () => { statusCalls++; return { available: false, resumeAt: '2026-12-01T00:00:00.000Z' }; },
+    storage,
+    now: () => 1_000,
+  });
+  await p.ready();
+  assert.equal(p.edgeAvailable, false, 'known before the batch is planned');
+  for (let i = 0; i < 3; i++) {
+    assert.equal((await p.process(jpeg(`${i}.jpg`), { format: 'webp', quality: 80 })).engine, 'local');
+  }
+  assert.equal(statusCalls, 1, 'status is asked once per page');
+});
+
+test('an open budget is checked once and then the edge is used', async () => {
+  const { HybridProcessor } = await load('../src/lib/transform/hybrid.ts');
+  let statusCalls = 0;
+  const p = new HybridProcessor({
+    edge: async () => webp('e'),
+    local: async () => assert.fail('local not expected'),
+    probe: async () => ({ width: 10, height: 10 }),
+    status: async () => { statusCalls++; return { available: true, resumeAt: null }; },
+    storage: fakeStorage(),
+  });
+  await Promise.all([1, 2, 3].map((i) => p.process(jpeg(`${i}.jpg`), { format: 'webp', quality: 80 })));
+  assert.equal(statusCalls, 1);
+});
+
+test('edge status: anything but a clear yes means on-device', async () => {
+  const { fetchEdgeStatus } = await load('../src/lib/transform/edge.ts');
+  const yes = await fetchEdgeStatus(async () => Response.json({ available: true, resumeAt: null }));
+  assert.equal(yes.available, true);
+  assert.equal(yes.resumeAt, null);
+  assert.equal((await fetchEdgeStatus(async () => Response.json({ available: false, resumeAt: 'x' }))).available, false);
+  assert.equal((await fetchEdgeStatus(async () => new Response('nope', { status: 404 }))).available, false, 'astro dev');
+  assert.equal((await fetchEdgeStatus(async () => { throw new TypeError('offline'); })).available, false);
+});
+
+test('a 9422 is reported with its key before the temp object is deleted', async () => {
+  const { transformAtEdge } = await load('../src/lib/transform/edge.ts');
+  const calls = [];
+  const fetch = async (url, init = {}) => {
+    const method = init.method || 'GET';
+    calls.push(`${method} ${String(url).split('?')[0]}${init.body && typeof init.body === 'string' ? ' ' + init.body : ''}`);
+    if (String(url) === '/api/upload-temp' && method === 'POST') {
+      return Response.json({ key: 'tmp/2026-11-06/k.png', url: 'https://t/tmp/2026-11-06/k.png' }, { status: 201 });
+    }
+    if (String(url).startsWith('/cdn-cgi/image/')) {
+      return new Response('limit', { status: 403, headers: { 'cf-resized': 'err=9422' } });
+    }
+    return new Response(null, { status: 204 });
+  };
+  await transformAtEdge(jpeg(), { format: 'webp', quality: 80 }, fetch).catch(() => {});
+  await new Promise((r) => setTimeout(r, 0));
+  assert.deepEqual(calls.map((c) => c.split(' ').slice(0, 2).join(' ')), [
+    'POST /api/upload-temp', 'GET /cdn-cgi/image/format=webp,quality=80,metadata=none/https://t/tmp/2026-11-06/k.png',
+    'POST /api/edge-status', 'DELETE /api/upload-temp',
+  ]);
+  assert.match(calls[2], /"code":"9422","key":"tmp\/2026-11-06\/k.png"/);
 });

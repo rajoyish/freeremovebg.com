@@ -399,6 +399,31 @@ Uploads are throttled to 60 per minute per IP by the `[[ratelimits]]` binding
 in `wrangler.toml`. A visitor over the limit gets a 429, and their tab switches
 to on-device encoding for 15 minutes.
 
+### Monthly free-tier budget
+
 The free plan includes 5,000 unique transformations a month. Every upload has
-a fresh key, so each conversion counts as unique. Past the limit the edge
-answers 9422 and visitors get on-device encoding with no visible error.
+a fresh key, so each upload is exactly one unique transformation. The worker
+counts them per calendar month (UTC) in the existing D1 database
+(`worker/edgeBudget.js`, table `edge_usage`, created on first use):
+
+- `GET /api/edge-status` returns `{ available, used, budget, resumeAt }`.
+  Each page asks once on load; when the month is closed it encodes everything
+  on the device and uploads nothing.
+- `POST /api/upload-temp` claims one unit before storing the file and answers
+  503 `quota_exhausted` once the budget is spent.
+- If the edge answers 9422 before the count gets there, the browser reports it
+  (`POST /api/edge-status` with the upload's key, which must still exist) and
+  the month closes for everyone.
+- A new month is a new row, so the edge reopens on the 1st at 00:00 UTC.
+
+The budget is `EDGE_MONTHLY_BUDGET` in `wrangler.toml` (default 4,900, leaving
+headroom under 5,000). Set it to `0` to keep every image on the device, or
+raise it after moving to a paid Images plan. If D1 is unavailable the worker
+fails open and the 9422 fallback still applies.
+
+Check the current month:
+
+```bash
+pnpm exec wrangler d1 execute freeremovebg_stats --remote \
+  --command "SELECT * FROM edge_usage ORDER BY month DESC LIMIT 3"
+```

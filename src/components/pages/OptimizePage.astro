@@ -7,6 +7,7 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../Header.astro';
 import Footer from '../Footer.astro';
 import Breadcrumb from '../Breadcrumb.astro';
+import ToolCounter from '../ToolCounter.astro';
 import { getDictionary, TOOL_LANGS } from '../../i18n/dictionaries';
 import { toolHref } from '../../i18n/routes';
 import { DEFAULT_LANG } from '../../i18n/config';
@@ -67,6 +68,7 @@ const formatChoices = [
             <svg width="14" height="14" fill="none" class="stroke-link" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 15 6 6m-6-6v4.8m0-4.8h4.8"/><path d="M9 19.8V15m0 0H4.2M9 15l-6 6"/><path d="M15 4.2V9m0 0h4.8M15 9l6-6"/><path d="M9 4.2V9m0 0H4.2M9 9 3 3"/></svg>
             {t.badge}
           </div>
+          <ToolCounter label={t.counterLabel} />
         </div>
       </section>
 
@@ -167,7 +169,7 @@ const formatChoices = [
       </section>
     </main>
 
-    <Footer lang={lang} />
+    <Footer lang={lang} variant="optimize" />
   </div>
 </Layout>
 
@@ -216,6 +218,7 @@ const formatChoices = [
     type OutputFormat,
   } from '../../lib/transform/formats';
   import { showToast } from '../../lib/ui/toast';
+  import { recordProcessed } from '../../lib/counter';
 
   type Status = 'queued' | 'working' | 'done' | 'kept' | 'error';
   interface Item {
@@ -428,6 +431,7 @@ const formatChoices = [
       item.format = target;
       item.engine = engine;
       item.settings = key;
+      recordProcessed('optimize');
     } catch (error) {
       console.error('[optimize]', item.file.name, error);
       item.status = 'error';
@@ -459,6 +463,7 @@ const formatChoices = [
         renderAll();
       }
     };
+    await processor.ready();
     const lanes = processor.edgeAvailable ? EDGE_CONCURRENCY : 1;
     await Promise.all(Array.from({ length: lanes }, (_, i) => lane(i)));
 

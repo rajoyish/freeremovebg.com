@@ -1,0 +1,78 @@
+---
+// Images processed by the whole site, shown on /convert and /optimize: the
+// real D1 total of homepage cutouts plus both tools (GET /api/count?scope=all,
+// worker/toolCounts.js), whichever engine processed them. Each tool still
+// records its own count; this display adds them up so the number is real from
+// day one. Styled like the homepage counter, but it shows only stored totals,
+// with no simulated ticks in between.
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<div class="tool-counter mt-8 mb-0 flex flex-col items-center gap-1">
+  <span data-count class="text-[clamp(1.75rem,4vw,2.5rem)] font-semibold tracking-[-1px] leading-none text-ink tabular-nums" aria-live="polite">0</span>
+  <span class="text-sm font-medium uppercase tracking-wide text-mute">{label}</span>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>('.tool-counter');
+  const el = root?.querySelector<HTMLElement>('[data-count]');
+
+  if (root && el) {
+    const compact = new Intl.NumberFormat(document.documentElement.lang || 'en', {
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    });
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let shown = 0;
+    let rafId = 0;
+
+    const render = (n: number) => { el.textContent = compact.format(Math.floor(n)); };
+
+    // Ease up to the new total. It never counts down, so a stale cached
+    // response cannot make the number jump backwards.
+    function animateTo(target: number): void {
+      if (target <= shown || reduceMotion) {
+        shown = Math.max(shown, target);
+        render(shown);
+        return;
+      }
+      cancelAnimationFrame(rafId);
+      const from = shown;
+      const delta = target - from;
+      const duration = Math.min(2000, 600 + delta * 4);
+      let start = 0;
+      const step = (ts: number) => {
+        if (!start) start = ts;
+        const p = Math.min(1, (ts - start) / duration);
+        shown = from + delta * (1 - Math.pow(1 - p, 3));
+        render(shown);
+        if (p < 1) rafId = requestAnimationFrame(step);
+        else shown = target;
+      };
+      rafId = requestAnimationFrame(step);
+    }
+
+    // `fresh` skips the 60s cache, right after this visitor's own images.
+    async function refresh(fresh = false): Promise<void> {
+      try {
+        const res = await fetch(`/api/count?scope=all${fresh ? `&t=${Date.now()}` : ''}`, {
+          headers: { Accept: 'application/json' },
+          cache: fresh ? 'no-store' : 'default',
+        });
+        if (!res.ok) return;
+        const count = Number((await res.json())?.count ?? 0);
+        if (Number.isFinite(count)) animateTo(count);
+      } catch {
+        // Non-critical: keep the last value.
+      }
+    }
+
+    refresh();
+    window.setInterval(() => refresh(), 60000);
+    window.addEventListener('global-counter-updated', () => refresh(true));
+  }
+</script>

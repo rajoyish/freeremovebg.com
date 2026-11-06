@@ -14,7 +14,7 @@ binding = "ASSETS"
 
 not_found_handling = "404-page"
 
-run_worker_first = ["/", "/api/count", "/api/upload-temp"]
+run_worker_first = ["/", "/api/count", "/api/upload-temp", "/api/edge-status"]
 
 # Global cutout counter.
 [[d1_databases]]
@@ -36,6 +36,12 @@ bucket_name = "freeremovebg-temp"
 # so /cdn-cgi/image/ accepts it as a source without an allow-list. Leave empty
 # to keep the edge off: every image is then encoded in the browser.
 TEMP_PUBLIC_URL = "https://temp.freeremovebg.com"
+
+# Uploads allowed per calendar month (UTC) before the edge pauses until the
+# 1st, counted in D1 by worker/edgeBudget.js. The free plan includes 5,000
+# unique transformations; this leaves headroom. Set it to "0" to keep every
+# image on the device, or raise it after moving to a paid Images plan.
+EDGE_MONTHLY_BUDGET = "4900"
 
 # Per-IP upload throttle for /api/upload-temp (worker/upload.js answers 429
 # past it, and the client then encodes on the device). 60 uploads a minute

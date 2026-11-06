@@ -1,4 +1,5 @@
-// Debounced accumulator for the global cutout counter.
+// Debounced accumulator for the global counters (cutouts, converter,
+// optimizer).
 //
 // Bulk uploads process many images in quick succession. To respect the WAF
 // (3 req / 10s) and the D1 free-tier write budget, we never POST per image —
@@ -13,40 +14,53 @@ const ENDPOINT = '/api/count';
 // skipped and the worker bypasses verification (see TURNSTILE_SECRET_KEY).
 const TURNSTILE_SITE_KEY = '0x4AAAAAADfcEh3QfthL5lmx';
 
-let pendingCount = 0;
-let timer: ReturnType<typeof setTimeout> | null = null;
+/**
+ * Which total an image counts toward. 'cutouts' is the homepage's original
+ * counter; the tools each have their own (worker/toolCounts.js).
+ */
+export type CounterKey = 'cutouts' | 'convert' | 'optimize';
+
+const pending = new Map<CounterKey, number>();
+const timers = new Map<CounterKey, ReturnType<typeof setTimeout>>();
 
 /** Record one successfully processed image and (re)arm the flush timer. */
 export function recordSuccessfulCutout(): void {
-  pendingCount += 1;
-  if (timer) clearTimeout(timer);
-  timer = setTimeout(flush, FLUSH_DELAY);
+  recordProcessed('cutouts');
 }
 
-async function flush(): Promise<void> {
-  timer = null;
-  if (pendingCount <= 0) return;
+/** Record one finished image for `key`, flushed in batches like cutouts. */
+export function recordProcessed(key: CounterKey): void {
+  pending.set(key, (pending.get(key) ?? 0) + 1);
+  const timer = timers.get(key);
+  if (timer) clearTimeout(timer);
+  timers.set(key, setTimeout(() => void flush(key), FLUSH_DELAY));
+}
 
-  const batch = Math.min(pendingCount, MAX_PER_REQUEST);
-  pendingCount -= batch;
+async function flush(key: CounterKey): Promise<void> {
+  timers.delete(key);
+  const count = pending.get(key) ?? 0;
+  if (count <= 0) return;
+
+  const batch = Math.min(count, MAX_PER_REQUEST);
+  pending.set(key, count - batch);
 
   try {
     const token = await getTurnstileToken();
     const res = await fetch(ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ count: batch, token }),
+      body: JSON.stringify({ count: batch, token, ...(key === 'cutouts' ? {} : { tool: key }) }),
     });
     if (res.ok) {
-      window.dispatchEvent(new CustomEvent('global-counter-updated'));
+      window.dispatchEvent(new CustomEvent('global-counter-updated', { detail: { key } }));
     }
   } catch {
     // Network/Turnstile failure must never disrupt the local tool.
   }
 
   // Large bursts (>50) leave a remainder — schedule another flush.
-  if (pendingCount > 0 && !timer) {
-    timer = setTimeout(flush, FLUSH_DELAY);
+  if ((pending.get(key) ?? 0) > 0 && !timers.has(key)) {
+    timers.set(key, setTimeout(() => void flush(key), FLUSH_DELAY));
   }
 }
 

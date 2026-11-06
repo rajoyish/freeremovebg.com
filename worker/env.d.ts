@@ -5,5 +5,6 @@ export interface Env {
   ENVIRONMENT?: string;
   TEMP_BUCKET?: R2Bucket;         // temporary uploads for /convert and /optimize (worker/upload.js)
   TEMP_PUBLIC_URL?: string;       // public custom domain serving TEMP_BUCKET, e.g. https://temp.freeremovebg.com
+  EDGE_MONTHLY_BUDGET?: string;   // monthly transformation budget (worker/edgeBudget.js)
   UPLOAD_LIMITER?: { limit(opts: { key: string }): Promise<{ success: boolean }> };
 }

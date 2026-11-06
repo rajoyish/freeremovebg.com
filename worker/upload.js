@@ -16,7 +16,10 @@
 // that are left over after a day.
 // ---------------------------------------------------------------------------
 
+import { edgeStatus, markExhausted, reserveTransformation } from "./edgeBudget.js";
+
 export const UPLOAD_PATH = "/api/upload-temp";
+export const STATUS_PATH = "/api/edge-status";
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 const TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -146,6 +149,22 @@ export async function handleUpload(request, env, now = Date.now()) {
   const kind = sniffImage(bytes.subarray(0, 32));
   if (!kind) return json({ error: "unsupported_type" }, 415);
 
+  // Each upload becomes one unique transformation, so claim it from this
+  // month's free-tier budget before storing anything. If D1 itself fails, let
+  // the upload through: the edge still answers 9422 at the real limit, and
+  // the browser falls back on that.
+  if (env.DB) {
+    try {
+      const claim = await reserveTransformation(env, now);
+      if (!claim.ok) {
+        const { resumeAt } = await edgeStatus(env, now);
+        return json({ error: "quota_exhausted", resumeAt }, 503);
+      }
+    } catch (error) {
+      console.warn("edge budget unavailable, allowing upload:", error?.message);
+    }
+  }
+
   const day = new Date(now).toISOString().slice(0, 10);
   const key = `tmp/${day}/${crypto.randomUUID()}.${kind.ext}`;
   const expiresAt = new Date(now + TTL_MS).toISOString();
@@ -166,4 +185,64 @@ export async function handleUpload(request, env, now = Date.now()) {
   }
 
   return json({ key, url: `${base}/${key}`, expiresAt }, 201);
+}
+
+// ---------------------------------------------------------------------------
+//   GET  /api/edge-status  -> { available, resumeAt, used, budget }
+//   POST /api/edge-status  { code: "9422", key } -> close the month early
+//
+// Pages ask once on load whether the edge is open this month. When it is not,
+// they encode on the device and never upload.
+//
+// The report exists because the upload count is an estimate: if the edge
+// says 9422 first, the browser that saw it closes the month for everyone. It
+// must name a temp object that still exists, so a report needs a real upload
+// behind it (origin-checked and rate limited) rather than one bare request.
+// ---------------------------------------------------------------------------
+
+export async function handleEdgeStatus(request, env, now = Date.now()) {
+  const url = new URL(request.url);
+  if (request.method !== "GET" && request.method !== "POST") {
+    return json({ error: "method_not_allowed" }, 405, { Allow: "GET, POST" });
+  }
+
+  if (!env.TEMP_BUCKET || !publicBase(env)) {
+    return json({ available: false, reason: "unconfigured", resumeAt: null }, 200);
+  }
+  if (!env.DB) {
+    return json({ available: true, reason: "no_budget_store", resumeAt: null }, 200);
+  }
+
+  if (request.method === "POST") {
+    if (!originAllowed(request, url)) return json({ error: "forbidden" }, 403);
+    let payload;
+    try {
+      payload = await request.json();
+    } catch {
+      return json({ error: "invalid_json" }, 400);
+    }
+    const key = String(payload?.key || "");
+    if (String(payload?.code) !== "9422") return json({ error: "unsupported_code" }, 400);
+    if (!KEY_PATTERN.test(key)) return json({ error: "invalid_key" }, 400);
+    let exists = false;
+    try {
+      exists = Boolean(await env.TEMP_BUCKET.head(key));
+    } catch {
+      exists = false;
+    }
+    if (!exists) return json({ error: "unknown_key" }, 404);
+    try {
+      await markExhausted(env, now);
+    } catch {
+      return json({ error: "db_error" }, 500);
+    }
+  }
+
+  try {
+    const status = await edgeStatus(env, now);
+    return json(status, 200);
+  } catch {
+    // Fail open, the same as the upload path.
+    return json({ available: true, reason: "budget_unavailable", resumeAt: null }, 200);
+  }
 }
