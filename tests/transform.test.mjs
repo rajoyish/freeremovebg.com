@@ -42,6 +42,13 @@ test('format helpers name outputs and choose formats', async () => {
   assert.equal(f.keepFormatFor('image/png'), 'png');
   assert.equal(f.keepFormatFor('image/gif'), 'webp');
 
+  // Optimizer PNG palette: 100 stays lossless, lower quality means fewer colours.
+  assert.equal(f.pngColorsFor(100), 0);
+  assert.equal(f.pngColorsFor(80), 205);
+  assert.equal(f.pngColorsFor(50), 128);
+  assert.equal(f.pngColorsFor(0), 16);
+  assert.equal(f.pngColorsFor(Number.NaN), 0);
+
   assert.equal(f.isRasterImage(new File([''], 'x.svg', { type: 'image/svg+xml' })), false);
   assert.equal(f.isRasterImage(new File([''], 'x.heic', { type: '' })), true);
   assert.equal(f.FORMATS.png.edge, false, 'png is not a valid /cdn-cgi/image/ format value');
