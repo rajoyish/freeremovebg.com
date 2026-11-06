@@ -344,3 +344,61 @@ To go live (once the site has a handful of users and is AdSense-approved):
    you want them (e.g. in `HomePage.astro` between sections). The home page tool
    UI and the AI `<script>` engine need no changes.
 4. Rebuild and deploy. No CSP or header edits are required.
+
+## Image converter & optimizer
+
+`/convert/` (one image, choose a format) and `/optimize/` (a batch, one
+quality level, ZIP download) share a hybrid engine in `src/lib/transform/`:
+
+| File | Role |
+| --- | --- |
+| `formats.ts` | Output formats, which engine can write each, download names |
+| `edge.ts` | Primary engine: upload to R2, encode at `/cdn-cgi/image/`, delete |
+| `local.ts` + `encode.worker.ts` | Fallback: canvas encoders, plus `@jsquash` WASM for AVIF (and WebP in Safari) |
+| `hybrid.ts` | Edge first, local on failure. A systemic failure turns the edge off for the rest of the batch and for 15 minutes in that tab |
+
+The upload endpoint is `POST/DELETE /api/upload-temp` in `worker/upload.js`.
+It lives in the Worker, next to `/api/count`, because the site is a static
+Astro build with no server adapter.
+
+What goes local, and when:
+
+- **Always local:** PNG output (`png` is not a `/cdn-cgi/image/` format),
+  AVIF/BMP/TIFF input, AVIF output over 1,200 px, files over 25 MB.
+- **Whole batch goes local** (systemic): error 9422 (free-tier limit), 9403,
+  9524, network errors, or uploads unavailable (404 in `astro dev`, 503 when
+  R2 is not configured).
+- **That image only goes local:** other `Cf-Resized: err=…` codes, 413/415
+  from the upload, or a format the edge substituted (AVIF served as WebP).
+
+In local development the edge is never reachable, so every image takes the
+fallback path. To exercise the edge path without Cloudflare, mock the two
+endpoints in Playwright with `page.route` (see `tests/transform.test.mjs` for
+the response shapes).
+
+### One-time Cloudflare setup (before merging)
+
+The `[[r2_buckets]]` binding in `wrangler.toml` makes a deploy fail if the
+bucket does not exist, so create it first:
+
+```bash
+wrangler r2 bucket create freeremovebg-temp
+# Expire anything the client failed to delete:
+wrangler r2 bucket lifecycle add freeremovebg-temp expire-temp tmp/ --expire-days 1
+```
+
+Then, in the dashboard:
+
+1. **R2 → freeremovebg-temp → Settings → Custom Domains:** connect
+   `temp.freeremovebg.com`. It must be on the `freeremovebg.com` zone, so
+   `/cdn-cgi/image/` accepts it as a source without an allow-list. If you pick
+   a different host, update `TEMP_PUBLIC_URL` in `wrangler.toml`.
+2. **Images → Transformations:** enable transformations for `freeremovebg.com`.
+
+Uploads are throttled to 60 per minute per IP by the `[[ratelimits]]` binding
+in `wrangler.toml`. A visitor over the limit gets a 429, and their tab switches
+to on-device encoding for 15 minutes.
+
+The free plan includes 5,000 unique transformations a month. Every upload has
+a fresh key, so each conversion counts as unique. Past the limit the edge
+answers 9422 and visitors get on-device encoding with no visible error.

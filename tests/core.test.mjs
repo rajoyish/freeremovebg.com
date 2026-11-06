@@ -1,49 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import vm from 'node:vm';
-import ts from 'typescript';
-
-// Load the actual browser modules with controlled DOM/ML boundaries, without
-// downloading models or adding a second test framework.
-async function loadModule(path, mocks = {}, globals = {}) {
-  const context = vm.createContext({ Blob, File, URL, console, setTimeout, clearTimeout,
-    navigator: { userAgent: 'iPhone', maxTouchPoints: 5 }, ...globals });
-  const cache = new Map();
-  async function load(url) {
-    if (cache.has(url.href)) return cache.get(url.href);
-    const source = await readFile(url, 'utf8');
-    const { outputText } = ts.transpileModule(source, { compilerOptions: {
-      target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext,
-    } });
-    const module = new vm.SourceTextModule(outputText, {
-      context, identifier: url.href,
-      initializeImportMeta: meta => { meta.url = url.href; },
-      importModuleDynamically: async specifier => {
-        const imported = await resolve(specifier, module);
-        if (imported.status === 'unlinked') await imported.link(resolve);
-        if (imported.status !== 'evaluated') await imported.evaluate();
-        return imported;
-      },
-    });
-    cache.set(url.href, module);
-    await module.link(resolve);
-    return module;
-  }
-  async function resolve(specifier, parent) {
-    if (specifier in mocks) {
-      const exports = mocks[specifier];
-      return new vm.SyntheticModule(Object.keys(exports), function () {
-        for (const [key, value] of Object.entries(exports)) this.setExport(key, value);
-      }, { context });
-    }
-    assert.ok(specifier.startsWith('.'), `Unexpected dependency: ${specifier}`);
-    return load(new URL(`${specifier}.ts`, parent.identifier));
-  }
-  const module = await load(new URL(path, import.meta.url));
-  await module.evaluate();
-  return module.namespace;
-}
+import { loadModule } from './load-module.mjs';
 
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const photo = name => new File(['photo'], name, { type: 'image/jpeg' });

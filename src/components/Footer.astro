@@ -55,6 +55,8 @@ const href = (p: string) => (p === '/' ? homeHref(lang) : pageHref(lang, p));
     <div class="mt-8 pt-8 border-t border-[#2a2a2a] flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-[#a3a3a3]">
       <nav class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2" aria-label="Footer">
         <a href={href('/')} class="text-[#a3a3a3] no-underline hover:text-[#ededed] transition-colors">{nav.home}</a>
+        <a href="/convert/" class="text-[#a3a3a3] no-underline hover:text-[#ededed] transition-colors">{nav.convert}</a>
+        <a href="/optimize/" class="text-[#a3a3a3] no-underline hover:text-[#ededed] transition-colors">{nav.optimize}</a>
         <a href={href('/about')} class="text-[#a3a3a3] no-underline hover:text-[#ededed] transition-colors">{nav.about}</a>
         <a href={href('/privacy-policy')} class="text-[#a3a3a3] no-underline hover:text-[#ededed] transition-colors">{nav.privacy}</a>
         <a href={href('/terms')} class="text-[#a3a3a3] no-underline hover:text-[#ededed] transition-colors">{nav.terms}</a>

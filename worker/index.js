@@ -1,4 +1,5 @@
 import { supportedCodes, defaultLang, langCookie } from "./region-map.js";
+import { handleUpload, UPLOAD_PATH } from "./upload.js";
 
 const CRAWLER_UA = [
   "googlebot",
@@ -59,6 +60,10 @@ export default {
 
     if (pathname === "/api/count") {
       return handleCount(request, env);
+    }
+
+    if (pathname === UPLOAD_PATH) {
+      return handleUpload(request, env);
     }
 
     const isNavigation =

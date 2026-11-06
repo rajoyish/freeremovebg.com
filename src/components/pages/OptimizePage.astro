@@ -1,0 +1,531 @@
+---
+// Batch image optimizer (/optimize). Each file runs through the hybrid engine
+// (src/lib/transform/hybrid.ts): edge first, and once the edge fails for good
+// (free-tier limit, network) the rest of the batch runs in the browser.
+// Copy lives in en.json under `optimizer`.
+import Layout from '../../layouts/Layout.astro';
+import Header from '../Header.astro';
+import Footer from '../Footer.astro';
+import Breadcrumb from '../Breadcrumb.astro';
+import { getDictionary } from '../../i18n/dictionaries';
+import { DEFAULT_LANG } from '../../i18n/config';
+import { FORMATS, OUTPUT_FORMATS } from '../../lib/transform/formats';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = DEFAULT_LANG } = Astro.props;
+const dict = getDictionary(lang);
+const t = dict.optimizer;
+
+const strings = {
+  optimize: t.optimize,
+  optimizeOne: t.optimizeOne,
+  optimizing: t.optimizing,
+  allDone: t.allDone,
+  statusQueued: t.statusQueued,
+  statusWorking: t.statusWorking,
+  statusDone: t.statusDone,
+  statusKept: t.statusKept,
+  statusError: t.statusError,
+  keptNote: t.keptNote,
+  summary: t.summary,
+  totalSaved: t.totalSaved,
+  download: t.download,
+  remove: t.remove,
+  engineEdge: t.engineEdge,
+  engineLocal: t.engineLocal,
+  notImage: t.notImage,
+};
+
+const formatChoices = [
+  { id: 'keep', label: t.formatKeep },
+  ...OUTPUT_FORMATS.map((id) => ({ id, label: FORMATS[id].label })),
+];
+---
+
+<Layout
+  title={t.title}
+  description={t.description}
+  keywords={t.keywords}
+  lang={lang}
+  basePath="/optimize"
+  hreflangLangs={[DEFAULT_LANG]}
+>
+  <div class="min-h-screen flex flex-col">
+    <Header lang={lang} basePath="/optimize" availableLangs={[DEFAULT_LANG]} />
+    <Breadcrumb path="/optimize/" current={dict.nav.optimize} lang={lang} />
+
+    <main class="flex-1">
+      <section class="px-6 pt-12 pb-8 text-center">
+        <div class="max-w-190 mx-auto">
+          <h1 class="text-[clamp(2rem,5vw,3.25rem)] font-semibold tracking-[-2px] leading-[1.1] mt-0 mb-5 text-ink text-balance">{t.h1}</h1>
+          <p class="text-lg text-body leading-[1.7] mt-0 mb-6 max-w-150 mx-auto">{t.intro}</p>
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-canvas-soft-2 border border-hairline rounded-pill text-[13px] text-body font-medium">
+            <svg width="14" height="14" fill="none" class="stroke-link" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 15 6 6m-6-6v4.8m0-4.8h4.8"/><path d="M9 19.8V15m0 0H4.2M9 15l-6 6"/><path d="M15 4.2V9m0 0h4.8M15 9l6-6"/><path d="M9 4.2V9m0 0H4.2M9 9 3 3"/></svg>
+            {t.badge}
+          </div>
+        </div>
+      </section>
+
+      <section class="px-6 pb-16">
+        <div class="max-w-240 mx-auto">
+
+          <!-- Settings bar -->
+          <div class="bg-canvas border border-hairline rounded-lg shadow-sm p-4 sm:p-5 grid gap-5 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-end">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label for="quality" class="font-mono text-xs uppercase tracking-wider text-mute">{t.qualityLabel}</label>
+                <output id="quality-value" for="quality" class="font-mono text-sm font-medium text-ink tabular-nums">80</output>
+              </div>
+              <input id="quality" type="range" min="0" max="100" value="80" class="w-full accent-ink cursor-pointer disabled:cursor-not-allowed disabled:opacity-40" aria-describedby="quality-hint" />
+              <p id="quality-hint" class="text-xs text-mute mt-1.5 mb-0">{t.qualityHint}</p>
+            </div>
+
+            <fieldset class="border-0 p-0 m-0 min-w-0">
+              <legend class="font-mono text-xs uppercase tracking-wider text-mute mb-2 p-0">{t.formatLabel}</legend>
+              <div class="inline-flex flex-wrap bg-canvas-soft-2 border border-hairline rounded-md p-0.75 gap-0.5">
+                {formatChoices.map((f, i) => (
+                  <label class="cursor-pointer">
+                    <input type="radio" name="out-format" value={f.id} checked={i === 0} class="peer sr-only" />
+                    <span class="block px-3 py-1.5 rounded-sm text-[13px] font-medium text-body transition-colors peer-checked:bg-ink peer-checked:text-on-primary hover:text-ink peer-focus-visible:outline-2 peer-focus-visible:outline-offset-1 peer-focus-visible:outline-link">{f.label}</span>
+                  </label>
+                ))}
+              </div>
+              <p id="format-hint" class="text-xs text-mute mt-1.5 mb-0">{t.keepHint}</p>
+            </fieldset>
+
+            <button id="optimize-btn" type="button" disabled
+              class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer whitespace-nowrap transition-opacity hover:opacity-[0.85] disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+              <span id="optimize-spinner" class="hidden w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin" aria-hidden="true"></span>
+              <span id="optimize-label">{t.optimize.replace('{count}', '0')}</span>
+            </button>
+          </div>
+
+          <!-- Drop zone -->
+          <div id="drop-zone" role="button" tabindex="0" aria-label={t.browse}
+            class="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 rounded-lg border-2 border-dashed border-hairline-strong bg-canvas px-6 py-8 text-center sm:text-start cursor-pointer transition-colors hover:border-ink hover:bg-canvas-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link data-[drag=true]:border-ink data-[drag=true]:bg-canvas-soft">
+            <svg width="36" height="36" fill="none" class="stroke-mute shrink-0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18"/><circle cx="12" cy="8" r="2"/><rect width="16" height="16" x="6" y="2" rx="2"/></svg>
+            <div>
+              <p class="text-base font-semibold text-ink m-0">{t.dropTitle}</p>
+              <p class="text-sm text-mute mt-0.5 mb-0">{t.dropSubtitle}</p>
+            </div>
+            <span class="sm:ms-auto inline-flex items-center gap-1.5 px-4 py-2 bg-transparent text-ink border border-hairline rounded-pill text-[13px] font-medium">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+              <span id="browse-label" data-empty={t.browse} data-more={t.addMore}>{t.browse}</span>
+            </span>
+            <input type="file" id="file-input" accept="image/*,.heic,.heif,.avif" multiple class="hidden" />
+          </div>
+
+          <!-- File list -->
+          <div id="list-wrap" class="hidden mt-6 bg-canvas border border-hairline rounded-lg overflow-hidden">
+            <div class="hidden sm:grid grid-cols-[minmax(0,1fr)_5.5rem_5.5rem_9rem_2.5rem] gap-3 px-4 py-2.5 border-b border-hairline bg-canvas-soft font-mono text-[11px] uppercase tracking-wider text-mute">
+              <span>{t.colFile}</span>
+              <span class="text-end">{t.colBefore}</span>
+              <span class="text-end">{t.colAfter}</span>
+              <span>{t.colSaved}</span>
+              <span></span>
+            </div>
+            <ul id="file-list" class="list-none m-0 p-0 divide-y divide-hairline"></ul>
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3.5 border-t border-hairline bg-canvas-soft">
+              <div class="flex items-center gap-3 flex-wrap">
+                <span id="summary" class="text-[13px] text-body tabular-nums" aria-live="polite"></span>
+                <span id="total-saved" class="hidden px-2 py-0.5 rounded-pill text-xs font-medium bg-link/10 text-link tabular-nums"></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button id="clear-btn" type="button"
+                  class="px-3.5 py-2 bg-transparent text-body border border-hairline rounded-pill text-[13px] font-medium cursor-pointer transition-colors hover:border-ink hover:text-ink disabled:opacity-40 disabled:cursor-not-allowed">
+                  {t.clear}
+                </button>
+                <button id="zip-btn" type="button" disabled
+                  class="inline-flex items-center gap-2 px-4 py-2 bg-ink text-on-primary border-none rounded-pill text-[13px] font-medium cursor-pointer transition-opacity hover:opacity-[0.85] disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+                  <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  {t.downloadAll}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="px-6 py-16 bg-canvas-soft-2 border-t border-hairline">
+        <div class="max-w-240 mx-auto">
+          <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] text-ink mt-0 mb-8 text-center">{t.tipsHeading}</h2>
+          <ol class="grid gap-4 md:grid-cols-3 list-none m-0 p-0">
+            {t.tips.map((tip, i) => (
+              <li class="bg-canvas border border-hairline rounded-lg p-5">
+                <span class="font-mono text-xs text-mute">0{i + 1}</span>
+                <h3 class="text-base font-semibold text-ink mt-1 mb-2">{tip.title}</h3>
+                <p class="text-sm text-body leading-relaxed m-0">{tip.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+    </main>
+
+    <Footer lang={lang} />
+  </div>
+</Layout>
+
+<div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none"></div>
+
+<template id="row-template">
+  <li class="grid grid-cols-[minmax(0,1fr)_auto] sm:grid-cols-[minmax(0,1fr)_5.5rem_5.5rem_9rem_2.5rem] gap-x-3 gap-y-2 items-center px-4 py-3">
+    <div class="flex items-center gap-3 min-w-0">
+      <div class="shrink-0 w-10 h-10 rounded-sm border border-hairline bg-checkerboard overflow-hidden flex items-center justify-center">
+        <img data-thumb alt="" class="w-full h-full object-cover" loading="lazy" />
+      </div>
+      <div class="min-w-0">
+        <p data-name class="text-sm font-medium text-ink m-0 truncate"></p>
+        <p class="m-0 flex items-center gap-2 text-xs text-mute">
+          <span data-status></span>
+          <span data-engine class="hidden font-mono text-[10px] uppercase tracking-wider px-1.5 py-px rounded-xs border border-hairline"></span>
+        </p>
+      </div>
+    </div>
+    <span data-before class="hidden sm:block text-end font-mono text-xs text-body tabular-nums"></span>
+    <span data-after class="hidden sm:block text-end font-mono text-xs text-ink tabular-nums"></span>
+    <div class="hidden sm:flex items-center gap-2" data-saved-wrap>
+      <div class="flex-1 h-1.5 bg-canvas-soft-2 rounded-pill overflow-hidden">
+        <div data-bar class="h-full bg-link rounded-pill w-(--saved) [--saved:0%] transition-[width] duration-500"></div>
+      </div>
+      <span data-saved class="w-10 text-end font-mono text-xs text-ink tabular-nums"></span>
+    </div>
+    <div class="flex items-center justify-end gap-1">
+      <span data-mobile-saved class="sm:hidden font-mono text-xs text-ink tabular-nums me-1"></span>
+      <a data-download href="#" download class="hidden w-8 h-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-canvas-soft-2 focus-visible:outline-2 focus-visible:outline-link">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      </a>
+      <button data-remove type="button" class="w-8 h-8 inline-flex items-center justify-center rounded-full bg-transparent border-none text-mute cursor-pointer transition-colors hover:bg-canvas-soft-2 hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-link">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  </li>
+</template>
+
+<script is:inline type="application/json" id="optimize-i18n" set:html={JSON.stringify(strings)} />
+
+<script>
+  import { HybridProcessor, type Engine } from '../../lib/transform/hybrid';
+  import {
+    FORMATS, formatBytes, isOutputFormat, isRasterImage, keepFormatFor, outputName, percentChange,
+    type OutputFormat,
+  } from '../../lib/transform/formats';
+  import { showToast } from '../../lib/ui/toast';
+
+  type Status = 'queued' | 'working' | 'done' | 'kept' | 'error';
+  interface Item {
+    id: number;
+    file: File;
+    thumbUrl: string;
+    status: Status;
+    /** Settings the current result was produced with; re-run when they change. */
+    settings: string;
+    blob: Blob | null;
+    blobUrl: string;
+    format: OutputFormat | null;
+    engine: Engine | null;
+    row: HTMLLIElement;
+  }
+
+  const I18N: Record<string, string> = (() => {
+    try { return JSON.parse(document.getElementById('optimize-i18n')?.textContent || '{}'); }
+    catch { return {}; }
+  })();
+  const fill = (s: string, vars: Record<string, string | number>) =>
+    s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''));
+
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  const dropZone = $('drop-zone');
+  const fileInput = $<HTMLInputElement>('file-input');
+  const browseLabel = $('browse-label');
+  const quality = $<HTMLInputElement>('quality');
+  const qualityValue = $<HTMLOutputElement>('quality-value');
+  const formatHint = $('format-hint');
+  const optimizeBtn = $<HTMLButtonElement>('optimize-btn');
+  const optimizeLabel = $('optimize-label');
+  const optimizeSpinner = $('optimize-spinner');
+  const listWrap = $('list-wrap');
+  const fileList = $('file-list');
+  const summary = $('summary');
+  const totalSaved = $('total-saved');
+  const zipBtn = $<HTMLButtonElement>('zip-btn');
+  const clearBtn = $<HTMLButtonElement>('clear-btn');
+  const toastContainer = $('toast-container');
+  const rowTemplate = $<HTMLTemplateElement>('row-template');
+  const formatInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="out-format"]'));
+
+  // Edge requests are network-bound, so a few run side by side. On-device
+  // encoding is CPU- and memory-bound, so it runs one at a time.
+  const EDGE_CONCURRENCY = 3;
+
+  const processor = new HybridProcessor();
+  const items: Item[] = [];
+  let nextId = 0;
+  let running = false;
+
+  const chosenFormat = (): OutputFormat | null => {
+    const v = formatInputs.find((i) => i.checked)?.value;
+    return isOutputFormat(v) ? v : null;
+  };
+  const settingsKey = () => `${chosenFormat() ?? 'keep'}:${quality.value}`;
+  const needsRun = (item: Item) =>
+    item.status === 'queued' || item.status === 'error' || item.settings !== settingsKey();
+  const isFinished = (item: Item) => item.status === 'done' || item.status === 'kept';
+
+  /** Download names, unique across the batch and stable for one render. */
+  function downloadNames(): Map<Item, string> {
+    const used = new Set<string>();
+    const names = new Map<Item, string>();
+    for (const item of items) {
+      if (!isFinished(item) || !item.format) continue;
+      names.set(item, outputName(item.file.name, item.format, used));
+    }
+    return names;
+  }
+
+  function renderRow(item: Item, name?: string) {
+    const r = item.row;
+    const q = <T extends HTMLElement = HTMLElement>(sel: string) => r.querySelector(sel) as T;
+    const finished = isFinished(item);
+    const stale = finished && item.settings !== settingsKey();
+
+    const statusText: Record<Status, string> = {
+      queued: I18N.statusQueued, working: I18N.statusWorking, done: I18N.statusDone,
+      kept: I18N.statusKept, error: I18N.statusError,
+    };
+    const status = q('[data-status]');
+    status.textContent = statusText[item.status];
+    status.title = item.status === 'kept' ? I18N.keptNote : '';
+    status.className = item.status === 'error' ? 'text-error' : item.status === 'working' ? 'text-ink' : '';
+
+    const engine = q('[data-engine]');
+    engine.classList.toggle('hidden', !finished || item.status === 'kept' || !item.engine);
+    engine.textContent = item.engine === 'edge' ? I18N.engineEdge : I18N.engineLocal;
+
+    q('[data-before]').textContent = formatBytes(item.file.size);
+    const after = finished && item.blob ? item.blob.size : NaN;
+    q('[data-after]').textContent = finished ? formatBytes(after) : '–';
+
+    const pct = finished ? -percentChange(item.file.size, after) : 0;
+    const savedText = finished ? `${Math.max(0, pct)}%` : '';
+    q('[data-saved]').textContent = savedText;
+    q('[data-mobile-saved]').textContent = finished ? `−${Math.max(0, pct)}%` : '';
+    q('[data-bar]').style.setProperty('--saved', `${Math.min(100, Math.max(0, pct))}%`);
+    r.classList.toggle('opacity-60', stale);
+
+    const dl = q<HTMLAnchorElement>('[data-download]');
+    dl.classList.toggle('hidden', !finished);
+    dl.classList.toggle('inline-flex', finished);
+    if (finished && name) {
+      dl.href = item.blobUrl;
+      dl.download = name;
+      dl.setAttribute('aria-label', `${I18N.download} ${name}`);
+      dl.title = name;
+    }
+    q<HTMLButtonElement>('[data-remove]').disabled = item.status === 'working';
+  }
+
+  function renderAll() {
+    const names = downloadNames();
+    items.forEach((item) => renderRow(item, names.get(item)));
+
+    listWrap.classList.toggle('hidden', items.length === 0);
+    browseLabel.textContent = items.length ? browseLabel.dataset.more || '' : browseLabel.dataset.empty || '';
+
+    const pending = items.filter(needsRun).length;
+    const finished = items.filter(isFinished);
+    const doneCount = items.filter((i) => isFinished(i) && i.settings === settingsKey()).length;
+
+    optimizeSpinner.classList.toggle('hidden', !running);
+    if (running) {
+      optimizeLabel.textContent = fill(I18N.optimizing, { done: doneCount, total: items.length });
+    } else if (items.length && !pending) {
+      optimizeLabel.textContent = I18N.allDone;
+    } else {
+      optimizeLabel.textContent = pending === 1 ? I18N.optimizeOne : fill(I18N.optimize, { count: pending });
+    }
+    optimizeBtn.disabled = running || pending === 0;
+    clearBtn.disabled = running;
+    zipBtn.disabled = running || finished.length === 0;
+
+    summary.textContent = fill(I18N.summary, { done: doneCount, total: items.length });
+    const before = finished.reduce((s, i) => s + i.file.size, 0);
+    const after = finished.reduce((s, i) => s + (i.blob?.size ?? 0), 0);
+    const saved = before - after;
+    totalSaved.classList.toggle('hidden', saved <= 0);
+    totalSaved.textContent = fill(I18N.totalSaved, {
+      size: formatBytes(saved),
+      percent: before ? Math.round((saved / before) * 100) : 0,
+    });
+  }
+
+  function addFiles(files: File[]) {
+    const images = files.filter(isRasterImage);
+    if (images.length < files.length) showToast(toastContainer, I18N.notImage, 6000);
+    for (const file of images) {
+      const row = rowTemplate.content.firstElementChild!.cloneNode(true) as HTMLLIElement;
+      const item: Item = {
+        id: ++nextId, file, thumbUrl: URL.createObjectURL(file), status: 'queued', settings: '',
+        blob: null, blobUrl: '', format: null, engine: null, row,
+      };
+      const thumb = row.querySelector<HTMLImageElement>('[data-thumb]')!;
+      thumb.src = item.thumbUrl;
+      thumb.onerror = () => { thumb.classList.add('invisible'); };
+      const nameEl = row.querySelector<HTMLElement>('[data-name]')!;
+      nameEl.textContent = file.name;
+      nameEl.title = file.name;
+      const removeBtn = row.querySelector<HTMLButtonElement>('[data-remove]')!;
+      removeBtn.setAttribute('aria-label', fill(I18N.remove, { name: file.name }));
+      removeBtn.addEventListener('click', () => removeItem(item));
+      items.push(item);
+      fileList.appendChild(row);
+    }
+    renderAll();
+  }
+
+  function releaseResult(item: Item) {
+    if (item.blobUrl && item.blob !== item.file) URL.revokeObjectURL(item.blobUrl);
+    item.blobUrl = '';
+    item.blob = null;
+  }
+
+  function removeItem(item: Item) {
+    if (item.status === 'working') return;
+    const idx = items.indexOf(item);
+    if (idx >= 0) items.splice(idx, 1);
+    releaseResult(item);
+    URL.revokeObjectURL(item.thumbUrl);
+    item.row.remove();
+    renderAll();
+  }
+
+  async function runItem(item: Item, format: OutputFormat | null, q: number, key: string) {
+    const target = format ?? keepFormatFor(item.file.type);
+    item.status = 'working';
+    renderAll();
+    try {
+      const { blob, engine } = await processor.process(item.file, { format: target, quality: q });
+      releaseResult(item);
+      // Same format and no smaller: hand back the original rather than a
+      // "compressed" file that is bigger than what the visitor started with.
+      const sameFormat = FORMATS[target].mime === item.file.type;
+      if (sameFormat && blob.size >= item.file.size) {
+        item.blob = item.file;
+        item.blobUrl = item.thumbUrl;
+        item.status = 'kept';
+      } else {
+        item.blob = blob;
+        item.blobUrl = URL.createObjectURL(blob);
+        item.status = 'done';
+      }
+      item.format = target;
+      item.engine = engine;
+      item.settings = key;
+    } catch (error) {
+      console.error('[optimize]', item.file.name, error);
+      item.status = 'error';
+    }
+  }
+
+  async function optimizeAll() {
+    if (running) return;
+    const format = chosenFormat();
+    const q = Number(quality.value);
+    const key = settingsKey();
+    const queue = items.filter(needsRun);
+    if (!queue.length) return;
+
+    running = true;
+    formatInputs.forEach((i) => { i.disabled = true; });
+    quality.disabled = true;
+    renderAll();
+
+    // Lanes beyond the first stop as soon as the edge switches off, so a
+    // batch that hits the free-tier limit midway carries on one file at a
+    // time in the browser.
+    const lane = async (index: number) => {
+      while (queue.length) {
+        if (index > 0 && !processor.edgeAvailable) return;
+        const item = queue.shift()!;
+        if (!items.includes(item)) continue; // removed while waiting
+        await runItem(item, format, q, key);
+        renderAll();
+      }
+    };
+    const lanes = processor.edgeAvailable ? EDGE_CONCURRENCY : 1;
+    await Promise.all(Array.from({ length: lanes }, (_, i) => lane(i)));
+
+    running = false;
+    formatInputs.forEach((i) => { i.disabled = false; });
+    quality.disabled = false;
+    renderAll();
+  }
+
+  async function downloadZip() {
+    const names = downloadNames();
+    if (!names.size) return;
+    zipBtn.disabled = true;
+    try {
+      const { default: JSZip } = await import('jszip');
+      const zip = new JSZip();
+      // Images are already compressed; deflating them again only costs time.
+      names.forEach((name, item) => zip.file(name, item.blob!, { compression: 'STORE' }));
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'optimized-images_freeremovebg.zip';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } finally {
+      renderAll();
+    }
+  }
+
+  function clearAll() {
+    if (running) return;
+    [...items].forEach(removeItem);
+  }
+
+  function syncFormatHint() {
+    formatHint.classList.toggle('invisible', chosenFormat() !== null);
+  }
+
+  const openPicker = () => fileInput.click();
+  dropZone.addEventListener('click', openPicker);
+  dropZone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); }
+  });
+  fileInput.addEventListener('change', () => {
+    addFiles(Array.from(fileInput.files || []));
+    fileInput.value = '';
+  });
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.dataset.drag = 'true'; });
+  dropZone.addEventListener('dragleave', () => { dropZone.dataset.drag = 'false'; });
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.dataset.drag = 'false';
+    addFiles(Array.from(e.dataTransfer?.files || []));
+  });
+  document.addEventListener('paste', (e) => {
+    if (e.defaultPrevented || !e.clipboardData) return;
+    if (e.composedPath().some((t) => t instanceof HTMLElement && (t.isContentEditable || t.matches('input, textarea, [role="textbox"]')))) return;
+    const files = Array.from(e.clipboardData.files).filter(isRasterImage);
+    if (!files.length) return;
+    e.preventDefault();
+    addFiles(files);
+  });
+
+  quality.addEventListener('input', () => { qualityValue.textContent = quality.value; renderAll(); });
+  formatInputs.forEach((i) => i.addEventListener('change', () => { syncFormatHint(); renderAll(); }));
+  optimizeBtn.addEventListener('click', () => { void optimizeAll(); });
+  zipBtn.addEventListener('click', () => { void downloadZip(); });
+  clearBtn.addEventListener('click', clearAll);
+
+  syncFormatHint();
+  renderAll();
+</script>
