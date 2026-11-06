@@ -6,7 +6,11 @@
 // original rather than linking a URL that was never generated.
 
 import { DEFAULT_LANG } from "./config";
-import { hasPageTranslations, hasUseCaseTranslations } from "./dictionaries";
+import {
+  hasPageTranslations,
+  hasToolTranslations,
+  hasUseCaseTranslations,
+} from "./dictionaries";
 import { localizedSlug } from "./slugs";
 import type { UseCaseSlug } from "../data/useCases";
 
@@ -25,6 +29,14 @@ export const homeHref = (lang: string): string =>
  */
 export const pageHref = (lang: string, path: string): string =>
   `${hasPageTranslations(lang) ? langPrefix(lang) : ""}${path}/`;
+
+/**
+ * Converter or optimizer page: '/convert' or '/optimize', without the trailing
+ * slash. A language with the tool translations gets its own prefix
+ * (/es/convert/); one without links to the English page.
+ */
+export const toolHref = (lang: string, path: "/convert" | "/optimize"): string =>
+  `${hasToolTranslations(lang) ? langPrefix(lang) : ""}${path}/`;
 
 /**
  * Use-case landing page for a slug.

@@ -151,6 +151,20 @@ body {
   line-height: 1.4 !important;
 }
 
+/* Letter-spacing pulls apart cursive Arabic-script letters and breaks Indic
+   and Thai conjuncts. The system monospace fonts have no glyphs for these
+   scripts either, and their fallback sets each letter in a fixed-width cell.
+   So the small mono labels use the regular face here, untracked. */
+:is(:lang(ar), :lang(fa), :lang(ur), :lang(hi), :lang(mr), :lang(ne), :lang(bn),
+    :lang(gu), :lang(pa), :lang(ta), :lang(te), :lang(th)) :is(.tracking-wide, .tracking-wider) {
+  letter-spacing: normal;
+}
+
+:is(:lang(ar), :lang(fa), :lang(ur), :lang(hi), :lang(mr), :lang(ne), :lang(bn),
+    :lang(gu), :lang(pa), :lang(ta), :lang(te), :lang(th)) .font-mono {
+  font-family: var(--font-sans);
+}
+
 /* GLightbox: hide the filename caption */
 .gslide-description {
   display: none !important;

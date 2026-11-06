@@ -81,6 +81,14 @@ const PAGE_STRINGS: string[] = (() => {
   return [...set];
 })();
 
+// Same, for the converter (/convert) and optimizer (/optimize) pages.
+const TOOL_STRINGS: string[] = (() => {
+  const set = new Set<string>();
+  collectStrings(en.converter, set);
+  collectStrings(en.optimizer, set);
+  return [...set];
+})();
+
 function fullyTranslated(code: string, strings: string[]): boolean {
   if (code === DEFAULT_LANG) return true;
   const cache = LOCALE_MAPS[code];
@@ -117,6 +125,16 @@ export function hasPageTranslations(code: string): boolean {
   return fullyTranslated(code, PAGE_STRINGS);
 }
 
+/**
+ * Whether `code` has a complete translation of the converter and optimizer
+ * pages. Gates /<lang>/convert/ and /<lang>/optimize/ the same way the two
+ * gates above do, so a partial translation never publishes English prose
+ * under a localized URL.
+ */
+export function hasToolTranslations(code: string): boolean {
+  return fullyTranslated(code, TOOL_STRINGS);
+}
+
 /** Language codes with localized use-case pages, in languages.json order. */
 export const USE_CASE_LANGS: string[] = LANGUAGES.map((l) => l.code).filter(
   hasUseCaseTranslations,
@@ -125,4 +143,9 @@ export const USE_CASE_LANGS: string[] = LANGUAGES.map((l) => l.code).filter(
 /** Language codes with localized about/contact/privacy/terms pages. */
 export const PAGE_LANGS: string[] = LANGUAGES.map((l) => l.code).filter(
   hasPageTranslations,
+);
+
+/** Language codes with localized converter and optimizer pages. */
+export const TOOL_LANGS: string[] = LANGUAGES.map((l) => l.code).filter(
+  hasToolTranslations,
 );
