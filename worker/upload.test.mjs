@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { d1 } from "../tests/d1.mjs";
 import worker from "./index.js";
 import { handleUpload, sniffImage, MAX_UPLOAD_BYTES } from "./upload.js";
 
@@ -18,6 +19,7 @@ function fakeBucket() {
 }
 
 const env = (overrides = {}) => ({
+  DB: d1(),
   TEMP_BUCKET: fakeBucket(),
   TEMP_PUBLIC_URL: "https://temp.freeremovebg.com/",
   ...overrides,

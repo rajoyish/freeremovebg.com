@@ -16,7 +16,7 @@
 // that are left over after a day.
 // ---------------------------------------------------------------------------
 
-import { edgeStatus, markExhausted, reserveTransformation } from "./edgeBudget.js";
+import { edgeStatus, markExhausted, nextMonthStart, releaseTransformation, reserveTransformation } from "./edgeBudget.js";
 
 export const UPLOAD_PATH = "/api/upload-temp";
 export const STATUS_PATH = "/api/edge-status";
@@ -149,20 +149,17 @@ export async function handleUpload(request, env, now = Date.now()) {
   const kind = sniffImage(bytes.subarray(0, 32));
   if (!kind) return json({ error: "unsupported_type" }, 415);
 
-  // Each upload becomes one unique transformation, so claim it from this
-  // month's free-tier budget before storing anything. If D1 itself fails, let
-  // the upload through: the edge still answers 9422 at the real limit, and
-  // the browser falls back on that.
-  if (env.DB) {
-    try {
-      const claim = await reserveTransformation(env, now);
-      if (!claim.ok) {
-        const { resumeAt } = await edgeStatus(env, now);
-        return json({ error: "quota_exhausted", resumeAt }, 503);
-      }
-    } catch (error) {
-      console.warn("edge budget unavailable, allowing upload:", error?.message);
+  // Reserve before exposing a source URL. If accounting is unavailable, the
+  // browser can still encode locally without creating untracked edge usage.
+  if (!env.DB) return json({ error: "budget_unavailable" }, 503);
+  try {
+    const claim = await reserveTransformation(env, now);
+    if (!claim.ok) {
+      return json({ error: "quota_exhausted", resumeAt: nextMonthStart(now) }, 503);
     }
+  } catch (error) {
+    console.warn("edge budget unavailable:", error?.message);
+    return json({ error: "budget_unavailable" }, 503);
   }
 
   const day = new Date(now).toISOString().slice(0, 10);
@@ -181,6 +178,13 @@ export async function handleUpload(request, env, now = Date.now()) {
       customMetadata: { expiresAt },
     });
   } catch {
+    // No source URL reached the browser, so no transformation could start.
+    // Use the reservation's month even if the write crossed midnight UTC.
+    try {
+      await releaseTransformation(env, now);
+    } catch (error) {
+      console.warn("edge reservation release failed:", error?.message);
+    }
     return json({ error: "storage_error" }, 500);
   }
 
@@ -210,7 +214,7 @@ export async function handleEdgeStatus(request, env, now = Date.now()) {
     return json({ available: false, reason: "unconfigured", resumeAt: null }, 200);
   }
   if (!env.DB) {
-    return json({ available: true, reason: "no_budget_store", resumeAt: null }, 200);
+    return json({ available: false, reason: "no_budget_store", resumeAt: null }, 200);
   }
 
   if (request.method === "POST") {
@@ -242,7 +246,6 @@ export async function handleEdgeStatus(request, env, now = Date.now()) {
     const status = await edgeStatus(env, now);
     return json(status, 200);
   } catch {
-    // Fail open, the same as the upload path.
-    return json({ available: true, reason: "budget_unavailable", resumeAt: null }, 200);
+    return json({ available: false, reason: "budget_unavailable", resumeAt: null }, 200);
   }
 }
