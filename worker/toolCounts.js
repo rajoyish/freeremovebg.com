@@ -3,7 +3,6 @@
 // through the same /api/count endpoint as the cutout counter:
 //
 //   GET  /api/count?tool=convert           -> { count }
-//   GET  /api/count?scope=all              -> { count }  cutouts + both tools
 //   POST /api/count  { count, token, tool } -> { count }
 //
 // One row per tool. A request without `tool` still reads and writes the
@@ -56,15 +55,3 @@ export async function addToolCount(db, tool, inc) {
   return row?.total ?? 0;
 }
 
-/**
- * Every image processed on the site: homepage cutouts plus both tools. This
- * is what the converter and optimizer pages show, so the number is real from
- * day one instead of starting at zero for each new tool.
- */
-export async function readSiteTotal(db) {
-  const cutouts = await db.prepare("SELECT total_cutouts FROM stats WHERE id = 1").first();
-  const tools = await withTable(db, () =>
-    db.prepare("SELECT COALESCE(SUM(total), 0) AS total FROM tool_counts").first(),
-  );
-  return (cutouts?.total_cutouts ?? 0) + (tools?.total ?? 0);
-}

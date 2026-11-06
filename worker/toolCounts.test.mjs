@@ -69,13 +69,3 @@ test("tool counts keep the cutout counter's guards", async () => {
   assert.equal((await post(e, { count: 0, tool: "convert" })).status, 400);
   assert.equal((await (await post(e, { count: 500, tool: "optimize" })).json()).count, 50, "capped per request");
 });
-
-test("scope=all adds cutouts and both tools for the tool pages", async () => {
-  const e = env();
-  assert.equal((await get(e, "?scope=all")).count, 23443, "cutouts only, before any tool image");
-  await post(e, { count: 4, tool: "convert" });
-  await post(e, { count: 6, tool: "optimize" });
-  await post(e, { count: 1 });
-  assert.equal((await get(e, "?scope=all")).count, 23443 + 4 + 6 + 1);
-  assert.equal((await get(e, "?tool=convert")).count, 4, "per-tool totals still kept");
-});

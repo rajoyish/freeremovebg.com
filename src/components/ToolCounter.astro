@@ -1,18 +1,17 @@
 ---
-// Images processed by the whole site, shown on /convert and /optimize: the
-// real D1 total of homepage cutouts plus both tools (GET /api/count?scope=all,
-// worker/toolCounts.js), whichever engine processed them. Each tool still
-// records its own count; this display adds them up so the number is real from
-// day one. Styled like the homepage counter, but it shows only stored totals,
-// with no simulated ticks in between.
+// Images converted or optimized worldwide, on /convert and /optimize: the real
+// D1 total for this page's tool (GET /api/count?tool=…, worker/toolCounts.js),
+// whichever engine processed them. Styled like the homepage counter, but it
+// shows only stored totals, with no simulated ticks in between.
 interface Props {
+  tool: 'convert' | 'optimize';
   label: string;
 }
 
-const { label } = Astro.props;
+const { tool, label } = Astro.props;
 ---
 
-<div class="tool-counter mt-8 mb-0 flex flex-col items-center gap-1">
+<div class="tool-counter mt-8 mb-0 flex flex-col items-center gap-1" data-tool={tool}>
   <span data-count class="text-[clamp(1.75rem,4vw,2.5rem)] font-semibold tracking-[-1px] leading-none text-ink tabular-nums" aria-live="polite">0</span>
   <span class="text-sm font-medium uppercase tracking-wide text-mute">{label}</span>
 </div>
@@ -20,8 +19,9 @@ const { label } = Astro.props;
 <script>
   const root = document.querySelector<HTMLElement>('.tool-counter');
   const el = root?.querySelector<HTMLElement>('[data-count]');
+  const tool = root?.dataset.tool;
 
-  if (root && el) {
+  if (root && el && tool) {
     const compact = new Intl.NumberFormat(document.documentElement.lang || 'en', {
       notation: 'compact',
       maximumFractionDigits: 1,
@@ -59,7 +59,7 @@ const { label } = Astro.props;
     // `fresh` skips the 60s cache, right after this visitor's own images.
     async function refresh(fresh = false): Promise<void> {
       try {
-        const res = await fetch(`/api/count?scope=all${fresh ? `&t=${Date.now()}` : ''}`, {
+        const res = await fetch(`/api/count?tool=${tool}${fresh ? `&t=${Date.now()}` : ''}`, {
           headers: { Accept: 'application/json' },
           cache: fresh ? 'no-store' : 'default',
         });
@@ -73,6 +73,8 @@ const { label } = Astro.props;
 
     refresh();
     window.setInterval(() => refresh(), 60000);
-    window.addEventListener('global-counter-updated', () => refresh(true));
+    window.addEventListener('global-counter-updated', (e) => {
+      if ((e as CustomEvent<{ key?: string }>).detail?.key === tool) refresh(true);
+    });
   }
 </script>

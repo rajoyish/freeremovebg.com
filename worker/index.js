@@ -1,6 +1,6 @@
 import { supportedCodes, defaultLang, langCookie } from "./region-map.js";
 import { handleEdgeStatus, handleUpload, STATUS_PATH, UPLOAD_PATH } from "./upload.js";
-import { addToolCount, readSiteTotal, readToolCount, toolOf } from "./toolCounts.js";
+import { addToolCount, readToolCount, toolOf } from "./toolCounts.js";
 
 const CRAWLER_UA = [
   "googlebot",
@@ -174,19 +174,7 @@ async function handleCount(request, env) {
 
   if (request.method === "GET") {
     // Same-origin GETs send a null Origin — allow those and allowlisted origins.
-    const params = new URL(request.url).searchParams;
-    if (params.get("scope") === "all") {
-      let count = 0;
-      try {
-        count = await readSiteTotal(env.DB);
-      } catch {
-        count = 0;
-      }
-      return jsonResponse({ count }, 200, origin, {
-        "Cache-Control": "public, max-age=60",
-      });
-    }
-    const tool = toolOf(params.get("tool"));
+    const tool = toolOf(new URL(request.url).searchParams.get("tool"));
     if (tool) {
       let count = 0;
       try {
