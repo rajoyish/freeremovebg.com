@@ -28,6 +28,7 @@ export interface EdgeOptions {
 type FetchFn = typeof fetch;
 
 const UPLOAD_ENDPOINT = '/api/upload-temp';
+const STATUS_ENDPOINT = '/api/edge-status';
 
 /** The free plan's "unique transformations per month exceeded" code. */
 export const LIMIT_REACHED = '9422';
@@ -73,6 +74,43 @@ export async function uploadTemp(file: Blob, name: string, fetchFn: FetchFn = fe
   return { key: data.key, url: data.url };
 }
 
+export interface EdgeStatus {
+  available: boolean;
+  /** When the monthly budget reopens (ISO), if it is closed. */
+  resumeAt: string | null;
+}
+
+/**
+ * Whether the edge is open this month (worker/edgeBudget.js). Anything other
+ * than a clear yes, including a 404 in `astro dev` or a network error, counts
+ * as no: on-device encoding needs nothing from the network.
+ */
+export async function fetchEdgeStatus(fetchFn: FetchFn = fetch): Promise<EdgeStatus> {
+  try {
+    const res = await fetchFn(STATUS_ENDPOINT, { cache: 'no-store' });
+    if (!res.ok) return { available: false, resumeAt: null };
+    const data = (await res.json()) as Partial<EdgeStatus>;
+    return { available: data.available === true, resumeAt: data.resumeAt ?? null };
+  } catch {
+    return { available: false, resumeAt: null };
+  }
+}
+
+/**
+ * Tell the worker the edge answered 9422, which closes the month for every
+ * visitor. Must run before the temp object is deleted: the worker only
+ * accepts a report for an upload that still exists.
+ */
+async function reportLimit(key: string, fetchFn: FetchFn): Promise<void> {
+  try {
+    await fetchFn(STATUS_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: LIMIT_REACHED, key }),
+    });
+  } catch {}
+}
+
 /** Best-effort cleanup. The bucket's lifecycle rule catches anything missed. */
 export function deleteTemp(key: string, fetchFn: FetchFn = fetch): void {
   fetchFn(`${UPLOAD_ENDPOINT}?key=${encodeURIComponent(key)}`, {
@@ -103,6 +141,7 @@ export async function transformAtEdge(
     }
 
     const code = resizeErrorCode(res.headers);
+    if (code === LIMIT_REACHED) await reportLimit(key, fetchFn);
     if (code) throw new EdgeError(`Edge error ${code}`, SYSTEMIC_CODES.has(code), code);
 
     if (!res.ok) {
@@ -111,6 +150,7 @@ export async function transformAtEdge(
       // like. Some error pages carry the code only in the body.
       const text = await res.text().catch(() => '');
       const bodyCode = text.match(/\b(9\d{3})\b/)?.[1];
+      if (bodyCode === LIMIT_REACHED) await reportLimit(key, fetchFn);
       throw new EdgeError(
         `Transformation failed: HTTP ${res.status}`,
         bodyCode ? SYSTEMIC_CODES.has(bodyCode) : true,

@@ -6,6 +6,7 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../Header.astro';
 import Footer from '../Footer.astro';
 import Breadcrumb from '../Breadcrumb.astro';
+import ToolCounter from '../ToolCounter.astro';
 import { getDictionary, TOOL_LANGS } from '../../i18n/dictionaries';
 import { toolHref } from '../../i18n/routes';
 import { DEFAULT_LANG } from '../../i18n/config';
@@ -57,6 +58,7 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
             <svg width="14" height="14" fill="none" class="stroke-link" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
             {t.badge}
           </div>
+          <ToolCounter tool="convert" label={t.counterLabel} />
         </div>
       </section>
 
@@ -182,7 +184,7 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
       </section>
     </main>
 
-    <Footer lang={lang} />
+    <Footer lang={lang} variant="convert" />
   </div>
 </Layout>
 
@@ -194,6 +196,7 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
   import { HybridProcessor } from '../../lib/transform/hybrid';
   import { FORMATS, formatBytes, formatFromMime, isOutputFormat, isRasterImage, outputName, percentChange, type OutputFormat } from '../../lib/transform/formats';
   import { showToast } from '../../lib/ui/toast';
+  import { recordProcessed } from '../../lib/counter';
 
   const I18N: Record<string, string> = (() => {
     try { return JSON.parse(document.getElementById('convert-i18n')?.textContent || '{}'); }
@@ -324,6 +327,7 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
       downloadLink.download = outputName(file.name, format, new Set());
       $('download-label').textContent = fill(I18N.download, { format: FORMATS[format].label });
       result.classList.remove('hidden');
+      recordProcessed('convert');
       result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (error) {
       console.error('[convert]', error);
