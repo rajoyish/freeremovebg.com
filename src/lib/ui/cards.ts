@@ -3,12 +3,41 @@ import 'img-comparison-slider';
 import 'img-comparison-slider/dist/styles.css';
 import GLightbox from 'glightbox';
 import 'glightbox/dist/css/glightbox.min.css';
+import { handoffUrl, newHandoffKey, stashHandoff } from '../handoff';
 
 export interface ToolI18n {
   original: string;
   removed: string;
   downloadPng: string;
   viewFullImage: string;
+  convertImage: string;
+  optimizeImage: string;
+  convertHref: string;
+  optimizeHref: string;
+}
+
+const ARROW_ICON = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>`;
+
+/**
+ * Turns an <a target="_blank"> into a handoff link: on activation it gets a
+ * fresh key in its href and the files are stashed under that key. Covers
+ * middle-click (auxclick) too, which opens the link without a click event.
+ */
+export function bindHandoffLink(
+  link: HTMLAnchorElement,
+  base: string,
+  getFiles: () => Promise<Array<{ name: string; blob: Blob }>>
+) {
+  const arm = (e: MouseEvent) => {
+    if (e.type === 'auxclick' && e.button !== 1) return;
+    const key = newHandoffKey();
+    link.href = handoffUrl(base, key);
+    void getFiles()
+      .then((files) => stashHandoff(key, files))
+      .catch((err) => console.error('[handoff]', err));
+  };
+  link.addEventListener('click', arm);
+  link.addEventListener('auxclick', arm);
 }
 
 interface CardsViewElements {
@@ -97,6 +126,16 @@ export class CardsView {
           ${modelLabel}
         </p>
       </div>
+      <div class="grid grid-cols-2 border-t border-canvas-soft-2">
+        <a data-handoff="convert" href="${this.i18n.convertHref}" target="_blank" rel="noopener"
+          class="flex items-center justify-center gap-1.5 px-3 py-2.5 text-[13px] font-medium text-ink no-underline transition-colors hover:bg-canvas-soft focus-visible:bg-canvas-soft">
+          ${this.i18n.convertImage}${ARROW_ICON}
+        </a>
+        <a data-handoff="optimize" href="${this.i18n.optimizeHref}" target="_blank" rel="noopener"
+          class="flex items-center justify-center gap-1.5 px-3 py-2.5 text-[13px] font-medium text-ink no-underline border-l border-canvas-soft-2 transition-colors hover:bg-canvas-soft focus-visible:bg-canvas-soft">
+          ${this.i18n.optimizeImage}${ARROW_ICON}
+        </a>
+      </div>
     `;
     this.els.imagesContainer.appendChild(card);
     this.els.imageGrid.classList.remove('hidden');
@@ -104,6 +143,10 @@ export class CardsView {
     (card.querySelector('.dl-btn') as HTMLButtonElement).addEventListener('click', () => {
       onDownload(name, processedUrl);
     });
+
+    const getFile = async () => [{ name, blob: await (await fetch(processedUrl)).blob() }];
+    bindHandoffLink(card.querySelector('[data-handoff="convert"]')!, this.i18n.convertHref, getFile);
+    bindHandoffLink(card.querySelector('[data-handoff="optimize"]')!, this.i18n.optimizeHref, getFile);
 
     const imageArea = card.querySelector<HTMLElement>('[data-compare-area]');
     const sliderEl = card.querySelector<HTMLElement & { value?: number }>('img-comparison-slider');

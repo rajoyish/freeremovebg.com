@@ -4,6 +4,7 @@
 // HomePage.astro so use-case landing pages can embed the same tool.
 import { getDictionary } from '../i18n/dictionaries';
 import { DEFAULT_LANG } from '../i18n/config';
+import { toolHref } from '../i18n/routes';
 
 interface Props {
   lang?: string;
@@ -30,6 +31,10 @@ const toolStrings = {
   original: t.original,
   removed: t.removed,
   viewFullImage: t.viewFullImage,
+  convertImage: t.convertImage,
+  optimizeImage: t.optimizeImage,
+  convertHref: toolHref(lang, '/convert'),
+  optimizeHref: toolHref(lang, '/optimize'),
   status: {
     queued: t.statusQueued,
     analysing: t.statusAnalysing,
@@ -115,11 +120,18 @@ const toolStrings = {
     <div id="image-grid" class="hidden mt-10">
       <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h2 class="text-2xl font-semibold text-ink m-0">{t.processedImages}</h2>
+        <div class="flex items-center gap-2 flex-wrap">
+        <a id="optimize-all-link" href={toolStrings.optimizeHref} target="_blank" rel="noopener"
+          class="flex items-center gap-2 px-5 py-2.5 bg-transparent text-ink border border-hairline rounded-pill text-sm font-medium no-underline transition-colors hover:border-ink">
+          {t.optimizeAll}
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </a>
         <button id="download-all-btn"
           class="flex items-center gap-2 px-5 py-2.5 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85]">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
           {t.downloadAll}
         </button>
+        </div>
       </div>
       <div id="images-container" class="grid gap-5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]"></div>
     </div>
@@ -138,7 +150,7 @@ const toolStrings = {
 
   import { isImageFile, QueueManager } from '../lib/core/QueueManager';
   import { ThumbsView } from '../lib/ui/thumbs';
-  import { CardsView } from '../lib/ui/cards';
+  import { CardsView, bindHandoffLink } from '../lib/ui/cards';
   import { ProgressView } from '../lib/ui/progress';
   import { showToast } from '../lib/ui/toast';
 
@@ -148,6 +160,7 @@ const toolStrings = {
     selectImages: string; glitchWarning: string; imagesSelected: string;
     imageSelected: string; removeImage: string; downloadPng: string;
     original: string; removed: string; viewFullImage: string;
+    convertImage: string; optimizeImage: string; convertHref: string; optimizeHref: string;
     status: { queued: string; analysing: string; processing: string; done: string; error: string };
   }
   const I18N: ToolI18n = (() => {
@@ -312,4 +325,9 @@ const toolStrings = {
     void queueManager.addFiles(images);
   });
   downloadAllBtn.addEventListener('click', () => { queueManager.downloadAll(); });
+  bindHandoffLink(
+    document.getElementById('optimize-all-link') as HTMLAnchorElement,
+    I18N.optimizeHref,
+    async () => queueManager.getResults()
+  );
 </script>

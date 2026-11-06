@@ -177,6 +177,13 @@ export class QueueManager {
     this.views.thumbs.setStatus(item.id, status);
   }
 
+  /** Finished cutouts, in queue order. */
+  getResults(): Array<{ name: string; blob: Blob }> {
+    return this.queue
+      .filter(q => q.blob && q.outName)
+      .map(q => ({ name: q.outName!, blob: q.blob! }));
+  }
+
   async downloadAll() {
     const ready = this.queue.filter(q => q.blob && q.outName);
     if (!ready.length) return;

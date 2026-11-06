@@ -218,6 +218,7 @@ const formatChoices = [
     type OutputFormat,
   } from '../../lib/transform/formats';
   import { showToast } from '../../lib/ui/toast';
+  import { takeHandoff } from '../../lib/handoff';
   import { recordProcessed } from '../../lib/counter';
 
   type Status = 'queued' | 'working' | 'done' | 'kept' | 'error';
@@ -536,4 +537,5 @@ const formatChoices = [
 
   syncFormatHint();
   renderAll();
+  void takeHandoff().then((files) => { if (files.length) addFiles(files); });
 </script>

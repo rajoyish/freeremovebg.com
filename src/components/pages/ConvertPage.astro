@@ -196,6 +196,7 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
   import { HybridProcessor } from '../../lib/transform/hybrid';
   import { FORMATS, formatBytes, formatFromMime, isOutputFormat, isRasterImage, outputName, percentChange, type OutputFormat } from '../../lib/transform/formats';
   import { showToast } from '../../lib/ui/toast';
+  import { takeHandoff } from '../../lib/handoff';
   import { recordProcessed } from '../../lib/counter';
 
   const I18N: Record<string, string> = (() => {
@@ -371,4 +372,5 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
   $('another-btn').addEventListener('click', () => { setFile(null); openPicker(); });
 
   syncControls();
+  void takeHandoff().then((files) => { if (files.length) acceptFiles(files); });
 </script>

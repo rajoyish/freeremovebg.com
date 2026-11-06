@@ -421,5 +421,8 @@
   "Better page speed scores": "Jobb oldalbetöltési pontszámok",
   "Freeing up storage space": "Tárhely felszabadítása",
   "Images Converted Worldwide": "Átalakított képek világszerte",
-  "Images Optimized Worldwide": "Optimalizált képek világszerte"
+  "Images Optimized Worldwide": "Optimalizált képek világszerte",
+  "Convert": "Konvertálás",
+  "Optimize": "Optimalizálás",
+  "Optimize all": "Összes optimalizálása"
 }
