@@ -2,7 +2,7 @@
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import { getDictionary } from '../i18n/dictionaries';
 import { DEFAULT_LANG, LANGUAGES } from '../i18n/config';
-import { homeHref, pageHref, toolHref } from '../i18n/routes';
+import { homeHref, toolHref } from '../i18n/routes';
 
 interface Props {
   lang?: string;
@@ -25,26 +25,14 @@ const {
 const dict = getDictionary(lang);
 const t = dict.nav;
 
-// Nav links keep the visitor in their language wherever that language has the
-// page, so a chosen language survives navigation instead of resetting to
-// English on the first click.
-const href = (p: string) => (p === '/' ? homeHref(lang) : pageHref(lang, p));
-
-// The converter and optimizer have their own translation gate (TOOL_LANGS),
-// separate from the content pages, so they get their own URL builder.
-const linkFor = (p: string) =>
-  p === '/convert' || p === '/optimize' ? toolHref(lang, p) : href(p);
-
 const currentPath = (basePath.replace(/\/$/, '') || '/');
 
+// Keep the main navigation focused on tools. Informational pages live in the
+// footer, and each tool link preserves the language where it is translated.
 const navLinks = [
-  { path: '/', label: t.home },
-  { path: '/convert', label: t.convert },
-  { path: '/optimize', label: t.optimize },
-  { path: '/about', label: t.about },
-  { path: '/privacy-policy', label: t.privacy },
-  { path: '/terms', label: t.terms },
-  { path: '/contact', label: t.contact },
+  { path: '/', href: homeHref(lang), label: t.home },
+  { path: '/convert', href: toolHref(lang, '/convert'), label: t.convert },
+  { path: '/optimize', href: toolHref(lang, '/optimize'), label: t.optimize },
 ];
 
 function isActive(path: string) {
@@ -58,15 +46,15 @@ const switcherPath = currentPath === '/' ? '/' : `${currentPath}/`;
 <header class="sticky top-0 z-50 border-b border-hairline bg-canvas/80 backdrop-blur-sm">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between gap-2 h-16">
-      <a href={href('/')} class="flex items-center gap-2 no-underline min-w-0">
+      <a href={homeHref(lang)} class="flex items-center gap-2 no-underline min-w-0">
         <img src="/favicon.svg" alt="FreeRemoveBG logo" class="w-8 h-8 shrink-0" />
         <span class="text-lg font-semibold tracking-tight text-ink truncate">FreeRemoveBG</span>
       </a>
 
       <nav class="hidden lg:flex items-center gap-6" aria-label="Main">
-        {navLinks.map(({ path, label }) => (
+        {navLinks.map(({ path, href, label }) => (
           <a
-            href={linkFor(path)}
+            href={href}
             class:list={[
               'text-sm no-underline transition-colors',
               isActive(path) ? 'font-bold text-ink' : 'text-body hover:text-ink',
@@ -124,10 +112,10 @@ const switcherPath = currentPath === '/' ? '/' : `${currentPath}/`;
 
     <nav id="mobile-menu" class="hidden lg:hidden border-t border-hairline py-4" aria-label="Mobile">
       <ul class="flex flex-col gap-1 list-none m-0 p-0">
-        {navLinks.map(({ path, label }) => (
+        {navLinks.map(({ path, href, label }) => (
           <li>
             <a
-              href={linkFor(path)}
+              href={href}
               class:list={[
                 'block px-3 py-2.5 text-sm no-underline rounded-md transition-colors',
                 isActive(path) ? 'font-bold text-ink bg-canvas-soft-2' : 'text-body hover:bg-canvas-soft-2 hover:text-ink',
