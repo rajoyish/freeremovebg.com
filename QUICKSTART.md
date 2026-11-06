@@ -4,7 +4,7 @@ Get your AI-powered background remover running in 3 minutes.
 
 ## Prerequisites
 
-- Node.js 22.12.0 or higher
+- Node.js 22.23.4 or higher
 - pnpm (recommended) or npm
 
 ## Installation
@@ -69,7 +69,7 @@ Or connect your GitHub repo to Vercel for automatic deployments.
 
 ### Build errors
 
-- Ensure Node.js >= 22.12.0
+- Ensure Node.js >= 22.23.4
 - Run `pnpm approve-builds onnxruntime-node protobufjs`
 - Clear `node_modules` and reinstall
 

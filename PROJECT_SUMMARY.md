@@ -277,7 +277,7 @@ vercel deploy
 
 ### Environment Requirements
 
-- Node.js 22.12.0+
+- Node.js 22.23.4+
 - Static file hosting
 - CDN access to Hugging Face
 - HTTPS (for WebGPU)
