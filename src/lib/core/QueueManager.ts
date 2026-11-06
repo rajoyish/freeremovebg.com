@@ -4,6 +4,7 @@ import { buildOutName } from './naming';
 import type { ModelMode } from './model';
 import { runRemovalInWorker } from './removalClient';
 import { recordSuccessfulCutout } from '../counter';
+import { MOBILE_MAX_DIMENSION, needsLowMemoryProcessing } from './processingPolicy';
 
 type ReceivedI18n = {
   starting: string;
@@ -37,6 +38,7 @@ interface ToolViews {
   thumbs: {
     addThumb: (item: { id: string; file: File; status: ThumbStatus }) => void;
     setStatus: (id: string, status: ThumbStatus) => void;
+    setPreview: (id: string, url: string) => void;
     removeThumb: (id: string, done?: () => void) => void;
     showInZone: (items: Array<{ id: string; file: File; status: ThumbStatus }>, total: number) => void;
     updateCount: (n: number) => void;
@@ -73,6 +75,8 @@ export class QueueManager {
   private usedNames = new Set<string>();
   private idCounter = 0;
   private currentMode: ModelMode = 'auto';
+  private processing: Promise<void> | null = null;
+  private lowMemory = needsLowMemoryProcessing();
 
   constructor(
     private views: ToolViews,
@@ -94,7 +98,6 @@ export class QueueManager {
     }
     this.queue.length = 0;
     this.usedNames.clear();
-    this.idCounter = 0;
 
     this.views.thumbs.reset();
     this.views.cards.reset();
@@ -115,7 +118,9 @@ export class QueueManager {
     this.queue.splice(idx, 1);
 
     if (this.queue.length === 0) {
-      this.views.thumbs.removeThumb(id, () => this.reset());
+      this.views.thumbs.removeThumb(id, () => {
+        if (this.queue.length === 0) this.reset();
+      });
     } else {
       this.views.thumbs.updateCount(this.queue.length);
       this.views.thumbs.removeThumb(id);
@@ -139,30 +144,37 @@ export class QueueManager {
     this.views.thumbs.showInZone(newItems, this.queue.length);
     this.views.progress.show();
 
-    const total = newItems.length;
-    let done = 0;
-    this.views.progress.set(done, total, this.i18n.starting);
+    // Every upload joins the same drain, including files added during loading.
+    if (!this.processing) {
+      this.processing = this.drain().finally(() => { this.processing = null; });
+    }
+    await this.processing;
+  }
 
-    for (const item of newItems) {
-      if (!this.queue.includes(item)) {
-        done++;
-        this.views.progress.set(done, total, this.i18n.processing);
-        continue;
-      }
-      this.views.progress.set(done, total, this.i18n.processing);
+  private async drain(): Promise<void> {
+    let item: QueueItem | undefined;
+    while ((item = this.queue.find(q => q.status === 'queued'))) {
+      this.updateProgress(this.i18n.processing);
       try {
         await this.processItem(item);
       } catch (err) {
         console.error(`Skipping ${item.file.name}:`, err);
         this.views.showToast('An error occurred. Please try again after some time.');
       }
-      done++;
-      this.views.progress.set(done, total, done === total ? this.i18n.allDone : this.i18n.processing);
+      this.updateProgress(this.i18n.processing);
     }
+    this.updateProgress(this.i18n.allDone);
+    this.views.progress.scheduleHide(2000);
+  }
 
-    if (done === total) {
-      this.views.progress.scheduleHide(2000);
-    }
+  private updateProgress(message: string) {
+    const done = this.queue.filter(q => q.status === 'done' || q.status === 'error').length;
+    this.views.progress.set(done, this.queue.length, message);
+  }
+
+  private setStatus(item: QueueItem, status: ThumbStatus) {
+    item.status = status;
+    this.views.thumbs.setStatus(item.id, status);
   }
 
   async downloadAll() {
@@ -186,23 +198,22 @@ export class QueueManager {
   }
 
   private async processItem(item: QueueItem): Promise<void> {
-    const originalUrl = URL.createObjectURL(item.file);
-    item.originalUrl = originalUrl;
+    const mode = this.currentMode;
+    this.setStatus(item, mode === 'auto' && !this.lowMemory ? 'analysing' : 'processing');
 
     try {
-      const pngBlob = await normalizeToPng(item.file);
+      const pngBlob = await normalizeToPng(item.file, this.lowMemory ? MOBILE_MAX_DIMENSION : Infinity);
+      if (!this.queue.includes(item)) return;
+      // Mobile previews must not decode the original camera image again.
+      const originalUrl = URL.createObjectURL(this.lowMemory ? pngBlob : item.file);
+      item.originalUrl = originalUrl;
+      this.views.thumbs.setPreview(item.id, originalUrl);
 
-      if (this.currentMode === 'portrait') {
-        this.views.thumbs.setStatus(item.id, 'processing');
-      } else if (this.currentMode === 'general') {
-        this.views.thumbs.setStatus(item.id, 'processing');
-      } else {
-        this.views.thumbs.setStatus(item.id, 'analysing');
-      }
-
-      const { blob, usedModel } = await runRemovalInWorker(this.currentMode, pngBlob);
+      const { blob, usedModel } = await runRemovalInWorker(mode, pngBlob, this.lowMemory);
+      if (!this.queue.includes(item)) return;
 
       const glitched = await isGlitched(blob);
+      if (!this.queue.includes(item)) return;
       if (glitched) {
         this.views.showToast(`"${item.file.name}" ${this.i18n.glitchWarning}`);
       }
@@ -226,10 +237,10 @@ export class QueueManager {
         }
       );
 
-      this.views.thumbs.setStatus(item.id, 'done');
+      this.setStatus(item, 'done');
       recordSuccessfulCutout();
     } catch (err) {
-      this.views.thumbs.setStatus(item.id, 'error');
+      if (this.queue.includes(item)) this.setStatus(item, 'error');
       throw err;
     }
   }

@@ -81,6 +81,8 @@ public/
 
 Smart mode automatically detects whether an image contains a person and routes it to the best engine. You can also select the engine manually (People & Portraits or Objects & Graphics).
 
+On mobile and devices reporting 4 GB of memory or less, Smart mode uses the smaller general model for both people and objects. Images are resized to at most 2,048 pixels on the longest edge before processing and previewing. Each photo runs in its own worker so model memory is released before the next photo. Desktop processing keeps the original resolution.
+
 ## SEO
 
 - Per-page title, meta description, keywords, and canonical URL
