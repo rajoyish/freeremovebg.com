@@ -2,9 +2,12 @@
 // Monthly budget for Cloudflare Image Transformations (free tier).
 //
 // The free plan allows 5,000 unique transformations per calendar month. Every
-// upload to /api/upload-temp gets a fresh key, so each one becomes exactly one
-// unique transformation. Counting uploads per month (UTC) therefore tracks the
-// quota without calling Cloudflare's API.
+// upload to /api/upload-temp reserves one transformation using a fresh key.
+// This is a conservative estimate, not Cloudflare's account-wide usage: it
+// includes abandoned/failed transformations and misses usage before tracking
+// started or outside this endpoint. Reconcile historical usage with
+// scripts/reconcile-edge-usage.mjs. The legacy `uploads` column holds the
+// reconciled budget estimate, not a count of completed conversions.
 //
 // Once the count reaches the budget, or a browser reports that the edge
 // answered 9422, the month is marked exhausted. From then on:
@@ -16,7 +19,7 @@
 // The table creates itself on first use. There is no migration to run.
 // ---------------------------------------------------------------------------
 
-// Headroom under 5,000 for anything else on the zone that transforms images.
+// Headroom under 5,000 for other transformations in the account.
 export const DEFAULT_BUDGET = 4900;
 
 const TABLE_SQL = `CREATE TABLE IF NOT EXISTS edge_usage (
@@ -68,6 +71,7 @@ export async function edgeStatus(env, now = Date.now()) {
   return {
     available: !exhausted,
     used,
+    estimated: true,
     budget,
     month,
     resumeAt: exhausted ? nextMonthStart(now) : null,
@@ -93,6 +97,13 @@ export async function reserveTransformation(env, now = Date.now()) {
       .first(),
   );
   return row ? { ok: true, used: row.uploads } : { ok: false };
+}
+
+/** Release only a reservation whose R2 write failed, before returning a URL. */
+export async function releaseTransformation(env, now) {
+  await env.DB.prepare(
+    "UPDATE edge_usage SET uploads = MAX(0, uploads - 1) WHERE month = ?",
+  ).bind(monthKey(now)).run();
 }
 
 /** Close the month early, e.g. when the edge itself answered 9422. */

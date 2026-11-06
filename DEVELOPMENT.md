@@ -401,16 +401,30 @@ to on-device encoding for 15 minutes.
 
 ### Monthly free-tier budget
 
-The free plan includes 5,000 unique transformations a month. Every upload has
-a fresh key, so each upload is exactly one unique transformation. The worker
-counts them per calendar month (UTC) in the existing D1 database
-(`worker/edgeBudget.js`, table `edge_usage`, created on first use):
+The free plan includes 5,000 unique transformations a month. The worker
+reserves one unit for each upload with a fresh key and tracks those reservations
+per UTC calendar month in D1. The `edge_usage.uploads` column holds the budget
+estimate, including any historical reconciliation. It is not Cloudflare's
+account-wide transformation metric or a count of completed conversions.
 
-- `GET /api/edge-status` returns `{ available, used, budget, resumeAt }`.
+Cloudflare counts unique source images and transformation options across the
+account. Earlier usage and requests outside `/api/upload-temp` are missing
+from the local counter. An abandoned upload can consume a reservation without
+producing a transformation. See [Cloudflare Images pricing](https://developers.cloudflare.com/images/pricing/).
+
+The separate `tool_counts` table records completed conversions and optimizations,
+including on-device processing, which consumes no Cloudflare transformations.
+Those totals should not be reconciled to the dashboard.
+
+The budget table creates itself on first use:
+
+- `GET /api/edge-status` returns `{ available, used, estimated: true, budget, resumeAt }`.
   Each page asks once on load; when the month is closed it encodes everything
   on the device and uploads nothing.
 - `POST /api/upload-temp` claims one unit before storing the file and answers
   503 `quota_exhausted` once the budget is spent.
+- A failed R2 write releases its reservation. Deleting a source after processing
+  does not release it, because the transformation may already have been counted.
 - If the edge answers 9422 before the count gets there, the browser reports it
   (`POST /api/edge-status` with the upload's key, which must still exist) and
   the month closes for everyone.
@@ -418,8 +432,8 @@ counts them per calendar month (UTC) in the existing D1 database
 
 The budget is `EDGE_MONTHLY_BUDGET` in `wrangler.toml` (default 4,900, leaving
 headroom under 5,000). Set it to `0` to keep every image on the device, or
-raise it after moving to a paid Images plan. If D1 is unavailable the worker
-fails open and the 9422 fallback still applies.
+raise it after moving to a paid Images plan. If D1 is unavailable, the worker
+stops uploads and the browser encodes locally, avoiding untracked edge usage.
 
 Check the current month:
 
@@ -427,3 +441,30 @@ Check the current month:
 pnpm exec wrangler d1 execute freeremovebg_stats --remote \
   --command "SELECT * FROM edge_usage ORDER BY month DESC LIMIT 3"
 ```
+
+When tracking starts partway through a month, reconcile from the dashboard's
+unique transformations for that same UTC month. For example, the November 2026
+screenshots showed 12 transformations while D1 held 1. Generate a guarded repair:
+
+```bash
+node scripts/reconcile-edge-usage.mjs 2026-11 1 12 > /tmp/edge-usage-reconciliation.sql
+pnpm exec wrangler d1 execute freeremovebg_stats --remote \
+  --file /tmp/edge-usage-reconciliation.sql
+pnpm exec wrangler d1 execute freeremovebg_stats --remote \
+  --command "SELECT * FROM edge_usage WHERE month = '2026-11'"
+```
+
+The script only prints SQL. Applying it raises the budget estimate to 12 only
+if D1 still holds 1. Check the rows written and then read the row back. Zero
+rows written means the row changed, the repair already ran, or the month is missing.
+Read D1 and obtain a fresh dashboard snapshot before generating another repair.
+The repair preserves exhaustion and never lowers usage. Subsequent uploads
+increment the reconciled value; the next month starts at zero.
+
+The November correction above was applied on 2026-11-06. Both D1 and the live
+`/api/edge-status` endpoint returned 12 afterward. The conversion and optimization
+totals remained 1 each.
+
+This is a manual snapshot reconciliation, not automatic Cloudflare billing
+synchronization. Dashboard delays, failed transformations and other account
+usage can still cause differences. Do not use this estimate as billing data.

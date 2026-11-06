@@ -1,27 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { DatabaseSync } from "node:sqlite";
+import { d1 } from "../tests/d1.mjs";
 import worker from "./index.js";
-import { budgetOf, edgeStatus, markExhausted, monthKey, nextMonthStart, reserveTransformation } from "./edgeBudget.js";
+import { budgetOf, edgeStatus, markExhausted, monthKey, nextMonthStart, releaseTransformation, reserveTransformation } from "./edgeBudget.js";
 import { handleEdgeStatus, handleUpload } from "./upload.js";
-
-// The slice of the D1 API the budget uses, backed by real SQLite so the SQL
-// itself is under test. The table starts missing, as it does in production.
-function d1() {
-  const db = new DatabaseSync(":memory:");
-  return {
-    db,
-    prepare(sql) {
-      let args = [];
-      const stmt = {
-        bind: (...a) => { args = a; return stmt; },
-        first: async () => db.prepare(sql).get(...args) ?? null,
-        run: async () => { db.prepare(sql).run(...args); return { success: true }; },
-      };
-      return stmt;
-    },
-  };
-}
 
 const NOV = Date.parse("2026-11-06T10:00:00Z");
 const DEC = Date.parse("2026-12-01T00:00:01Z");
@@ -109,10 +91,50 @@ test("uploads are refused with resumeAt once the month is used up", async () => 
   assert.equal((await handleUpload(upload(), e, DEC)).status, 201, "December reopens");
 });
 
-test("a broken budget store fails open rather than blocking uploads", async () => {
+test("missing or broken accounting sends processing to the browser without uploads", async () => {
   const broken = { prepare() { throw new Error("D1 down"); } };
-  const res = await handleUpload(upload(), env({ DB: broken }), NOV);
-  assert.equal(res.status, 201);
+  for (const DB of [undefined, broken]) {
+    const e = env({ DB });
+    const res = await handleUpload(upload(), e, NOV);
+    assert.equal(res.status, 503);
+    assert.equal((await res.json()).error, "budget_unavailable");
+    assert.equal(e.TEMP_BUCKET.objects.size, 0);
+    const status = await (await handleEdgeStatus(statusReq(), e, NOV)).json();
+    assert.equal(status.available, false);
+    assert.equal(status.resumeAt, null, "an outage must not close the entire month");
+  }
+});
+
+test("a failed R2 write releases its reservation and leaves room for a retry", async () => {
+  const e = env({ EDGE_MONTHLY_BUDGET: "1" });
+  const put = e.TEMP_BUCKET.put;
+  e.TEMP_BUCKET.put = async () => { throw new Error("R2 down"); };
+  assert.equal((await handleUpload(upload(), e, NOV)).status, 500);
+  assert.equal((await edgeStatus(e, NOV)).used, 0);
+  e.TEMP_BUCKET.put = put;
+  assert.equal((await handleUpload(upload(), e, NOV)).status, 201);
+  assert.equal((await edgeStatus(e, NOV)).used, 1);
+});
+
+test("release uses the reserved month and preserves exhaustion and other months", async () => {
+  const e = env();
+  await reserveTransformation(e, NOV);
+  await reserveTransformation(e, DEC);
+  await markExhausted(e, NOV);
+  await releaseTransformation(e, NOV);
+  assert.equal((await edgeStatus(e, NOV)).used, 0);
+  assert.equal((await edgeStatus(e, NOV)).available, false);
+  assert.equal((await edgeStatus(e, DEC)).used, 1);
+});
+
+test("deleting a source does not refund a transformation reservation", async () => {
+  const e = env();
+  const { key } = await (await handleUpload(upload(), e, NOV)).json();
+  const request = new Request(`${ORIGIN}/api/upload-temp?key=${key}`, {
+    method: "DELETE", headers: { Origin: ORIGIN },
+  });
+  assert.equal((await handleUpload(request, e, NOV)).status, 204);
+  assert.equal((await edgeStatus(e, NOV)).used, 1);
 });
 
 test("GET /api/edge-status reports the month", async () => {
@@ -120,6 +142,7 @@ test("GET /api/edge-status reports the month", async () => {
   const open = await (await handleEdgeStatus(statusReq(), e, NOV)).json();
   assert.equal(open.available, true);
   assert.equal(open.budget, 3);
+  assert.equal(open.estimated, true);
 
   const unconfigured = await (await handleEdgeStatus(statusReq(), env({ TEMP_PUBLIC_URL: "" }), NOV)).json();
   assert.equal(unconfigured.available, false);
