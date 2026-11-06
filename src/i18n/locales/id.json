@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Mengapa PNG yang saya unduh menampilkan latar belakang kotak-kotak?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Papan kotak abu-abu-putih adalah cara penampil gambar menampilkan transparansi — itu bukan bagian dari file Anda. Letakkan PNG di atas latar apa pun dan area kotak-kotak tersebut akan menampilkan apa pun yang ada di bawahnya.",
   "Does converting to transparent PNG reduce quality?": "Apakah mengonversi ke PNG transparan menurunkan kualitas?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Tidak. PNG itu lossless dan hasil ekspornya menyimpan dimensi piksel asli unggahan Anda, sehingga tidak ada yang terkompresi atau berkurang kualitasnya."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Tidak. PNG itu lossless dan hasil ekspornya menyimpan dimensi piksel asli unggahan Anda, sehingga tidak ada yang terkompresi atau berkurang kualitasnya.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Di perangkat ini, ukuran gambar disesuaikan hingga sisi terpanjangnya maksimal 2.048 piksel. Mode Pintar menggunakan model yang sama untuk orang dan objek.",
+  "Paste an image with Ctrl+V or ⌘V": "Tempel gambar dengan Ctrl+V atau ⌘V"
 }

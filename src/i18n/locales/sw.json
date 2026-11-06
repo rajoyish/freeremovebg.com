@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Kwa nini PNG niliyopakua inaonyesha mandharinyuma yenye miraba?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Miraba ya kijivu na nyeupe ni njia ambayo vionyeshi vya picha hutumia kuonyesha uwazi. Si sehemu ya faili yako. Weka PNG juu ya mandharinyuma yoyote na eneo la miraba litaonyesha kilicho chini yake.",
   "Does converting to transparent PNG reduce quality?": "Je, kubadilisha picha kuwa PNG yenye uwazi hupunguza ubora?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Hapana. PNG huhifadhi picha bila kupoteza ubora, na faili inayotolewa hubaki na vipimo vya asili vya pikseli vya picha uliyoweka, hivyo hakuna kinachobanwa au kupunguzwa ukubwa."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Hapana. PNG huhifadhi picha bila kupoteza ubora, na faili inayotolewa hubaki na vipimo vya asili vya pikseli vya picha uliyoweka, hivyo hakuna kinachobanwa au kupunguzwa ukubwa.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Kwenye kifaa hiki, ukubwa wa picha hubadilishwa ili upande mrefu zaidi usizidi pikseli 2,048. Hali ya \"Mwenye busara\" hutumia modeli moja kwa watu na vitu.",
+  "Paste an image with Ctrl+V or ⌘V": "Bandika picha kwa Ctrl+V au ⌘V"
 }

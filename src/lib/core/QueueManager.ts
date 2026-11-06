@@ -66,7 +66,7 @@ interface ToolViews {
 
 const IMAGE_EXT = /\.(jpe?g|png|webp|gif|bmp|avif|svg|ico|tiff?)$/i;
 
-function isImageFile(f: File): boolean {
+export function isImageFile(f: File): boolean {
   return f.type.startsWith('image/') || IMAGE_EXT.test(f.name);
 }
 

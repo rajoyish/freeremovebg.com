@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "لماذا يظهر ملف PNG الذي قمت بتنزيله خلفية متقلبة؟",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "اللوحة المتقلبة الرمادية والبيضاء هي كيفية عرض عارضي الصور للشفافية — إنها ليست جزءاً من ملفك. ضع ملف PNG فوق أي خلفية وستظهر منطقة اللوحة المتقلبة أي شيء تحتها.",
   "Does converting to transparent PNG reduce quality?": "هل يؤدي التحويل إلى PNG شفاف إلى تقليل الجودة؟",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "لا. إن PNG صيغة غير منقوصة ويبقي التصدير أبعاد البكسل الأصلية لتحميلك، لذا لا يتم ضغط أي شيء أو تصغيره."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "لا. إن PNG صيغة غير منقوصة ويبقي التصدير أبعاد البكسل الأصلية لتحميلك، لذا لا يتم ضغط أي شيء أو تصغيره.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "على هذا الجهاز، يُعدَّل حجم الصور بحيث لا يتجاوز أطول ضلع ٢٬٠٤٨ بكسل. يستخدم الوضع الذكي النموذج نفسه للأشخاص والأشياء.",
+  "Paste an image with Ctrl+V or ⌘V": "الصق صورة باستخدام Ctrl+V أو ⌘V"
 }

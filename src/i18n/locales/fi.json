@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Miksi lataamani PNG-kuva näyttää ruudullisen taustan?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Harmaavalkoinen ruutukuvio on tapa, jolla kuvankatseluohjelmat näyttävät läpinäkyvyyden – se ei ole osa tiedostoasi. Sijoita PNG-kuva minkä tahansa taustan päälle, ja ruudullinen alue näyttää mitä sen alla on.",
   "Does converting to transparent PNG reduce quality?": "Heikentääkö läpinäkyväksi PNG:ksi muuntaminen laatua?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Ei. PNG on häviötön ja vienti säilyttää latauksesi alkuperäiset pikselimitat, joten mitään ei pakata tai pienennetä."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Ei. PNG on häviötön ja vienti säilyttää latauksesi alkuperäiset pikselimitat, joten mitään ei pakata tai pienennetä.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Tällä laitteella kuvien kokoa muutetaan niin, että pisin sivu on enintään 2 048 pikseliä. Älykäs tila käyttää samaa mallia ihmisille ja esineille.",
+  "Paste an image with Ctrl+V or ⌘V": "Liitä kuva painamalla Ctrl+V tai ⌘V"
 }

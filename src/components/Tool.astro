@@ -72,7 +72,7 @@ const toolStrings = {
           <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
         </svg>
         <p class="text-lg font-semibold text-ink mt-0 mb-2">{t.dropTitle}</p>
-        <p class="text-sm text-mute mt-0 mb-6">{t.dropSubtitle}</p>
+        <p class="text-sm text-mute mt-0 mb-6">{t.dropSubtitle}<br />{t.pasteHint}</p>
         <button id="browse-btn"
           class="px-6 py-2.5 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85]">
           {t.browse}
@@ -136,7 +136,7 @@ const toolStrings = {
   import { needsLowMemoryProcessing } from '../lib/core/processingPolicy';
   import type { ModelMode } from '../lib/core/model';
 
-  import { QueueManager } from '../lib/core/QueueManager';
+  import { isImageFile, QueueManager } from '../lib/core/QueueManager';
   import { ThumbsView } from '../lib/ui/thumbs';
   import { CardsView } from '../lib/ui/cards';
   import { ProgressView } from '../lib/ui/progress';
@@ -290,6 +290,26 @@ const toolStrings = {
     e.preventDefault();
     if (!uploadZone.classList.contains('has-files')) setDragState(false);
     if (e.dataTransfer?.files.length) queueManager.addFiles(Array.from(e.dataTransfer.files));
+  });
+  document.addEventListener('paste', (e) => {
+    if (e.defaultPrevented || !e.clipboardData) return;
+    // Let text fields and editors handle their own paste, including in shadow DOM.
+    if (e.composedPath().some(target => target instanceof HTMLElement && (
+      target.isContentEditable || target.matches('input, textarea, [role="textbox"]')
+    ))) return;
+
+    let images = Array.from(e.clipboardData.files).filter(isImageFile);
+    // Some browsers expose clipboard images only through the item list.
+    if (!images.length) {
+      images = Array.from(e.clipboardData.items)
+        .filter(item => item.kind === 'file')
+        .map(item => item.getAsFile())
+        .filter((file): file is File => file !== null && isImageFile(file));
+    }
+    if (!images.length) return;
+
+    e.preventDefault();
+    void queueManager.addFiles(images);
   });
   downloadAllBtn.addEventListener('click', () => { queueManager.downloadAll(); });
 </script>

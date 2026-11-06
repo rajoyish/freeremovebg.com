@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "De ce fișierul PNG descărcat are un fundal în carouri?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Tabla de șah alb-gri e modul în care vizualizatoarele de imagini indică transparența — nu face parte din fișierul tău. Dacă pui PNG-ul deasupra oricărui fundal, porțiunea cu carouri va fi înlocuită de tot ce se află sub el.",
   "Does converting to transparent PNG reduce quality?": "Conversia la un fișier PNG transparent reduce calitatea?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Nu. Formatul PNG se face fără pierderi de calitate, iar exportarea reține dimensiunile de pixeli originale ale încărcării tale, astfel încât nimic nu va fi comprimat sau micșorat."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Nu. Formatul PNG se face fără pierderi de calitate, iar exportarea reține dimensiunile de pixeli originale ale încărcării tale, astfel încât nimic nu va fi comprimat sau micșorat.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Pe acest dispozitiv, imaginile sunt redimensionate la cel mult 2.048 de pixeli pe latura cea mai lungă. Modul Inteligent folosește același model pentru persoane și obiecte.",
+  "Paste an image with Ctrl+V or ⌘V": "Lipește o imagine cu Ctrl+V sau ⌘V"
 }

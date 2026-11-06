@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Kenapa hasil gambar selepas disimpan kelihatan seolah berpapan catur?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Rona papan catur kelabu putih inilah tandanya tahap ketelusan pada paparan imej. PNG ini bertindak apabila digabung serta ditindih berpandukan pilihan letak kawasan di sebalik fail terbabit.",
   "Does converting to transparent PNG reduce quality?": "Adakah mutu resolusinya semakin lemah sewaktu diubah dalam format PNG ini?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Bukan sama sekali. Hakikat sebenar pada kehebatan saiz ukuran asalnya itu beroperasi tanpa mengurangkan resolusi kualiti imej walaupun sedikit, kekal menakjubkan sepenuhnya seakan fail dari asalnya."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Bukan sama sekali. Hakikat sebenar pada kehebatan saiz ukuran asalnya itu beroperasi tanpa mengurangkan resolusi kualiti imej walaupun sedikit, kekal menakjubkan sepenuhnya seakan fail dari asalnya.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Pada peranti ini, saiz imej diubah supaya sisi terpanjang tidak melebihi 2,048 piksel. Mod Pintar menggunakan model yang sama untuk orang dan objek.",
+  "Paste an image with Ctrl+V or ⌘V": "Tampal imej dengan Ctrl+V atau ⌘V"
 }

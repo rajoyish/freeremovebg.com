@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "İndirdiğim PNG neden kareli (dama tahtası) bir arka plan gösteriyor?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Gri-beyaz dama tahtası deseni, görüntüleyicilerin şeffaflığı nasıl gösterdiğidir; dosyanızın bir parçası değildir. PNG'yi herhangi bir arka planın üzerine yerleştirin; o desenli alan altında ne varsa onu gösterecektir.",
   "Does converting to transparent PNG reduce quality?": "Şeffaf PNG'ye dönüştürmek kaliteyi düşürür mü?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Hayır. PNG kayıpsızdır ve dışa aktarım işlemi yüklediğiniz görüntünün orijinal piksel boyutlarını korur, dolayısıyla hiçbir şey sıkıştırılmaz veya küçültülmez."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Hayır. PNG kayıpsızdır ve dışa aktarım işlemi yüklediğiniz görüntünün orijinal piksel boyutlarını korur, dolayısıyla hiçbir şey sıkıştırılmaz veya küçültülmez.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Bu cihazda görseller, en uzun kenarı en fazla 2.048 piksel olacak şekilde yeniden boyutlandırılır. Akıllı mod, insanlar ve nesneler için aynı modeli kullanır.",
+  "Paste an image with Ctrl+V or ⌘V": "Ctrl+V veya ⌘V ile görsel yapıştırın"
 }

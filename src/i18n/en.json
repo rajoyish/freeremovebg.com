@@ -37,6 +37,7 @@
     "mobileHint": "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.",
     "dropTitle": "Drop images here or click to upload",
     "dropSubtitle": "Supports JPG, PNG, WebP, GIF, BMP, AVIF and more · Multiple files supported",
+    "pasteHint": "Paste an image with Ctrl+V or ⌘V",
     "browse": "Browse Files",
     "addMore": "Add more",
     "processedImages": "Processed Images",

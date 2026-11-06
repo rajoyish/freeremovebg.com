@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Hvorfor har min downloadede PNG en ternet baggrund?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Det grå- og hvidternede mønster er måden, som billedfremvisere viser gennemsigtighed på – det er ikke en del af din fil. Placer PNG'en oven på en hvilken som helst baggrund, og det ternede område vil vise, hvad der ligger nedenunder.",
   "Does converting to transparent PNG reduce quality?": "Nedsættes kvaliteten ved konvertering til en gennemsigtig PNG?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Nej. PNG er tabsfrit, og eksporten beholder de oprindelige pixeldimensioner fra din upload, så intet komprimeres eller nedskaleres."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Nej. PNG er tabsfrit, og eksporten beholder de oprindelige pixeldimensioner fra din upload, så intet komprimeres eller nedskaleres.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "På denne enhed tilpasses billedstørrelsen, så den længste side er højst 2.048 pixels. Smart tilstand bruger samme model til personer og genstande.",
+  "Paste an image with Ctrl+V or ⌘V": "Indsæt et billede med Ctrl+V eller ⌘V"
 }

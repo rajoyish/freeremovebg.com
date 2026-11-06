@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "ਡਾਊਨਲੋਡ ਕੀਤੀ PNG ਵਿੱਚ ਚੌਖਾਨੇ ਵਾਲਾ ਬੈਕਗ੍ਰਾਊਂਡ ਕਿਉਂ ਦਿਸਦਾ ਹੈ?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "ਸਲੇਟੀ ਅਤੇ ਸਫ਼ੈਦ ਚੌਖਾਨੇ ਤਸਵੀਰ ਵੇਖਣ ਵਾਲੇ ਐਪਾਂ ਵਿੱਚ ਪਾਰਦਰਸ਼ਤਾ ਦਿਖਾਉਣ ਦਾ ਤਰੀਕਾ ਹਨ। ਇਹ ਫਾਈਲ ਦਾ ਹਿੱਸਾ ਨਹੀਂ। PNG ਨੂੰ ਕਿਸੇ ਬੈਕਗ੍ਰਾਊਂਡ ਉੱਤੇ ਰੱਖੋ ਅਤੇ ਚੌਖਾਨਿਆਂ ਵਾਲੀ ਥਾਂ ਤੋਂ ਹੇਠਲੀ ਚੀਜ਼ ਦਿਸੇਗੀ।",
   "Does converting to transparent PNG reduce quality?": "ਕੀ ਪਾਰਦਰਸ਼ੀ PNG ਵਿੱਚ ਬਦਲਣ ਨਾਲ ਗੁਣਵੱਤਾ ਘਟਦੀ ਹੈ?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "ਨਹੀਂ। PNG ਗੁਣਵੱਤਾ ਨਹੀਂ ਗੁਆਉਂਦਾ ਅਤੇ ਨਿਰਯਾਤ ਵੇਲੇ ਮੂਲ ਤਸਵੀਰ ਦੇ ਪਿਕਸਲ ਮਾਪ ਬਰਕਰਾਰ ਰਹਿੰਦੇ ਹਨ। ਇਸ ਲਈ ਕੁਝ ਵੀ ਕੰਪ੍ਰੈੱਸ ਜਾਂ ਛੋਟਾ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ।"
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "ਨਹੀਂ। PNG ਗੁਣਵੱਤਾ ਨਹੀਂ ਗੁਆਉਂਦਾ ਅਤੇ ਨਿਰਯਾਤ ਵੇਲੇ ਮੂਲ ਤਸਵੀਰ ਦੇ ਪਿਕਸਲ ਮਾਪ ਬਰਕਰਾਰ ਰਹਿੰਦੇ ਹਨ। ਇਸ ਲਈ ਕੁਝ ਵੀ ਕੰਪ੍ਰੈੱਸ ਜਾਂ ਛੋਟਾ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ।",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "ਇਸ ਡਿਵਾਈਸ 'ਤੇ ਤਸਵੀਰਾਂ ਦਾ ਆਕਾਰ ਇਸ ਤਰ੍ਹਾਂ ਬਦਲਿਆ ਜਾਂਦਾ ਹੈ ਕਿ ਸਭ ਤੋਂ ਲੰਮਾ ਕਿਨਾਰਾ ਵੱਧ ਤੋਂ ਵੱਧ 2,048 ਪਿਕਸਲ ਹੋਵੇ। ਸਮਾਰਟ ਮੋਡ ਲੋਕਾਂ ਅਤੇ ਵਸਤੂਆਂ ਲਈ ਇੱਕੋ ਮਾਡਲ ਵਰਤਦਾ ਹੈ।",
+  "Paste an image with Ctrl+V or ⌘V": "Ctrl+V ਜਾਂ ⌘V ਨਾਲ ਤਸਵੀਰ ਪੇਸਟ ਕਰੋ"
 }
