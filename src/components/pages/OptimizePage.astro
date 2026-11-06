@@ -7,7 +7,8 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../Header.astro';
 import Footer from '../Footer.astro';
 import Breadcrumb from '../Breadcrumb.astro';
-import { getDictionary } from '../../i18n/dictionaries';
+import { getDictionary, TOOL_LANGS } from '../../i18n/dictionaries';
+import { toolHref } from '../../i18n/routes';
 import { DEFAULT_LANG } from '../../i18n/config';
 import { FORMATS, OUTPUT_FORMATS } from '../../lib/transform/formats';
 
@@ -51,11 +52,11 @@ const formatChoices = [
   keywords={t.keywords}
   lang={lang}
   basePath="/optimize"
-  hreflangLangs={[DEFAULT_LANG]}
+  hreflangLangs={TOOL_LANGS}
 >
   <div class="min-h-screen flex flex-col">
-    <Header lang={lang} basePath="/optimize" availableLangs={[DEFAULT_LANG]} />
-    <Breadcrumb path="/optimize/" current={dict.nav.optimize} lang={lang} />
+    <Header lang={lang} basePath="/optimize" availableLangs={TOOL_LANGS} />
+    <Breadcrumb path={toolHref(lang, '/optimize')} current={dict.nav.optimize} lang={lang} />
 
     <main class="flex-1">
       <section class="px-6 pt-12 pb-8 text-center">
@@ -179,23 +180,23 @@ const formatChoices = [
         <img data-thumb alt="" class="w-full h-full object-cover" loading="lazy" />
       </div>
       <div class="min-w-0">
-        <p data-name class="text-sm font-medium text-ink m-0 truncate"></p>
+        <p data-name dir="auto" class="text-sm font-medium text-ink m-0 truncate"></p>
         <p class="m-0 flex items-center gap-2 text-xs text-mute">
           <span data-status></span>
           <span data-engine class="hidden font-mono text-[10px] uppercase tracking-wider px-1.5 py-px rounded-xs border border-hairline"></span>
         </p>
       </div>
     </div>
-    <span data-before class="hidden sm:block text-end font-mono text-xs text-body tabular-nums"></span>
-    <span data-after class="hidden sm:block text-end font-mono text-xs text-ink tabular-nums"></span>
+    <span data-before dir="ltr" class="hidden sm:block text-end font-mono text-xs text-body tabular-nums"></span>
+    <span data-after dir="ltr" class="hidden sm:block text-end font-mono text-xs text-ink tabular-nums"></span>
     <div class="hidden sm:flex items-center gap-2" data-saved-wrap>
       <div class="flex-1 h-1.5 bg-canvas-soft-2 rounded-pill overflow-hidden">
         <div data-bar class="h-full bg-link rounded-pill w-(--saved) [--saved:0%] transition-[width] duration-500"></div>
       </div>
-      <span data-saved class="w-10 text-end font-mono text-xs text-ink tabular-nums"></span>
+      <span data-saved dir="ltr" class="w-10 text-end font-mono text-xs text-ink tabular-nums"></span>
     </div>
     <div class="flex items-center justify-end gap-1">
-      <span data-mobile-saved class="sm:hidden font-mono text-xs text-ink tabular-nums me-1"></span>
+      <span data-mobile-saved dir="ltr" class="sm:hidden font-mono text-xs text-ink tabular-nums me-1"></span>
       <a data-download href="#" download class="hidden w-8 h-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-canvas-soft-2 focus-visible:outline-2 focus-visible:outline-link">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
       </a>
@@ -235,8 +236,10 @@ const formatChoices = [
     try { return JSON.parse(document.getElementById('optimize-i18n')?.textContent || '{}'); }
     catch { return {}; }
   })();
+  // Each value is wrapped in Unicode isolates (FSI…PDI) so a figure like
+  // "1.8 MB" keeps its own direction inside right-to-left sentences.
   const fill = (s: string, vars: Record<string, string | number>) =>
-    s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''));
+    s.replace(/\{(\w+)\}/g, (_, k) => `\u2068${vars[k] ?? ''}\u2069`);
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const dropZone = $('drop-zone');

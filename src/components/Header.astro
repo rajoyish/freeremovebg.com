@@ -2,7 +2,7 @@
 import LanguageSwitcher from './LanguageSwitcher.astro';
 import { getDictionary } from '../i18n/dictionaries';
 import { DEFAULT_LANG, LANGUAGES } from '../i18n/config';
-import { homeHref, pageHref } from '../i18n/routes';
+import { homeHref, pageHref, toolHref } from '../i18n/routes';
 
 interface Props {
   lang?: string;
@@ -30,10 +30,10 @@ const t = dict.nav;
 // English on the first click.
 const href = (p: string) => (p === '/' ? homeHref(lang) : pageHref(lang, p));
 
-// The converter and optimizer exist in English only for now, so every language
-// links to the one URL that is actually built.
-const TOOL_PATHS = new Set(['/convert', '/optimize']);
-const linkFor = (p: string) => (TOOL_PATHS.has(p) ? `${p}/` : href(p));
+// The converter and optimizer have their own translation gate (TOOL_LANGS),
+// separate from the content pages, so they get their own URL builder.
+const linkFor = (p: string) =>
+  p === '/convert' || p === '/optimize' ? toolHref(lang, p) : href(p);
 
 const currentPath = (basePath.replace(/\/$/, '') || '/');
 

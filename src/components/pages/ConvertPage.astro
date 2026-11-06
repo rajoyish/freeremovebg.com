@@ -6,7 +6,8 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../Header.astro';
 import Footer from '../Footer.astro';
 import Breadcrumb from '../Breadcrumb.astro';
-import { getDictionary } from '../../i18n/dictionaries';
+import { getDictionary, TOOL_LANGS } from '../../i18n/dictionaries';
+import { toolHref } from '../../i18n/routes';
 import { DEFAULT_LANG } from '../../i18n/config';
 import { FORMATS, OUTPUT_FORMATS } from '../../lib/transform/formats';
 
@@ -41,11 +42,11 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
   keywords={t.keywords}
   lang={lang}
   basePath="/convert"
-  hreflangLangs={[DEFAULT_LANG]}
+  hreflangLangs={TOOL_LANGS}
 >
   <div class="min-h-screen flex flex-col">
-    <Header lang={lang} basePath="/convert" availableLangs={[DEFAULT_LANG]} />
-    <Breadcrumb path="/convert/" current={dict.nav.convert} lang={lang} />
+    <Header lang={lang} basePath="/convert" availableLangs={TOOL_LANGS} />
+    <Breadcrumb path={toolHref(lang, '/convert')} current={dict.nav.convert} lang={lang} />
 
     <main class="flex-1">
       <section class="px-6 pt-12 pb-8 text-center">
@@ -86,11 +87,12 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
                 <img id="source-preview" alt="" class="hidden max-h-80 max-w-full object-contain" />
               </div>
 
-              <dl id="source-meta" class="hidden mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 font-mono text-xs m-0">
-                <dt class="text-mute">name</dt><dd id="meta-name" class="text-ink m-0 truncate"></dd>
-                <dt class="text-mute">size</dt><dd id="meta-size" class="text-ink m-0 tabular-nums"></dd>
-                <dt class="text-mute">type</dt><dd id="meta-type" class="text-ink m-0"></dd>
-              </dl>
+              <div id="source-meta" class="hidden mt-3 font-mono text-xs">
+                <p id="meta-name" dir="auto" class="text-ink m-0 truncate"></p>
+                <p class="text-mute m-0 mt-1 tabular-nums">
+                  <span id="meta-size" dir="ltr"></span> · <span id="meta-type" dir="ltr"></span>
+                </p>
+              </div>
 
               <input type="file" id="file-input" accept="image/*,.heic,.heif,.avif" class="hidden" />
             </div>
@@ -139,9 +141,9 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-3 flex-wrap font-mono text-sm tabular-nums">
-                  <span><span class="text-mute">{t.original}</span> <span id="size-before" class="text-ink"></span></span>
+                  <span><span class="text-mute">{t.original}</span> <span id="size-before" dir="ltr" class="text-ink"></span></span>
                   <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="text-mute rtl:rotate-180" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
-                  <span><span class="text-mute">{t.converted}</span> <span id="size-after" class="text-ink font-semibold"></span></span>
+                  <span><span class="text-mute">{t.converted}</span> <span id="size-after" dir="ltr" class="text-ink font-semibold"></span></span>
                   <span id="size-delta" class="px-2 py-0.5 rounded-pill text-xs font-medium"></span>
                 </div>
                 <p id="engine-badge" class="inline-flex items-center gap-1.5 mt-3 mb-0 text-xs text-mute">
@@ -197,8 +199,10 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
     try { return JSON.parse(document.getElementById('convert-i18n')?.textContent || '{}'); }
     catch { return {}; }
   })();
+  // Each value is wrapped in Unicode isolates (FSI…PDI) so a figure like
+  // "1.8 MB" keeps its own direction inside right-to-left sentences.
   const fill = (s: string, vars: Record<string, string | number>) =>
-    s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''));
+    s.replace(/\{(\w+)\}/g, (_, k) => `\u2068${vars[k] ?? ''}\u2069`);
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
   const dropZone = $('drop-zone');

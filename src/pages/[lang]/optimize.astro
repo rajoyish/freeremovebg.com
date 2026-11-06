@@ -1,0 +1,18 @@
+---
+import OptimizePage from '../../components/pages/OptimizePage.astro';
+import { TOOL_LANGS } from '../../i18n/dictionaries';
+import { DEFAULT_LANG } from '../../i18n/config';
+
+// Only languages whose locale file carries every converter and optimizer
+// string, so an untranslated language never gets English prose under a
+// /<lang>/ URL.
+export function getStaticPaths() {
+  return TOOL_LANGS.filter((lang) => lang !== DEFAULT_LANG).map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params;
+---
+
+<OptimizePage lang={lang} />
