@@ -131,6 +131,10 @@ export default defineConfig({
         "@huggingface/transformers",
         "@imgly/background-removal",
         "onnxruntime-web",
+        // The converter/optimizer WASM encoders locate their .wasm files via
+        // import.meta.url, which pre-bundling would break.
+        "@jsquash/avif",
+        "@jsquash/webp",
       ],
     },
     build: {

@@ -30,10 +30,17 @@ const t = dict.nav;
 // English on the first click.
 const href = (p: string) => (p === '/' ? homeHref(lang) : pageHref(lang, p));
 
+// The converter and optimizer exist in English only for now, so every language
+// links to the one URL that is actually built.
+const TOOL_PATHS = new Set(['/convert', '/optimize']);
+const linkFor = (p: string) => (TOOL_PATHS.has(p) ? `${p}/` : href(p));
+
 const currentPath = (basePath.replace(/\/$/, '') || '/');
 
 const navLinks = [
   { path: '/', label: t.home },
+  { path: '/convert', label: t.convert },
+  { path: '/optimize', label: t.optimize },
   { path: '/about', label: t.about },
   { path: '/privacy-policy', label: t.privacy },
   { path: '/terms', label: t.terms },
@@ -56,10 +63,10 @@ const switcherPath = currentPath === '/' ? '/' : `${currentPath}/`;
         <span class="text-lg font-semibold tracking-tight text-ink truncate">FreeRemoveBG</span>
       </a>
 
-      <nav class="hidden md:flex items-center gap-6" aria-label="Main">
+      <nav class="hidden lg:flex items-center gap-6" aria-label="Main">
         {navLinks.map(({ path, label }) => (
           <a
-            href={href(path)}
+            href={linkFor(path)}
             class:list={[
               'text-sm no-underline transition-colors',
               isActive(path) ? 'font-bold text-ink' : 'text-body hover:text-ink',
@@ -104,7 +111,7 @@ const switcherPath = currentPath === '/' ? '/' : `${currentPath}/`;
           aria-label={t.openMenu}
           aria-expanded="false"
           aria-controls="mobile-menu"
-          class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-hairline bg-canvas-soft-2 cursor-pointer transition-colors hover:border-hairline-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+          class="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-md border border-hairline bg-canvas-soft-2 cursor-pointer transition-colors hover:border-hairline-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
           <svg id="menu-icon-open" class="w-5 h-5 text-ink" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -115,12 +122,12 @@ const switcherPath = currentPath === '/' ? '/' : `${currentPath}/`;
       </div>
     </div>
 
-    <nav id="mobile-menu" class="hidden md:hidden border-t border-hairline py-4" aria-label="Mobile">
+    <nav id="mobile-menu" class="hidden lg:hidden border-t border-hairline py-4" aria-label="Mobile">
       <ul class="flex flex-col gap-1 list-none m-0 p-0">
         {navLinks.map(({ path, label }) => (
           <li>
             <a
-              href={href(path)}
+              href={linkFor(path)}
               class:list={[
                 'block px-3 py-2.5 text-sm no-underline rounded-md transition-colors',
                 isActive(path) ? 'font-bold text-ink bg-canvas-soft-2' : 'text-body hover:bg-canvas-soft-2 hover:text-ink',

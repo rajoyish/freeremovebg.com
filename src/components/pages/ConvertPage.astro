@@ -1,0 +1,366 @@
+---
+// Single-image format converter (/convert). The engine is hybrid: Cloudflare's
+// edge first, the visitor's browser on any failure (src/lib/transform/).
+// Copy lives in en.json under `converter`.
+import Layout from '../../layouts/Layout.astro';
+import Header from '../Header.astro';
+import Footer from '../Footer.astro';
+import Breadcrumb from '../Breadcrumb.astro';
+import { getDictionary } from '../../i18n/dictionaries';
+import { DEFAULT_LANG } from '../../i18n/config';
+import { FORMATS, OUTPUT_FORMATS } from '../../lib/transform/formats';
+
+interface Props {
+  lang?: string;
+}
+
+const { lang = DEFAULT_LANG } = Astro.props;
+const dict = getDictionary(lang);
+const t = dict.converter;
+
+const strings = {
+  convert: t.convert,
+  converting: t.converting,
+  smaller: t.smaller,
+  larger: t.larger,
+  sameSize: t.sameSize,
+  engineEdge: t.engineEdge,
+  engineLocal: t.engineLocal,
+  download: t.download,
+  notImage: t.notImage,
+  oneAtATime: t.oneAtATime,
+  failed: t.failed,
+};
+
+const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.formatHints[id] }));
+---
+
+<Layout
+  title={t.title}
+  description={t.description}
+  keywords={t.keywords}
+  lang={lang}
+  basePath="/convert"
+  hreflangLangs={[DEFAULT_LANG]}
+>
+  <div class="min-h-screen flex flex-col">
+    <Header lang={lang} basePath="/convert" availableLangs={[DEFAULT_LANG]} />
+    <Breadcrumb path="/convert/" current={dict.nav.convert} lang={lang} />
+
+    <main class="flex-1">
+      <section class="px-6 pt-12 pb-8 text-center">
+        <div class="max-w-190 mx-auto">
+          <h1 class="text-[clamp(2rem,5vw,3.25rem)] font-semibold tracking-[-2px] leading-[1.1] mt-0 mb-5 text-ink text-balance">{t.h1}</h1>
+          <p class="text-lg text-body leading-[1.7] mt-0 mb-6 max-w-150 mx-auto">{t.intro}</p>
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-canvas-soft-2 border border-hairline rounded-pill text-[13px] text-body font-medium">
+            <svg width="14" height="14" fill="none" class="stroke-link" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+            {t.badge}
+          </div>
+        </div>
+      </section>
+
+      <section class="px-6 pb-16">
+        <div id="converter" class="max-w-240 mx-auto bg-canvas border border-hairline rounded-lg shadow-sm overflow-hidden">
+          <div class="grid md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+
+            <!-- Source -->
+            <div class="p-5 sm:p-6 border-b md:border-b-0 md:border-r border-hairline">
+              <div class="flex items-center justify-between gap-3 mb-3">
+                <span class="font-mono text-xs uppercase tracking-wider text-mute">{t.sourceLabel}</span>
+                <button id="replace-btn" type="button"
+                  class="hidden text-[13px] font-medium text-ink bg-transparent border border-hairline rounded-pill px-3 py-1 cursor-pointer transition-colors hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+                  {t.replace}
+                </button>
+              </div>
+
+              <div id="drop-zone" role="button" tabindex="0" aria-label={t.browse}
+                class="group relative flex min-h-80 items-center justify-center rounded-md border-2 border-dashed border-hairline-strong bg-canvas-soft cursor-pointer transition-colors hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link data-[drag=true]:border-ink data-[drag=true]:bg-canvas-soft-2 data-[filled=true]:border-solid data-[filled=true]:border-hairline data-[filled=true]:cursor-default data-[filled=true]:bg-checkerboard">
+                <div id="drop-empty" class="px-6 py-10 text-center">
+                  <div class="w-12 h-12 mx-auto mb-4 rounded-[10px] bg-ink flex items-center justify-center">
+                    <svg width="22" height="22" fill="none" class="stroke-on-primary" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></svg>
+                  </div>
+                  <p class="text-base font-semibold text-ink mt-0 mb-1">{t.dropTitle}</p>
+                  <p class="text-sm text-mute mt-0 mb-5">{t.dropSubtitle}</p>
+                  <span class="inline-block px-5 py-2 bg-ink text-on-primary rounded-pill text-sm font-medium transition-opacity group-hover:opacity-[0.85]">{t.browse}</span>
+                </div>
+                <img id="source-preview" alt="" class="hidden max-h-80 max-w-full object-contain" />
+              </div>
+
+              <dl id="source-meta" class="hidden mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 font-mono text-xs m-0">
+                <dt class="text-mute">name</dt><dd id="meta-name" class="text-ink m-0 truncate"></dd>
+                <dt class="text-mute">size</dt><dd id="meta-size" class="text-ink m-0 tabular-nums"></dd>
+                <dt class="text-mute">type</dt><dd id="meta-type" class="text-ink m-0"></dd>
+              </dl>
+
+              <input type="file" id="file-input" accept="image/*,.heic,.heif,.avif" class="hidden" />
+            </div>
+
+            <!-- Options -->
+            <div class="p-5 sm:p-6 flex flex-col">
+              <fieldset class="border-0 p-0 m-0">
+                <legend class="font-mono text-xs uppercase tracking-wider text-mute mb-3 p-0">{t.formatLabel}</legend>
+                <div class="grid grid-cols-2 gap-2.5">
+                  {formats.map((f, i) => (
+                    <label class="relative block cursor-pointer rounded-md border border-hairline bg-canvas p-3 transition-colors hover:border-hairline-strong has-checked:border-ink has-checked:bg-canvas-soft-2 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-link">
+                      <input type="radio" name="format" value={f.id} checked={i === 0} class="sr-only" data-label={f.label} data-lossy={String(f.lossy)} />
+                      <span class="flex items-baseline justify-between gap-2">
+                        <span class="text-base font-semibold text-ink">{f.label}</span>
+                        <span class="font-mono text-[11px] text-mute">.{f.ext}</span>
+                      </span>
+                      <span class="block mt-1 text-xs text-body leading-snug">{f.hint}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div class="mt-6">
+                <div class="flex items-center justify-between mb-2">
+                  <label for="quality" class="font-mono text-xs uppercase tracking-wider text-mute">{t.qualityLabel}</label>
+                  <output id="quality-value" for="quality" class="font-mono text-sm font-medium text-ink tabular-nums">80</output>
+                </div>
+                <input id="quality" type="range" min="1" max="100" value="80" class="w-full accent-ink cursor-pointer disabled:cursor-not-allowed disabled:opacity-40" />
+                <p id="quality-note" class="text-xs text-mute mt-2 mb-0 min-h-4" data-lossless={t.qualityLossless} data-jpeg={t.jpegFlatten}></p>
+              </div>
+
+              <button id="convert-btn" type="button" disabled
+                class="mt-6 md:mt-auto w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85] disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+                <span id="convert-spinner" class="hidden w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin" aria-hidden="true"></span>
+                <span id="convert-label">{t.convert.replace('{format}', formats[0].label)}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Result -->
+          <div id="result" class="hidden border-t border-hairline bg-canvas-soft p-5 sm:p-6" aria-live="polite">
+            <h2 class="text-lg font-semibold text-ink mt-0 mb-4">{t.resultHeading}</h2>
+            <div class="flex flex-col sm:flex-row gap-5 sm:items-center">
+              <div class="shrink-0 w-full sm:w-36 h-36 rounded-md border border-hairline bg-checkerboard flex items-center justify-center overflow-hidden">
+                <img id="result-preview" alt="" class="max-w-full max-h-full object-contain" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-3 flex-wrap font-mono text-sm tabular-nums">
+                  <span><span class="text-mute">{t.original}</span> <span id="size-before" class="text-ink"></span></span>
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="text-mute rtl:rotate-180" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+                  <span><span class="text-mute">{t.converted}</span> <span id="size-after" class="text-ink font-semibold"></span></span>
+                  <span id="size-delta" class="px-2 py-0.5 rounded-pill text-xs font-medium"></span>
+                </div>
+                <p id="engine-badge" class="inline-flex items-center gap-1.5 mt-3 mb-0 text-xs text-mute">
+                  <span id="engine-dot" class="w-1.5 h-1.5 rounded-full"></span>
+                  <span id="engine-label"></span>
+                </p>
+              </div>
+              <div class="flex flex-col gap-2 sm:items-end">
+                <a id="download-link" href="#" download
+                  class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-ink text-on-primary rounded-pill text-sm font-medium no-underline transition-opacity hover:opacity-[0.85] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  <span id="download-label"></span>
+                </a>
+                <button id="another-btn" type="button"
+                  class="text-[13px] font-medium text-body bg-transparent border-none cursor-pointer underline-offset-4 hover:text-ink hover:underline">
+                  {t.another}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="px-6 py-16 bg-canvas-soft-2 border-t border-hairline">
+        <div class="max-w-240 mx-auto">
+          <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] text-ink mt-0 mb-8 text-center">{t.guideHeading}</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            {t.guide.map((g) => (
+              <div class="bg-canvas border border-hairline rounded-lg p-5">
+                <h3 class="font-mono text-sm font-semibold text-ink mt-0 mb-2">{g.title}</h3>
+                <p class="text-sm text-body leading-relaxed m-0">{g.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <Footer lang={lang} />
+  </div>
+</Layout>
+
+<div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none"></div>
+
+<script is:inline type="application/json" id="convert-i18n" set:html={JSON.stringify(strings)} />
+
+<script>
+  import { HybridProcessor } from '../../lib/transform/hybrid';
+  import { FORMATS, formatBytes, formatFromMime, isOutputFormat, isRasterImage, outputName, percentChange, type OutputFormat } from '../../lib/transform/formats';
+  import { showToast } from '../../lib/ui/toast';
+
+  const I18N: Record<string, string> = (() => {
+    try { return JSON.parse(document.getElementById('convert-i18n')?.textContent || '{}'); }
+    catch { return {}; }
+  })();
+  const fill = (s: string, vars: Record<string, string | number>) =>
+    s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''));
+
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  const dropZone = $('drop-zone');
+  const dropEmpty = $('drop-empty');
+  const fileInput = $<HTMLInputElement>('file-input');
+  const replaceBtn = $('replace-btn');
+  const sourcePreview = $<HTMLImageElement>('source-preview');
+  const sourceMeta = $('source-meta');
+  const quality = $<HTMLInputElement>('quality');
+  const qualityValue = $<HTMLOutputElement>('quality-value');
+  const qualityNote = $('quality-note');
+  const convertBtn = $<HTMLButtonElement>('convert-btn');
+  const convertLabel = $('convert-label');
+  const convertSpinner = $('convert-spinner');
+  const result = $('result');
+  const resultPreview = $<HTMLImageElement>('result-preview');
+  const downloadLink = $<HTMLAnchorElement>('download-link');
+  const toastContainer = $('toast-container');
+  const formatInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="format"]'));
+
+  const processor = new HybridProcessor();
+  const state = {
+    file: null as File | null,
+    sourceUrl: '',
+    resultUrl: '',
+    busy: false,
+  };
+
+  const selectedFormat = (): OutputFormat => {
+    const v = formatInputs.find((i) => i.checked)?.value;
+    return isOutputFormat(v) ? v : 'webp';
+  };
+
+  function syncControls() {
+    const format = selectedFormat();
+    const lossy = FORMATS[format].lossy;
+    quality.disabled = !lossy || state.busy;
+    qualityNote.textContent = !lossy ? qualityNote.dataset.lossless || ''
+      : format === 'jpeg' ? qualityNote.dataset.jpeg || '' : '';
+    convertLabel.textContent = state.busy ? I18N.converting : fill(I18N.convert, { format: FORMATS[format].label });
+    convertBtn.disabled = !state.file || state.busy;
+    convertSpinner.classList.toggle('hidden', !state.busy);
+    formatInputs.forEach((i) => { i.disabled = state.busy; });
+  }
+
+  function clearResult() {
+    if (state.resultUrl) URL.revokeObjectURL(state.resultUrl);
+    state.resultUrl = '';
+    resultPreview.removeAttribute('src');
+    result.classList.add('hidden');
+  }
+
+  function setFile(file: File | null) {
+    clearResult();
+    if (state.sourceUrl) URL.revokeObjectURL(state.sourceUrl);
+    state.file = file;
+    state.sourceUrl = file ? URL.createObjectURL(file) : '';
+
+    dropZone.dataset.filled = String(!!file);
+    dropZone.setAttribute('tabindex', file ? '-1' : '0');
+    dropEmpty.classList.toggle('hidden', !!file);
+    sourcePreview.classList.toggle('hidden', !file);
+    sourceMeta.classList.toggle('hidden', !file);
+    replaceBtn.classList.toggle('hidden', !file);
+
+    if (file) {
+      sourcePreview.src = state.sourceUrl;
+      sourcePreview.alt = file.name;
+      $('meta-name').textContent = file.name;
+      $('meta-name').title = file.name;
+      $('meta-size').textContent = formatBytes(file.size);
+      $('meta-type').textContent = file.type || file.name.split('.').pop()?.toLowerCase() || '–';
+      sourcePreview.onload = () => {
+        $('meta-size').textContent = `${formatBytes(file.size)} · ${sourcePreview.naturalWidth}×${sourcePreview.naturalHeight}`;
+      };
+      // Don't offer a no-op: converting WebP to WebP is what people do by accident.
+      if (formatFromMime(file.type) === selectedFormat()) {
+        const next = formatInputs.find((i) => i.value !== selectedFormat());
+        if (next) next.checked = true;
+      }
+    }
+    syncControls();
+  }
+
+  function acceptFiles(files: File[]) {
+    if (state.busy || !files.length) return;
+    const images = files.filter(isRasterImage);
+    if (!images.length) { showToast(toastContainer, I18N.notImage, 6000); return; }
+    if (files.length > 1) showToast(toastContainer, I18N.oneAtATime, 8000);
+    setFile(images[0]);
+  }
+
+  async function convert() {
+    const file = state.file;
+    if (!file || state.busy) return;
+    const format = selectedFormat();
+    state.busy = true;
+    clearResult();
+    syncControls();
+    try {
+      const { blob, engine } = await processor.process(file, { format, quality: Number(quality.value) });
+      if (state.file !== file) return; // replaced while converting
+      state.resultUrl = URL.createObjectURL(blob);
+      resultPreview.src = state.resultUrl;
+      resultPreview.alt = file.name;
+
+      $('size-before').textContent = formatBytes(file.size);
+      $('size-after').textContent = formatBytes(blob.size);
+      const pct = percentChange(file.size, blob.size);
+      const delta = $('size-delta');
+      delta.textContent = pct < 0 ? fill(I18N.smaller, { percent: -pct })
+        : pct > 0 ? fill(I18N.larger, { percent: pct }) : I18N.sameSize;
+      delta.className = `px-2 py-0.5 rounded-pill text-xs font-medium ${pct < 0 ? 'bg-link/10 text-link' : 'bg-canvas-soft-2 text-body border border-hairline'}`;
+
+      $('engine-label').textContent = engine === 'edge' ? I18N.engineEdge : I18N.engineLocal;
+      $('engine-dot').className = `w-1.5 h-1.5 rounded-full ${engine === 'edge' ? 'bg-link' : 'bg-ink'}`;
+
+      downloadLink.href = state.resultUrl;
+      downloadLink.download = outputName(file.name, format, new Set());
+      $('download-label').textContent = fill(I18N.download, { format: FORMATS[format].label });
+      result.classList.remove('hidden');
+      result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (error) {
+      console.error('[convert]', error);
+      showToast(toastContainer, I18N.failed, 8000);
+    } finally {
+      state.busy = false;
+      syncControls();
+    }
+  }
+
+  const openPicker = () => { if (!state.busy) fileInput.click(); };
+
+  dropZone.addEventListener('click', () => { if (!state.file) openPicker(); });
+  dropZone.addEventListener('keydown', (e) => {
+    if (!state.file && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openPicker(); }
+  });
+  replaceBtn.addEventListener('click', openPicker);
+  fileInput.addEventListener('change', () => {
+    acceptFiles(Array.from(fileInput.files || []));
+    fileInput.value = '';
+  });
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.dataset.drag = 'true'; });
+  dropZone.addEventListener('dragleave', () => { dropZone.dataset.drag = 'false'; });
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.dataset.drag = 'false';
+    acceptFiles(Array.from(e.dataTransfer?.files || []));
+  });
+  document.addEventListener('paste', (e) => {
+    if (e.defaultPrevented || !e.clipboardData) return;
+    if (e.composedPath().some((t) => t instanceof HTMLElement && (t.isContentEditable || t.matches('input, textarea, [role="textbox"]')))) return;
+    const files = Array.from(e.clipboardData.files).filter(isRasterImage);
+    if (!files.length) return;
+    e.preventDefault();
+    acceptFiles(files);
+  });
+
+  quality.addEventListener('input', () => { qualityValue.textContent = quality.value; });
+  formatInputs.forEach((i) => i.addEventListener('change', syncControls));
+  convertBtn.addEventListener('click', () => { void convert(); });
+  $('another-btn').addEventListener('click', () => { setFile(null); openPicker(); });
+
+  syncControls();
+</script>
