@@ -415,7 +415,7 @@ const formatChoices = [
     item.status = 'working';
     renderAll();
     try {
-      const { blob, engine } = await processor.process(item.file, { format: target, quality: q });
+      const { blob, engine } = await processor.process(item.file, { format: target, quality: q, pngPalette: true });
       releaseResult(item);
       // Same format and no smaller: hand back the original rather than a
       // "compressed" file that is bigger than what the visitor started with.

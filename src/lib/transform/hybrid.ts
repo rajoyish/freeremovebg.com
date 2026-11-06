@@ -17,6 +17,8 @@ export type Engine = 'edge' | 'local';
 export interface HybridOptions {
   format: OutputFormat;
   quality: number;
+  /** Passed to the local engine; PNG never runs at the edge. */
+  pngPalette?: boolean;
 }
 
 export interface HybridResult {

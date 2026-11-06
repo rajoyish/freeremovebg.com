@@ -11,6 +11,11 @@ import { FORMATS, type OutputFormat } from './formats';
 export interface LocalOptions {
   format: OutputFormat;
   quality: number;
+  /**
+   * PNG only: reduce to a palette sized by `quality` (see pngColorsFor). The
+   * optimizer sets it; the converter leaves PNG output lossless.
+   */
+  pngPalette?: boolean;
 }
 
 type WorkerResponse = { id: number; ok: true; buffer: ArrayBuffer } | { id: number; ok: false; error: string };
@@ -42,7 +47,7 @@ function getWorker(): Worker {
   return (worker = w);
 }
 
-function encodeInWorker(format: 'avif' | 'webp', image: ImageData, quality: number): Promise<ArrayBuffer> {
+function encodeInWorker(format: 'avif' | 'webp' | 'png', image: ImageData, quality: number): Promise<ArrayBuffer> {
   return new Promise((resolve, reject) => {
     const id = ++nextId;
     const timer = setTimeout(() => {
@@ -73,7 +78,7 @@ function flattenOnWhite(source: HTMLCanvasElement): HTMLCanvasElement {
   return canvas;
 }
 
-export async function encodeLocally(file: File, { format, quality }: LocalOptions): Promise<Blob> {
+export async function encodeLocally(file: File, { format, quality, pngPalette }: LocalOptions): Promise<Blob> {
   const { mime } = FORMATS[format];
   const canvases: HTMLCanvasElement[] = [];
   try {
@@ -84,7 +89,8 @@ export async function encodeLocally(file: File, { format, quality }: LocalOption
       canvases.push(canvas);
     }
 
-    if (format !== 'avif') {
+    const viaWorker = format === 'avif' || (format === 'png' && pngPalette);
+    if (!viaWorker) {
       const blob = await canvasToBlob(canvas, mime, quality);
       // Browsers that cannot write a type silently return PNG instead.
       if (blob && blob.type === mime) return blob;
@@ -94,7 +100,7 @@ export async function encodeLocally(file: File, { format, quality }: LocalOption
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Canvas 2D context is unavailable in this browser.');
     const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const buffer = await encodeInWorker(format as 'avif' | 'webp', image, quality);
+    const buffer = await encodeInWorker(format as 'avif' | 'webp' | 'png', image, quality);
     return new Blob([buffer], { type: mime });
   } finally {
     // Release canvas backing stores now rather than at the next GC; mobile

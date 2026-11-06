@@ -81,6 +81,18 @@ export function formatBytes(bytes: number): string {
   return `${value < 10 ? value.toFixed(1) : Math.round(value)} ${units[i]}`;
 }
 
+/**
+ * Palette size for the optimizer's PNG output. Canvas PNGs are lossless and
+ * barely compressed, so re-encoding one never makes it smaller. The optimizer
+ * shrinks PNGs the way TinyPNG does instead: it reduces them to a palette of
+ * at most 256 colours (alpha included) and writes an indexed PNG. Quality 100
+ * stays lossless (0 = keep every colour); lower settings use fewer colours.
+ */
+export function pngColorsFor(quality: number): number {
+  if (!Number.isFinite(quality) || quality >= 100) return 0;
+  return Math.max(16, Math.min(256, Math.round((256 * quality) / 100)));
+}
+
 /** Signed percentage change from `before` to `after`, e.g. -42 for 42% smaller. */
 export function percentChange(before: number, after: number): number {
   if (!before) return 0;
