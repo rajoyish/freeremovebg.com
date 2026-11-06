@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Kodėl atsisiųstas PNG rodo languotą foną?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Pilki ir balti langeliai yra vaizdų peržiūros programų būdas rodyti skaidrumą, o ne jūsų failo dalis. Uždėkite PNG ant bet kokio fono ir languotoje srityje matysite tai, kas yra po juo.",
   "Does converting to transparent PNG reduce quality?": "Ar konvertavimas į skaidrų PNG mažina kokybę?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Ne. PNG yra nenuostolingas formatas, o eksportas išsaugo pradinius vaizdo matmenis pikseliais. Niekas neglaudinama prarandant kokybę ir nemažinama."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Ne. PNG yra nenuostolingas formatas, o eksportas išsaugo pradinius vaizdo matmenis pikseliais. Niekas neglaudinama prarandant kokybę ir nemažinama.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Šiame įrenginyje vaizdų dydis keičiamas taip, kad ilgiausia kraštinė būtų ne didesnė nei 2 048 pikseliai. Išmanusis režimas naudoja tą patį modelį žmonėms ir daiktams.",
+  "Paste an image with Ctrl+V or ⌘V": "Įklijuokite vaizdą paspaudę Ctrl+V arba ⌘V"
 }

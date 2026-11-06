@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Miks näitab allalaaditud PNG ruudulist tausta?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Hallvalge maleruut on pildivaaturite viis läbipaistvust näidata ega ole teie faili osa. Asetage PNG mis tahes taustale ja ruudulises alas näete seda, mis on pildi all.",
   "Does converting to transparent PNG reduce quality?": "Kas läbipaistvaks PNG-ks teisendamine vähendab kvaliteeti?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Ei. PNG on kadudeta vorming ning eksport säilitab pildi algsed pikslimõõtmed. Midagi ei tihendata kvaliteedikaoga ega vähendata."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Ei. PNG on kadudeta vorming ning eksport säilitab pildi algsed pikslimõõtmed. Midagi ei tihendata kvaliteedikaoga ega vähendata.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Selles seadmes muudetakse piltide suurust nii, et pikim külg oleks kuni 2048 pikslit. Nutikas režiim kasutab inimeste ja esemete jaoks sama mudelit.",
+  "Paste an image with Ctrl+V or ⌘V": "Kleebi pilt klahvidega Ctrl+V või ⌘V"
 }

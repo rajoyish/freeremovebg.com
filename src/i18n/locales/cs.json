@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Proč mé stažené PNG zobrazuje šachovnicové pozadí?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Šedobílá šachovnice je to, jak prohlížeče obrázků zobrazují průhlednost — není to součást vašeho souboru. Umístěte PNG nad jakékoliv pozadí a namísto oblasti s šachovnicí se objeví pozadí, které jste zvolili.",
   "Does converting to transparent PNG reduce quality?": "Snižuje konverze na průhledné PNG kvalitu?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Ne. PNG je bezeztrátový a náš export zachovává původní rozměry vašeho obrázku, tudíž nenastává žádná komprese nebo zmenšení."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Ne. PNG je bezeztrátový a náš export zachovává původní rozměry vašeho obrázku, tudíž nenastává žádná komprese nebo zmenšení.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Na tomto zařízení se velikost obrázků upraví tak, aby delší strana měla nejvýše 2 048 pixelů. Chytrý režim používá stejný model pro lidi i předměty.",
+  "Paste an image with Ctrl+V or ⌘V": "Vložte obrázek pomocí Ctrl+V nebo ⌘V"
 }

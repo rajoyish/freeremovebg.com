@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "למה ה-PNG שהורדתי מראה רקע משובץ?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "לוח השחמט האפור והלבן הוא הדרך בה מציגי תמונות מציגים שקיפות — זה לא חלק מהקובץ שלך. הנח את ה-PNG מעל כל רקע ואזור לוח השחמט יראה כל מה שנמצא מתחתיו.",
   "Does converting to transparent PNG reduce quality?": "האם ההמרה ל-PNG שקוף מפחיתה את האיכות?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "לא. PNG הוא ללא אובדן איכות והייצוא שומר על ממדי הפיקסלים המקוריים של ההעלאה שלך, כך ששום דבר לא נדחס או מוקטן."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "לא. PNG הוא ללא אובדן איכות והייצוא שומר על ממדי הפיקסלים המקוריים של ההעלאה שלך, כך ששום דבר לא נדחס או מוקטן.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "במכשיר הזה, גודל התמונות מותאם כך שהצלע הארוכה ביותר לא תעלה על 2,048 פיקסלים. המצב החכם משתמש באותו מודל לאנשים ולחפצים.",
+  "Paste an image with Ctrl+V or ⌘V": "הדביקו תמונה באמצעות Ctrl+V או ⌘V"
 }

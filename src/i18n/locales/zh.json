@@ -313,5 +313,7 @@
   "remove background from profile picture, profile photo background remover, transparent profile picture, headshot background removal, linkedin profile photo background": "头像去背景, 头像抠图, 透明头像png, 证件照换背景, 个人头像处理",
   "batch background removal, remove background from multiple images, bulk background remover, batch transparent png, mass image background removal": "批量抠图, 批量去除背景, 多张图片去背景, 批量处理图片背景, 批量透明png",
   "remove background from logo, transparent logo png, logo background remover, make logo background transparent, logo white background removal": "logo去背景, 标志抠图, 透明logo png, 商标去白底, logo透明背景制作",
-  "transparent png maker, make image background transparent, transparent background maker, png transparency tool, create transparent png online": "透明png制作, 制作透明背景, 在线生成透明png, 图片背景透明化, 透明底图片制作"
+  "transparent png maker, make image background transparent, transparent background maker, png transparency tool, create transparent png online": "透明png制作, 制作透明背景, 在线生成透明png, 图片背景透明化, 透明底图片制作",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "在此设备上，图片会缩放至最长边不超过 2,048 像素。智能模式使用同一个模型处理人物和物体。",
+  "Paste an image with Ctrl+V or ⌘V": "按 Ctrl+V 或 ⌘V 粘贴图片"
 }

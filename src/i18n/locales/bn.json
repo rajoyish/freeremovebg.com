@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "আমার ডাউনলোড করা পিএনজি ছবিতে চেকার্ড ব্যাকগ্রাউন্ড দেখাচ্ছে কেন?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "ধূসর-সাদা চেকারবোর্ড হলো ইমেজ ভিউয়ারদের ট্রান্সপারেন্সি দেখানোর একটি মাধ্যম — এটি আপনার ছবির কোনো অংশ নয়। পিএনজি ছবিটি যেকোনো ব্যাকড্রপের ওপর রাখলে এই চেকারবোর্ডের স্থানে নিচের ছবিটিই দেখা যাবে।",
   "Does converting to transparent PNG reduce quality?": "ট্রান্সপারেন্ট পিএনজি-তে রূপান্তর করলে কি ছবির কোয়ালিটি কমে যায়?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "না। পিএনজি হলো লসলেস ফরম্যাট এবং এক্সপোর্ট করার পর ছবির আসল পিক্সেল ডাইমেনশন অবিকৃত থাকে, ফলে ছবিটি কোনোভাবেই কম্প্রেস বা ডাউনস্কেল হয় না।"
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "না। পিএনজি হলো লসলেস ফরম্যাট এবং এক্সপোর্ট করার পর ছবির আসল পিক্সেল ডাইমেনশন অবিকৃত থাকে, ফলে ছবিটি কোনোভাবেই কম্প্রেস বা ডাউনস্কেল হয় না।",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "এই ডিভাইসে ছবির আকার এমনভাবে বদলানো হয়, যাতে দীর্ঘতম দিক সর্বোচ্চ ২,০৪৮ পিক্সেল হয়। স্মার্ট মোড মানুষ ও বস্তুর জন্য একই মডেল ব্যবহার করে।",
+  "Paste an image with Ctrl+V or ⌘V": "Ctrl+V বা ⌘V দিয়ে ছবি পেস্ট করুন"
 }

@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "ทำไมฉันถึงเห็นลายตารางด้านหลังในรูปที่เพิ่งดาวน์โหลดมา?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "ภาพลายตารางสีเทา-ขาว คือสิ่งที่บ่งบอกถึงส่วนที่โปร่งใสบนตัวโปรแกรมดูภาพ — มันไม่ใช่ส่วนหนึ่งในภาพของคุณหรอก เมื่อคุณเอาไฟล์รูปแบบ PNG เหล่านี้ไปแปะทับลงในพื้นหลังแบบไหน ส่วนที่เป็นตารางเหล่านั้นจะช่วยให้ภาพที่มีอยู่ด้านล่างโผล่มา",
   "Does converting to transparent PNG reduce quality?": "คุณภาพของไฟล์ภาพจะลดลงไหมเมื่อแปลงเป็นแบบโปร่งใส PNG?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "ไม่เลย เนื่องจากรูปแบบไฟล์ PNG จะช่วยให้ข้อมูลภาพของคุณไม่สูญหายไปไหน แถมเวลาเราเอาไฟล์นี้ออกมา มันก็จะช่วยรักษาขนาดดั้งเดิมในแบบที่คุณอัปโหลดไว้ ดังนั้นจะไม่เกิดการบีบอัดไฟล์และลดขนาดใดๆ แน่นอน"
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "ไม่เลย เนื่องจากรูปแบบไฟล์ PNG จะช่วยให้ข้อมูลภาพของคุณไม่สูญหายไปไหน แถมเวลาเราเอาไฟล์นี้ออกมา มันก็จะช่วยรักษาขนาดดั้งเดิมในแบบที่คุณอัปโหลดไว้ ดังนั้นจะไม่เกิดการบีบอัดไฟล์และลดขนาดใดๆ แน่นอน",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "บนอุปกรณ์นี้ ภาพจะถูกปรับขนาดให้ด้านที่ยาวที่สุดไม่เกิน 2,048 พิกเซล โหมดสมาร์ทใช้โมเดลเดียวกันสำหรับคนและวัตถุ",
+  "Paste an image with Ctrl+V or ⌘V": "วางภาพด้วย Ctrl+V หรือ ⌘V"
 }

@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Bakit nagpapakita ng checkered background ang na-download kong PNG?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Ang gray-at-white na checkerboard ay kung paano ipinapakita ng mga image viewer ang transparency — hindi ito bahagi ng iyong file. Ilagay ang PNG sa anumang backdrop at ipapakita ng checkerboard area kung ano man ang nasa ilalim nito.",
   "Does converting to transparent PNG reduce quality?": "Nakakabawas ba ng kalidad ang pag-convert sa transparent na PNG?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Hindi. Ang PNG ay lossless at ang pag-export ay nagpapanatili ng orihinal na pixel dimension ng iyong ina-upload, kaya walang na-compress o binabawasan ng sukat."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Hindi. Ang PNG ay lossless at ang pag-export ay nagpapanatili ng orihinal na pixel dimension ng iyong ina-upload, kaya walang na-compress o binabawasan ng sukat.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Sa device na ito, inaayos ang laki ng mga larawan para hindi lumampas sa 2,048 pixel ang pinakamahabang gilid. Gumagamit ang mode na Matalino ng iisang modelo para sa mga tao at bagay.",
+  "Paste an image with Ctrl+V or ⌘V": "Mag-paste ng larawan gamit ang Ctrl+V o ⌘V"
 }

@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Warum zeigt mein heruntergeladenes PNG einen karierten Hintergrund?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Das grau-weiße Schachbrettmuster ist die Art und Weise, wie Bildbetrachter Transparenz anzeigen — es ist nicht Teil Ihrer Datei. Platzieren Sie das PNG über einem beliebigen Hintergrund, und der Schachbrettbereich zeigt, was auch immer darunter liegt.",
   "Does converting to transparent PNG reduce quality?": "Verringert die Konvertierung in ein transparentes PNG die Qualität?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Nein. PNG ist verlustfrei, und beim Export bleiben die ursprünglichen Pixelabmessungen Ihres Uploads erhalten, sodass nichts komprimiert oder herunterskaliert wird."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Nein. PNG ist verlustfrei, und beim Export bleiben die ursprünglichen Pixelabmessungen Ihres Uploads erhalten, sodass nichts komprimiert oder herunterskaliert wird.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Auf diesem Gerät werden Bilder auf maximal 2.048 Pixel an der längsten Seite skaliert. Der Modus \"Intelligent\" verwendet dasselbe Modell für Personen und Objekte.",
+  "Paste an image with Ctrl+V or ⌘V": "Bild mit Ctrl+V oder ⌘V einfügen"
 }

@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Waarom toont mijn gedownloade PNG een geblokte achtergrond?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Het grijs-witte schaakbordpatroon is hoe afbeeldingsviewers transparantie weergeven — het is geen onderdeel van je bestand. Plaats de PNG over een willekeurige achtergrond en het schaakbordgebied toont alles wat eronder ligt.",
   "Does converting to transparent PNG reduce quality?": "Vermindert converteren naar transparante PNG de kwaliteit?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Nee. PNG is verliesvrij en de export behoudt de originele pixelafmetingen van je upload, dus er wordt niets gecomprimeerd of verkleind."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Nee. PNG is verliesvrij en de export behoudt de originele pixelafmetingen van je upload, dus er wordt niets gecomprimeerd of verkleind.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Op dit apparaat worden afbeeldingen geschaald tot maximaal 2.048 pixels aan de langste zijde. De modus Slim gebruikt hetzelfde model voor mensen en objecten.",
+  "Paste an image with Ctrl+V or ⌘V": "Plak een afbeelding met Ctrl+V of ⌘V"
 }

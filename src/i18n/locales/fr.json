@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Pourquoi mon fichier PNG téléchargé affiche-t-il un fond à carreaux ?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Le damier gris et blanc est la façon dont les visionneuses d'images affichent la transparence — il ne fait pas partie de votre fichier. Placez le fichier PNG sur n'importe quelle toile de fond et la zone en damier laissera voir ce qui se trouve en dessous.",
   "Does converting to transparent PNG reduce quality?": "La conversion en fichier PNG transparent réduit-elle la qualité ?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Non, le PNG est sans perte et l'exportation conserve les dimensions en pixels de l'image d'origine. Ainsi, rien n'est compressé ou réduit."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Non, le PNG est sans perte et l'exportation conserve les dimensions en pixels de l'image d'origine. Ainsi, rien n'est compressé ou réduit.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Sur cet appareil, les images sont redimensionnées à 2 048 pixels maximum sur le côté le plus long. Le mode Intelligent utilise le même modèle pour les personnes et les objets.",
+  "Paste an image with Ctrl+V or ⌘V": "Collez une image avec Ctrl+V ou ⌘V"
 }

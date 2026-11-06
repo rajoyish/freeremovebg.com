@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "ダウンロードしたPNGに市松模様の背景が表示されるのはなぜですか？",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "グレーと白の市松模様は、画像ビューアーが透明度を表示するためのものであり、ファイルの一部ではありません。PNGを他の背景の上に配置すれば、市松模様の部分には下の背景が表示されます。",
   "Does converting to transparent PNG reduce quality?": "透明なPNGに変換すると画質は下がりますか？",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "いいえ。PNGは可逆圧縮であり、書き出し時にはアップロードした画像の元のピクセル寸法が維持されるため、圧縮されたり縮小されたりすることはありません。"
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "いいえ。PNGは可逆圧縮であり、書き出し時にはアップロードした画像の元のピクセル寸法が維持されるため、圧縮されたり縮小されたりすることはありません。",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "この端末では、画像の長辺が最大2,048ピクセルになるようにサイズを調整します。スマートモードでは、人物と物体に同じモデルを使用します。",
+  "Paste an image with Ctrl+V or ⌘V": "Ctrl+V または ⌘V で画像を貼り付け"
 }

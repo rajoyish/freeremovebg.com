@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Γιατί το PNG που κατέβασα δείχνει ένα καρό φόντο;",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Η γκρι και λευκή σκακιέρα είναι ο τρόπος με τον οποίο τα προγράμματα προβολής εικόνων εμφανίζουν τη διαφάνεια — δεν αποτελεί μέρος του αρχείου σας. Τοποθετήστε το PNG πάνω από οποιοδήποτε φόντο και η περιοχή της σκακιέρας θα δείξει ό,τι βρίσκεται από κάτω.",
   "Does converting to transparent PNG reduce quality?": "Η μετατροπή σε διαφανές PNG μειώνει την ποιότητα;",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Όχι. Το PNG είναι χωρίς απώλειες και η εξαγωγή διατηρεί τις αρχικές διαστάσεις pixel της μεταφόρτωσής σας, επομένως τίποτα δεν συμπιέζεται ή μειώνεται σε κλίμακα."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Όχι. Το PNG είναι χωρίς απώλειες και η εξαγωγή διατηρεί τις αρχικές διαστάσεις pixel της μεταφόρτωσής σας, επομένως τίποτα δεν συμπιέζεται ή μειώνεται σε κλίμακα.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Σε αυτή τη συσκευή, οι εικόνες αλλάζουν μέγεθος ώστε η μεγαλύτερη πλευρά τους να μην ξεπερνά τα 2.048 pixel. Η έξυπνη λειτουργία χρησιμοποιεί το ίδιο μοντέλο για ανθρώπους και αντικείμενα.",
+  "Paste an image with Ctrl+V or ⌘V": "Επικολλήστε μια εικόνα με Ctrl+V ή ⌘V"
 }

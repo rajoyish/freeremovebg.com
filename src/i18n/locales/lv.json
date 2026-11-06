@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Kāpēc lejupielādētais PNG rāda rūtainu fonu?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Pelēkbaltais rūtojums ir veids, kā attēlu skatītāji parāda caurspīdīgumu, un tas nav faila daļa. Novietojiet PNG uz jebkura fona, un rūtainajā zonā būs redzams tas, kas atrodas apakšā.",
   "Does converting to transparent PNG reduce quality?": "Vai pārveidošana caurspīdīgā PNG samazina kvalitāti?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Nē. PNG ir bezzudumu formāts, un eksports saglabā sākotnējos attēla izmērus pikseļos. Nekas netiek saspiests ar kvalitātes zudumu vai samazināts."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Nē. PNG ir bezzudumu formāts, un eksports saglabā sākotnējos attēla izmērus pikseļos. Nekas netiek saspiests ar kvalitātes zudumu vai samazināts.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "Šajā ierīcē attēlu izmērs tiek pielāgots tā, lai garākā mala nepārsniegtu 2048 pikseļus. Viedais režīms izmanto vienu un to pašu modeli cilvēkiem un priekšmetiem.",
+  "Paste an image with Ctrl+V or ⌘V": "Ielīmējiet attēlu ar Ctrl+V vai ⌘V"
 }

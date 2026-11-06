@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "பதிவிறக்கிய PNG-இல் கட்டம் போட்ட பின்னணி ஏன் தெரிகிறது?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "சாம்பல் மற்றும் வெள்ளைக் கட்டங்கள் படப் பார்வையாளர்கள் ஒளிபுகுதலைக் காட்டும் முறை. அவை கோப்பின் பகுதியல்ல. PNG-ஐ எந்தப் பின்னணியிலும் வைத்தால் கட்டமுள்ள இடங்களில் கீழே உள்ள பின்னணி தெரியும்.",
   "Does converting to transparent PNG reduce quality?": "ஒளிபுகும் PNG ஆக மாற்றினால் தரம் குறையுமா?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "இல்லை. PNG இழப்பற்ற வடிவம். ஏற்றுமதி அசல் பிக்சல் பரிமாணங்களைப் பாதுகாக்கும். தரம் இழக்கும் சுருக்கமோ அளவு குறைப்போ இல்லை."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "இல்லை. PNG இழப்பற்ற வடிவம். ஏற்றுமதி அசல் பிக்சல் பரிமாணங்களைப் பாதுகாக்கும். தரம் இழக்கும் சுருக்கமோ அளவு குறைப்போ இல்லை.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "இந்தச் சாதனத்தில், படங்களின் நீளமான பக்கம் அதிகபட்சம் 2,048 பிக்சல்கள் இருக்கும்படி அளவு மாற்றப்படும். ஸ்மார்ட் பயன்முறை மனிதர்களுக்கும் பொருட்களுக்கும் ஒரே மாதிரியைப் பயன்படுத்துகிறது.",
+  "Paste an image with Ctrl+V or ⌘V": "Ctrl+V அல்லது ⌘V மூலம் படத்தை ஒட்டவும்"
 }

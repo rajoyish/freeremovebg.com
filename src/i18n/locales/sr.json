@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Зашто преузети PNG приказује карирану позадину?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Сиво-бела шаховница је начин на који прегледачи слика приказују провидност и није део датотеке. Поставите PNG на било коју позадину и кроз то подручје ће се видети подлога.",
   "Does converting to transparent PNG reduce quality?": "Да ли претварање у провидни PNG смањује квалитет?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Не. PNG је формат без губитака, а извоз задржава изворне димензије слике у пикселима. Ништа се не компримује уз губитак квалитета нити смањује."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Не. PNG је формат без губитака, а извоз задржава изворне димензије слике у пикселима. Ништа се не компримује уз губитак квалитета нити смањује.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "На овом уређају величина слика се прилагођава тако да дужа страница има највише 2.048 пиксела. Паметни режим користи исти модел за људе и предмете.",
+  "Paste an image with Ctrl+V or ⌘V": "Налепите слику помоћу Ctrl+V или ⌘V"
 }

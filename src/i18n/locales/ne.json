@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "डाउनलोड गरेको PNG मा किन बुट्टेदार पृष्ठभूमि देखिन्छ?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "खैरो र सेता कोठाको बुट्टाले तस्बिर हेर्ने एपमा पारदर्शिता जनाउँछ। यो तपाईंको फाइलको भाग होइन। PNG लाई कुनै पनि पृष्ठभूमिमाथि राख्दा बुट्टा भएको ठाउँबाट तलको सामग्री देखिन्छ।",
   "Does converting to transparent PNG reduce quality?": "पारदर्शी PNG मा बदल्दा गुणस्तर घट्छ?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "घट्दैन। PNG ले गुणस्तर गुमाउँदैन र निर्यात गर्दा मूल तस्बिरकै पिक्सेल आयाम कायम रहन्छ। त्यसैले केही खुम्चिँदैन वा सानो हुँदैन।"
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "घट्दैन। PNG ले गुणस्तर गुमाउँदैन र निर्यात गर्दा मूल तस्बिरकै पिक्सेल आयाम कायम रहन्छ। त्यसैले केही खुम्चिँदैन वा सानो हुँदैन।",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "यस उपकरणमा तस्बिरको आकार सबैभन्दा लामो किनारा बढीमा २,०४८ पिक्सेल हुने गरी मिलाइन्छ। स्मार्ट मोडले मानिस र वस्तुका लागि एउटै मोडेल प्रयोग गर्छ।",
+  "Paste an image with Ctrl+V or ⌘V": "Ctrl+V वा ⌘V प्रयोग गरेर तस्बिर पेस्ट गर्नुहोस्"
 }

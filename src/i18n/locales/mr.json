@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "डाउनलोड केलेल्या PNGमध्ये चौकटींची पार्श्वभूमी का दिसते?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "राखाडी-पांढऱ्या चौकटी ही चित्र पाहणाऱ्या सॉफ्टवेअरची पारदर्शकता दाखवण्याची पद्धत आहे. त्या फाइलचा भाग नाहीत. PNG कोणत्याही पार्श्वभूमीवर ठेवल्यावर चौकटींच्या जागी खालील भाग दिसेल.",
   "Does converting to transparent PNG reduce quality?": "पारदर्शक PNGमध्ये रूपांतर केल्याने दर्जा कमी होतो का?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "नाही. PNG हा गुणवत्ता न गमावणारा फॉरमॅट आहे आणि निर्यात मूळ पिक्सेल मापे कायम ठेवते. गुणवत्ता घालवणारे कॉम्प्रेशन किंवा आकार कमी करणे होत नाही."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "नाही. PNG हा गुणवत्ता न गमावणारा फॉरमॅट आहे आणि निर्यात मूळ पिक्सेल मापे कायम ठेवते. गुणवत्ता घालवणारे कॉम्प्रेशन किंवा आकार कमी करणे होत नाही.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "या डिव्हाइसवर प्रतिमांचा आकार असा बदलला जातो की सर्वात लांब बाजू जास्तीत जास्त २,०४८ पिक्सेल असेल. स्मार्ट मोड माणसे आणि वस्तूंसाठी एकच मॉडेल वापरतो.",
+  "Paste an image with Ctrl+V or ⌘V": "Ctrl+V किंवा ⌘V वापरून प्रतिमा पेस्ट करा"
 }

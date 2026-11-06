@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "Чому в завантаженому PNG відображається шаховий фон?",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "Сіро-біла шахівниця — це спосіб, яким програми для перегляду зображень відображають прозорість, вона не є частиною вашого файлу. Помістіть PNG на будь-який фон, і область у клітинку покаже те, що знаходиться під нею.",
   "Does converting to transparent PNG reduce quality?": "Чи знижує якість перетворення в прозорий PNG?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Ні. PNG зберігається без втрат, а експорт зберігає оригінальні розміри пікселів вашого завантаження, тому нічого не стискається і не зменшується."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "Ні. PNG зберігається без втрат, а експорт зберігає оригінальні розміри пікселів вашого завантаження, тому нічого не стискається і не зменшується.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "На цьому пристрої розмір зображень обмежено 2 048 пікселями за довшою стороною. Розумний режим використовує одну модель для людей і предметів.",
+  "Paste an image with Ctrl+V or ⌘V": "Вставте зображення за допомогою Ctrl+V або ⌘V"
 }

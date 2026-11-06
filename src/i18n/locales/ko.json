@@ -313,5 +313,7 @@
   "Why is my downloaded PNG showing a checkered background?": "다운로드한 PNG 파일에 체커보드 격자 배경이 보여요.",
   "The gray-and-white checkerboard is how image viewers display transparency — it is not part of your file. Place the PNG over any backdrop and the checkerboard area will show whatever is underneath.": "회색과 흰색이 교차하는 체커보드 패턴은 이미지 뷰어가 '투명함'을 표시하는 방식일 뿐 실제 파일의 일부가 아닙니다. PNG 파일을 다른 배경 위에 얹어 보면 해당 격자 부분이 아래 배경으로 투명하게 비치는 것을 확인할 수 있습니다.",
   "Does converting to transparent PNG reduce quality?": "투명 PNG로 변환하면 화질이 떨어지나요?",
-  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "아니요. PNG는 무손실 압축 포맷이며 결과물은 업로드한 원본 사진의 픽셀 크기를 그대로 유지합니다. 따라서 아무것도 압축되거나 축소되지 않습니다."
+  "No. PNG is lossless and the export keeps the original pixel dimensions of your upload, so nothing is compressed or downscaled.": "아니요. PNG는 무손실 압축 포맷이며 결과물은 업로드한 원본 사진의 픽셀 크기를 그대로 유지합니다. 따라서 아무것도 압축되거나 축소되지 않습니다.",
+  "On this device, images are resized to at most 2,048 pixels on the longest edge. Smart mode uses one model for people and objects.": "이 기기에서는 이미지의 긴 변이 최대 2,048픽셀이 되도록 크기를 조정합니다. 스마트 모드는 사람과 사물에 동일한 모델을 사용합니다.",
+  "Paste an image with Ctrl+V or ⌘V": "Ctrl+V 또는 ⌘V로 이미지 붙여넣기"
 }
