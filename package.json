@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.23.4"
   },
   "scripts": {
     "test": "node --experimental-vm-modules --test tests/*.test.mjs worker/*.test.mjs",
@@ -21,11 +21,11 @@
     "i18n:merge": "node scripts/i18n/merge.mjs"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/sitemap": "^3.7.4",
     "@huggingface/transformers": "^4.2.0",
     "@imgly/background-removal": "^1.7.0",
     "@tailwindcss/vite": "^4.3.3",
-    "astro": "^7.2.10",
+    "astro": "^7.4.7",
     "flag-icons": "^7.5.0",
     "glightbox": "^3.3.1",
     "img-comparison-slider": "^8.0.7",
@@ -35,7 +35,7 @@
   },
   "packageManager": "pnpm@11.5.1+sha512.93f7b57422ea7068257235b4c16eb60762eb68e1dc23723199cc739043ea9be2c4143274a399d8c6defa2b1176226d9ca1c4b63482d6200c1a8fbaa78c1d1485",
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
+    "@astrojs/check": "^0.9.12",
     "typescript": "^6.0.3",
     "wrangler": "^4.96.0"
   }

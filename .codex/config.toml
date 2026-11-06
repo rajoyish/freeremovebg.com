@@ -1,6 +1,9 @@
 [mcp_servers.astro-docs]
 url = "https://mcp.docs.astro.build/mcp"
 
+[mcp_servers.astro-docs.tools.search_astro_docs]
+approval_mode = "approve"
+
 [mcp_servers.playwright]
 command = "npx"
 args = ["@playwright/mcp@latest"]

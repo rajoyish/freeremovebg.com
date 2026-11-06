@@ -29,7 +29,7 @@ A free AI background remover, the [FreeRemoveBG](https://freeremovebg.com) that 
 
 ### Prerequisites
 
-- Node.js >= 22.12.0
+- Node.js >= 22.23.4
 - pnpm
 
 ### Installation
