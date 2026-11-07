@@ -104,6 +104,6 @@ MIT, except for the third-party components below.
 - **Ghostscript** ([@jspawn/ghostscript-wasm](https://github.com/jsscheller/ghostscript-wasm), built from [Artifex Ghostscript](https://www.ghostscript.com/)), licensed under the **GNU AGPL-3.0**, reads EPS and PostScript-based AI files and writes EPS. Source: [github.com/jsscheller/ghostscript-wasm](https://github.com/jsscheller/ghostscript-wasm) and [git.ghostscript.com](https://git.ghostscript.com/).
 - **MuPDF** ([mupdf](https://www.npmjs.com/package/mupdf), Artifex), licensed under the **GNU AGPL-3.0-or-later**, resizes PDF-based artwork and writes SVG. Source: [github.com/ArtifexSoftware/mupdf.js](https://github.com/ArtifexSoftware/mupdf.js) and [git.ghostscript.com](https://git.ghostscript.com/?p=mupdf.git).
 
-This site's own source is at [github.com/rajoyish/freeremovebg.com](https://github.com/rajoyish/freeremovebg.com).
+Also used: **pdf.js** ([pdfjs-dist](https://github.com/mozilla/pdf.js), Apache-2.0) to draw AI files, and **svg2pdf.js** ([github.com/yWorks/svg2pdf.js](https://github.com/yWorks/svg2pdf.js), MIT) with **jsPDF** ([github.com/parallax/jsPDF](https://github.com/parallax/jsPDF), MIT) to turn SVG into AI and EPS.
 
-Also used: **pdf.js** ([pdfjs-dist](https://github.com/mozilla/pdf.js), Apache-2.0) to draw AI files, and **svg2pdf.js** ([github.com/yWorks/svg2pdf.js](https://github.com/yWorks/svg2pdf.js), MIT) with **jsPDF** (MIT) to turn SVG into AI and EPS.
+All of them run unmodified. The exact versions are pinned in `package.json`, and the About page (`src/components/pages/AboutPage.astro`) lists each one with its version, licence and source link, in every language.

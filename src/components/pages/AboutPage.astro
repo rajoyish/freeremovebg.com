@@ -9,6 +9,8 @@ import Breadcrumb from '../Breadcrumb.astro';
 import { getDictionary, PAGE_LANGS, revise } from '../../i18n/dictionaries';
 import { DEFAULT_LANG } from '../../i18n/config';
 import { homeHref, pageHref } from '../../i18n/routes';
+import en from '../../i18n/en.json';
+import pkg from '../../../package.json';
 
 interface Props {
   lang?: string;
@@ -19,6 +21,33 @@ const dict = getDictionary(lang);
 // Converter and optimizer copy (revisions.about), where this language has it.
 // Vector conversion copy (revisions.aboutVector) on top, where translated.
 const t = revise(lang, revise(lang, dict.pages.about, 'about'), 'aboutVector');
+
+// The vector converter runs AGPL software (Ghostscript, MuPDF) in the
+// visitor's browser, so this page names each open-source component with its
+// exact version and licence and links to its source. Names, versions,
+// licence IDs and URLs read the same in every language, so none of this goes
+// through translation.
+const deps = pkg.dependencies as Record<string, string>;
+const version = (name: string) => deps[name]?.replace(/^[\^~]/, '') ?? '';
+const openSource = [
+  { name: 'Ghostscript', detail: `@jspawn/ghostscript-wasm ${version('@jspawn/ghostscript-wasm')}`, license: 'AGPL-3.0',
+    source: 'https://github.com/jsscheller/ghostscript-wasm', upstream: 'https://git.ghostscript.com/?p=ghostpdl.git' },
+  { name: 'MuPDF', detail: `mupdf ${version('mupdf')}`, license: 'AGPL-3.0-or-later',
+    source: 'https://github.com/ArtifexSoftware/mupdf.js', upstream: 'https://git.ghostscript.com/?p=mupdf.git' },
+  { name: 'pdf.js', detail: `pdfjs-dist ${version('pdfjs-dist')}`, license: 'Apache-2.0',
+    source: 'https://github.com/mozilla/pdf.js' },
+  { name: 'svg2pdf.js', detail: `svg2pdf.js ${version('svg2pdf.js')}`, license: 'MIT',
+    source: 'https://github.com/yWorks/svg2pdf.js' },
+  { name: 'jsPDF', detail: `jspdf ${version('jspdf')}`, license: 'MIT',
+    source: 'https://github.com/parallax/jsPDF' },
+];
+// The open-source section, found by its position in the English revision:
+// a translated revision keeps the same order. A language still on the older
+// copy has no such section and shows no list.
+const openSourceIndex = t.sections.length === en.revisions.aboutVector.sections.length
+  ? en.revisions.aboutVector.sections.findIndex((s) => s.heading === 'Built on Open Source')
+  : -1;
+const linkClass = 'text-link underline underline-offset-2 hover:text-link-deep';
 ---
 
 <Layout
@@ -54,6 +83,18 @@ const t = revise(lang, revise(lang, dict.pages.about, 'about'), 'aboutVector');
             <div class:list={['reveal', i > 0 && 'mt-12']} data-reveal>
               <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-5">{section.heading}</h2>
               <p class="text-base text-body leading-[1.8] m-0">{section.body}</p>
+              {i === openSourceIndex && (
+                <ul class="list-none m-0 mt-6 p-0 rounded-md border border-hairline divide-y divide-hairline text-sm" dir="ltr">
+                  {openSource.map((c) => (
+                    <li class="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-3">
+                      <a href={c.source} class={`font-semibold ${linkClass}`} rel="noopener">{c.name}</a>
+                      <span class="font-mono text-xs text-mute">{c.detail}</span>
+                      {c.license && <span class="font-mono text-[11px] px-1.5 py-px rounded-xs border border-hairline text-body">{c.license}</span>}
+                      {c.upstream && <a href={c.upstream} class={`ms-auto font-mono text-xs ${linkClass}`} rel="noopener">{new URL(c.upstream).host}</a>}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
 
