@@ -498,7 +498,7 @@
   "How can I optimize the image compression process?": "如何优化图片压缩流程？",
   "<p>Settle your settings once on a few sample images, then apply them to everything in one batch instead of image by image. Keep your originals, so you can redo a batch at a different quality later. For a site that publishes images every day, automate the same settings in your build or your CDN.</p>": "<p>先用几张样图把设置确定下来，然后一次性批量应用到所有图片，而不是一张张处理。保留原图，以后可以用不同的质量重新处理。如果网站每天都发布图片，可以在构建流程或 CDN 里自动套用同样的设置。</p>",
   "What tools can I use to optimize image file sizes?": "有哪些工具可以减小图片文件大小？",
-  "<p>For batches in the browser, the <strong>FreeRemoveBG</strong> optimizer is free with no file limit. Squoosh is good for tuning a single image side by side. ImageOptim is a free Mac app, and image CDNs or build plugins can optimize images automatically for large sites.</p>": "<p>在浏览器中批量处理的话，<strong>FreeRemoveBG</strong> 压缩工具免费且不限文件数量。Squoosh 适合并排对比、细调单张图片。ImageOptim 是免费的 Mac 应用，大型网站还可以用图片 CDN 或构建插件自动优化图片。</p>",
+  "<p>For batches in the browser, the <strong>FreeRemoveBG</strong> optimizer is free with no file limit. For large sites, image CDNs or build plugins can optimize images automatically.</p>": "<p>在浏览器中批量处理的话，<strong>FreeRemoveBG</strong> 压缩工具免费且不限文件数量。大型网站还可以用图片 CDN 或构建插件自动优化图片。</p>",
   "How to reduce image size?": "如何减小图片大小？",
   "<p>Open the <strong>FreeRemoveBG</strong> optimizer, add your images, set the quality (80 is a good start) and click Optimize. To shrink them further, switch the output format to WebP or AVIF. Download each file, or all of them as a ZIP.</p>": "<p>打开 <strong>FreeRemoveBG</strong> 压缩工具，添加图片，设置质量（80 是不错的起点），然后点击压缩。想再小一些，就把输出格式换成 WebP 或 AVIF。可以逐个下载，也可以打包成 ZIP 一次下载。</p>",
   "How to reduce image size on iPhone?": "如何在 iPhone 上减小图片大小？",
