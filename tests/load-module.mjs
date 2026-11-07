@@ -27,7 +27,9 @@ export async function loadModule(path, mocks = {}, globals = {}) {
       },
     });
     cache.set(url.href, module);
-    await module.link(resolve);
+    // Not linked here: link() on the root walks the whole graph through
+    // resolve(). Linking each module as it loads raced when two modules
+    // imported the same dependency.
     return module;
   }
   async function resolve(specifier, parent) {
@@ -41,6 +43,7 @@ export async function loadModule(path, mocks = {}, globals = {}) {
     return load(new URL(`${specifier}.ts`, parent.identifier));
   }
   const module = await load(new URL(path, import.meta.url));
+  await module.link(resolve);
   await module.evaluate();
   return module.namespace;
 }

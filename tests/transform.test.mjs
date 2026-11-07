@@ -131,6 +131,24 @@ test('hybrid uses the edge first and never sends PNG there', async () => {
   assert.deepEqual(local, ['a.jpg']);
 });
 
+test('localOnly keeps a file off the edge without switching the edge off', async () => {
+  const { HybridProcessor } = await load('../src/lib/transform/hybrid.ts');
+  let edgeCalls = 0;
+  let statusCalls = 0;
+  const p = new HybridProcessor({
+    edge: async () => { edgeCalls++; return new Blob(['e'], { type: 'image/webp' }); },
+    local: async () => new Blob(['l'], { type: 'image/webp' }),
+    probe: async () => ({ width: 64, height: 64 }),
+    status: async () => { statusCalls++; return { available: true, resumeAt: null }; },
+    storage: null,
+  });
+  const png = new File(['x'], 'icon.png', { type: 'image/png' });
+  assert.equal((await p.process(png, { format: 'webp', quality: 80, localOnly: true })).engine, 'local');
+  assert.equal(edgeCalls, 0);
+  assert.equal(statusCalls, 0);
+  assert.equal(p.edgeAvailable, true);
+});
+
 test('a 9422 midway through a batch routes every remaining image locally', async () => {
   const { HybridProcessor, EdgeError } = await load('../src/lib/transform/hybrid.ts');
   let edgeCalls = 0;
@@ -257,4 +275,101 @@ test('a 9422 is reported with its key before the temp object is deleted', async 
     'POST /api/edge-status', 'DELETE /api/upload-temp',
   ]);
   assert.match(calls[2], /"code":"9422","key":"tmp\/2026-11-06\/k.png"/);
+});
+
+test('vector files are recognised by name, type and content', async () => {
+  const v = await loadModule('../src/lib/transform/vector.ts', {}, { TextDecoder });
+  const f = await load('../src/lib/transform/formats.ts');
+  const file = (name, type = '') => new File([''], name, { type });
+
+  for (const vec of [file('logo.svg', 'image/svg+xml'), file('logo.ai'), file('logo.eps', 'image/x-eps'),
+    file('art', 'application/postscript'), file('LOGO.EPS')]) {
+    assert.equal(v.isVectorImage(vec), true, vec.name);
+    // image/x-eps must not pass for a raster the browser can decode.
+    assert.equal(f.isRasterImage(vec), false, vec.name);
+  }
+  assert.equal(v.isVectorImage(file('photo.jpg', 'image/jpeg')), false);
+
+  const bytes = (s) => new TextEncoder().encode(s);
+  assert.equal(v.sniffVector(bytes('%PDF-1.6\n%âãÏÓ')), 'pdf'); // a modern .ai
+  assert.equal(v.sniffVector(bytes('%!PS-Adobe-3.0 EPSF-3.0\n')), 'postscript');
+  assert.equal(v.sniffVector(Uint8Array.from([0xc5, 0xd0, 0xd3, 0xc6, 0, 0])), 'postscript'); // DOS EPS
+  assert.equal(v.sniffVector(bytes('<?xml version="1.0"?>\n<!-- c -->\n<svg xmlns="http://www.w3.org/2000/svg">')), 'svg');
+  assert.equal(v.sniffVector(bytes('GIF89a')), null);
+});
+
+test('vector output fits the longest side and the canvas area cap', async () => {
+  const v = await loadModule('../src/lib/transform/vector.ts', {}, { TextDecoder });
+  assert.deepEqual({ ...v.fitVector(100, 50, 2048) }, { width: 2048, height: 1024 });
+  assert.deepEqual({ ...v.fitVector(50, 100, 1024) }, { width: 512, height: 1024 });
+  // Icons scale down as well as up.
+  assert.deepEqual({ ...v.fitVector(24, 24, 16) }, { width: 16, height: 16 });
+  // A square at 8192 px would be 67 MP; raster output is held to about 16.7 MP.
+  const big = v.fitVector(10, 10, 8192);
+  assert.ok(big.width * big.height <= 16_777_216);
+  assert.equal(big.width, 4096);
+  // Vector output has no pixel cap.
+  assert.equal(v.fitVector(10, 10, 8192, false).width, 8192);
+});
+
+test('the size slider is logarithmic and round-trips the icon presets', async () => {
+  const v = await loadModule('../src/lib/transform/vector.ts', {}, { TextDecoder });
+  assert.equal(v.sliderToSize(0), 16);
+  assert.equal(v.sliderToSize(v.SLIDER_STEPS), 8192);
+  assert.equal(v.sliderToSize(v.SLIDER_STEPS / 3), 128); // 16 * 512^(1/3)
+  for (const size of [...v.ICON_SIZES, v.DEFAULT_VECTOR_SIZE, 4096]) {
+    assert.ok(Math.abs(v.sliderToSize(v.sizeToSlider(size)) - size) / size < 0.01, String(size));
+  }
+  assert.equal(v.clampVectorSize(3), 16);
+  assert.equal(v.clampVectorSize(99999), 8192);
+  assert.equal(v.clampVectorSize(NaN), v.DEFAULT_VECTOR_SIZE);
+});
+
+test('pasted SVG code becomes one named file per <svg> block', async () => {
+  const v = await loadModule('../src/lib/transform/vector.ts', {}, { TextDecoder });
+  const files = v.svgsFromText(`
+<!-- Heroicons -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-16"><path d="M0 0h1"/></svg>
+
+<svg width="64" height="64" class="bi bi-vector-pen" viewBox="0 0 16 16"><path d="M0 0h1"/></svg>
+<p>not an icon</p>
+<SVG viewBox="0 0 24 24"><path d="M0 0h1"/></SVG>`);
+  assert.deepEqual([...files.map((f) => f.name)], ['heroicons.svg', 'bi-vector-pen.svg', 'icon.svg']);
+  assert.equal(files[0].type, 'image/svg+xml');
+  // A missing namespace is added, so the file opens on its own.
+  assert.match(await files[1].text(), /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="64"/);
+  assert.equal(v.svgsFromText('just some text').length, 0);
+});
+
+test('currentColor resolves to the root colour or black', async () => {
+  const v = await loadModule('../src/lib/transform/vector.ts', {}, { TextDecoder });
+  assert.equal(v.resolveCurrentColor('<svg stroke="currentColor">'), '<svg stroke="#000000">');
+  assert.equal(v.resolveCurrentColor('<svg color="red" fill="currentColor">'), '<svg color="red" fill="red">');
+});
+
+test('EPS bounds are reset to the whole page', async () => {
+  const v = await loadModule('../src/lib/transform/vector.ts', {}, { TextDecoder });
+  const eps = '%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 18 34 82 66\n%%HiResBoundingBox: 18.00 34.00 82.00 66.00\n%%EndComments\n';
+  assert.equal(v.setEpsBounds(eps, 100, 64.5),
+    '%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: 0 0 100 65\n%%HiResBoundingBox: 0 0 100.00 64.50\n%%EndComments\n');
+});
+
+test('vector output formats get their own extensions', async () => {
+  const f = await load('../src/lib/transform/formats.ts');
+  const used = new Set();
+  assert.equal(f.outputName('logo.svg', 'svg', used), 'logo.svg');
+  assert.equal(f.outputName('logo.eps', 'ai', used), 'logo.ai');
+  assert.equal(f.outputName('logo.ai', 'eps', used), 'logo.eps');
+  assert.equal(f.isVectorOutput('ai'), true);
+  assert.equal(f.isVectorOutput('png'), false);
+});
+
+test('EPS bounds prefer the high-resolution bounding box', async () => {
+  const v = await loadModule('../src/lib/transform/vector.ts', {}, { TextDecoder });
+  assert.deepEqual({ ...v.postscriptBounds('%!PS\n%%BoundingBox: 10 10 110 60\n') }, { width: 100, height: 50 });
+  assert.deepEqual(
+    { ...v.postscriptBounds('%%BoundingBox: 0 0 101 51\n%%HiResBoundingBox: 0 0 100.5 50.25\n') },
+    { width: 100.5, height: 50.25 },
+  );
+  assert.equal(v.postscriptBounds('%%BoundingBox: (atend)\n'), null);
 });

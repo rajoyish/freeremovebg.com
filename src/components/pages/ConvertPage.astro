@@ -13,7 +13,10 @@ import ToolArticle from '../ToolArticle.astro';
 import { getDictionary, revise, TOOL_LANGS } from '../../i18n/dictionaries';
 import { toolHref } from '../../i18n/routes';
 import { DEFAULT_LANG } from '../../i18n/config';
-import { FORMATS, OUTPUT_FORMATS } from '../../lib/transform/formats';
+import { FORMATS, OUTPUT_FORMATS, VECTOR_FORMATS, VECTOR_OUTPUTS } from '../../lib/transform/formats';
+import {
+  DEFAULT_VECTOR_SIZE, ICON_SIZES, MAX_VECTOR_SIZE, MIN_VECTOR_SIZE, SLIDER_STEPS, sizeToSlider,
+} from '../../lib/transform/vector';
 
 interface Props {
   lang?: string;
@@ -23,6 +26,21 @@ const { lang = DEFAULT_LANG } = Astro.props;
 const dict = getDictionary(lang);
 // SEO copy, meta and FAQ from revisions.converter, where this language has it.
 const t = revise(lang, dict.converter, 'converter');
+// SVG, AI and EPS. A language that has not translated this revision yet still
+// converts vector files to raster formats, at the default size, but without
+// the size control or the vector output formats.
+const v = revise(lang, {}, 'converterVector');
+const vectorUi = !!v.sizeLabel;
+const intro = v.intro ?? t.intro;
+// Page meta and footer that name the vector formats, with the vector UI.
+const meta = { title: v.title ?? t.title, description: v.description ?? t.description, keywords: v.keywords ?? t.keywords };
+const h1 = v.h1 ?? t.h1;
+const footer = { ...t.footer, ...v.footer };
+// The vector section follows the JPG and PNG sections it extends.
+const article = t.article && v.vectorArticle
+  ? [...t.article.slice(0, 2), ...v.vectorArticle, ...t.article.slice(2)]
+  : t.article;
+const faq = t.faq && v.vectorFaq ? [...t.faq, ...v.vectorFaq] : t.faq;
 
 const o = dict.optimizer;
 const strings = {
@@ -43,20 +61,26 @@ const strings = {
   totalSaved: o.totalSaved,
   download: o.download,
   remove: o.remove,
+  vectorOnly: v.vectorOnly ?? '',
+  pasteNone: v.pasteNone ?? '',
+  convertedFrom: v.convertedFrom ?? '',
 };
 
 const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.formatHints[id] }));
+const vectorFormats = VECTOR_OUTPUTS.map((id) => ({ id, ...VECTOR_FORMATS[id], hint: v.formatHints?.[id] ?? '' }));
+// Every format's label, so the button reads "Convert to SVG" as well.
+const labels = Object.fromEntries([...formats, ...vectorFormats].map((f) => [f.id, f.label]));
 ---
 
 <Layout
-  title={t.title}
-  description={t.description}
-  keywords={t.keywords}
+  title={meta.title}
+  description={meta.description}
+  keywords={meta.keywords}
   lang={lang}
   basePath="/convert"
   hreflangLangs={TOOL_LANGS}
-  app={{ name: `Free Remove BG ${dict.nav.convert}`, featureList: t.footer.features }}
-  faq={t.faq}
+  app={{ name: `Free Remove BG ${dict.nav.convert}`, featureList: footer.features }}
+  faq={faq}
 >
   <div class="min-h-screen flex flex-col">
     <Header lang={lang} basePath="/convert" availableLangs={TOOL_LANGS} />
@@ -65,12 +89,21 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
     <main class="flex-1">
       <section class="px-6 pt-12 pb-8 text-center">
         <div class="max-w-190 mx-auto">
-          <h1 class="text-[clamp(2rem,5vw,3.25rem)] font-semibold tracking-[-2px] leading-[1.1] mt-0 mb-5 text-ink text-balance">{t.h1}</h1>
-          <p class="text-lg text-body leading-[1.7] mt-0 mb-6 max-w-150 mx-auto">{t.intro}</p>
+          <h1 class="text-[clamp(2rem,5vw,3.25rem)] font-semibold tracking-[-2px] leading-[1.1] mt-0 mb-5 text-ink text-balance">{h1}</h1>
+          <p class="text-lg text-body leading-[1.7] mt-0 mb-6 max-w-150 mx-auto">{intro}</p>
           <div class="inline-flex items-center gap-2 px-4 py-2 bg-canvas-soft-2 border border-hairline rounded-pill text-[13px] text-body font-medium">
             <svg width="14" height="14" fill="none" class="stroke-link" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
             {t.badge}
           </div>
+          {vectorUi && v.pasteBadge && (
+            <div class="mt-3">
+              <a href="#svg-paste" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-pill border border-link/30 bg-link/5 text-[13px] font-medium text-ink no-underline transition-colors hover:bg-link/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+                <span class="px-1.5 py-px rounded-pill bg-link text-on-primary text-[10px] font-semibold uppercase tracking-wider">{v.pasteNew}</span>
+                {v.pasteBadge}
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14m-6-6 6 6 6-6"/></svg>
+              </a>
+            </div>
+          )}
           <ToolCounter tool="convert" label={t.counterLabel} />
         </div>
       </section>
@@ -93,20 +126,48 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
               </div>
 
               <div id="drop-zone" role="button" tabindex="0" aria-label={o.browse}
-                class="group flex min-h-80 items-center justify-center rounded-md border-2 border-dashed border-hairline-strong bg-canvas-soft cursor-pointer transition-colors hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link data-[drag=true]:border-ink data-[drag=true]:bg-canvas-soft-2">
+                class="group flex min-h-64 items-center justify-center rounded-md border-2 border-dashed border-hairline-strong bg-canvas-soft cursor-pointer transition-colors hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link data-[drag=true]:border-ink data-[drag=true]:bg-canvas-soft-2">
                 <div class="px-6 py-10 text-center">
                   <div class="w-12 h-12 mx-auto mb-4 rounded-[10px] bg-ink flex items-center justify-center">
                     <svg width="22" height="22" fill="none" class="stroke-on-primary" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18"/><circle cx="12" cy="8" r="2"/><rect width="16" height="16" x="6" y="2" rx="2"/></svg>
                   </div>
                   <p class="text-base font-semibold text-ink mt-0 mb-1">{t.dropTitle}</p>
                   <p class="text-sm text-mute mt-0 mb-5">{o.dropSubtitle}</p>
+                  {v.dropHint && <p class="text-xs text-mute -mt-3 mb-5">{v.dropHint}</p>}
                   <span class="inline-block px-5 py-2 bg-ink text-on-primary rounded-pill text-sm font-medium transition-opacity group-hover:opacity-[0.85]">{o.browse}</span>
                 </div>
               </div>
 
               <ul id="file-list" class="hidden list-none m-0 p-0 max-h-96 overflow-y-auto rounded-md border border-hairline divide-y divide-hairline"></ul>
 
-              <input type="file" id="file-input" accept="image/*,.heic,.heif,.avif" multiple class="hidden" />
+              <input type="file" id="file-input" accept="image/*,.heic,.heif,.avif,.svg,.ai,.eps,.epsf,.ps,application/postscript,application/illustrator" multiple class="hidden" />
+
+              <!-- SVG code to files. Few converters take code, so it gets a card of its own. -->
+              {vectorUi && v.pasteTitle && (
+                <form id="svg-paste" class="mt-4 rounded-md border border-ink/15 bg-canvas-soft p-4 scroll-mt-24 target:ring-2 target:ring-link target:ring-offset-2">
+                  <div class="flex items-center gap-2.5 mb-1.5">
+                    <span class="shrink-0 w-7 h-7 rounded-sm bg-ink flex items-center justify-center" aria-hidden="true">
+                      <svg width="15" height="15" fill="none" class="stroke-on-primary" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>
+                    </span>
+                    <label for="svg-code" class="text-sm font-semibold text-ink">{v.pasteTitle}</label>
+                    <span class="px-1.5 py-px rounded-pill bg-link/10 text-link text-[10px] font-semibold uppercase tracking-wider">{v.pasteNew}</span>
+                  </div>
+                  <p class="text-xs text-body leading-relaxed mt-0 mb-3">{v.pasteBody}</p>
+                  <textarea id="svg-code" rows="4" spellcheck="false" autocomplete="off" autocapitalize="off" dir="ltr"
+                    placeholder={'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">\n  <path d="…" />\n</svg>'}
+                    class="block w-full resize-y min-h-24 max-h-72 rounded-md border border-hairline bg-canvas px-3 py-2 font-mono text-xs leading-relaxed text-ink placeholder:text-mute/70 hover:border-hairline-strong focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-link disabled:opacity-50"></textarea>
+                  <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <button id="svg-add" type="submit" disabled
+                      class="inline-flex items-center gap-1.5 px-4 py-2 bg-ink text-on-primary border-none rounded-pill text-[13px] font-medium cursor-pointer transition-opacity hover:opacity-[0.85] disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+                      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                      {v.pasteAdd}
+                    </button>
+                    <span class="text-xs text-mute [@media(pointer:coarse)]:hidden">
+                      {v.pasteShortcut?.split('{key}')[0]}<kbd data-paste-key class="px-1.5 py-px rounded-xs border border-hairline-strong bg-canvas font-mono text-[11px] text-ink">Ctrl+V</kbd>{v.pasteShortcut?.split('{key}')[1]}
+                    </span>
+                  </div>
+                </form>
+              )}
             </div>
 
             <!-- Options -->
@@ -125,6 +186,24 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
                     </label>
                   ))}
                 </div>
+                {vectorUi && (
+                  <>
+                    <p class="font-mono text-[11px] uppercase tracking-wider text-mute mt-4 mb-2">{v.vectorFormatsLabel}</p>
+                    <div class="grid grid-cols-3 gap-2.5">
+                      {vectorFormats.map((f) => (
+                        <label class="relative block cursor-pointer rounded-md border border-hairline bg-canvas p-3 transition-colors hover:border-hairline-strong has-checked:border-ink has-checked:bg-canvas-soft-2 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-link has-disabled:cursor-not-allowed has-disabled:opacity-60">
+                          <input type="radio" name="format" value={f.id} disabled class="sr-only" />
+                          <span class="flex items-baseline justify-between gap-1">
+                            <span class="text-base font-semibold text-ink">{f.label}</span>
+                            <span class="font-mono text-[11px] text-mute">.{f.ext}</span>
+                          </span>
+                          <span class="block mt-1 text-xs text-body leading-snug">{f.hint}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <p id="vector-formats-hint" class="text-xs text-mute mt-2 mb-0">{v.vectorFormatsHint}</p>
+                  </>
+                )}
               </fieldset>
 
               <div class="mt-6">
@@ -133,11 +212,54 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
                   <output id="quality-value" for="quality" class="font-mono text-sm font-medium text-ink tabular-nums">80</output>
                 </div>
                 <input id="quality" type="range" min="1" max="100" value="80" class="w-full accent-ink cursor-pointer disabled:cursor-not-allowed disabled:opacity-40" />
-                <p id="quality-note" class="text-xs text-mute mt-2 mb-0 min-h-4" data-lossless={t.qualityLossless} data-jpeg={t.jpegFlatten}></p>
+                <p id="quality-note" class="text-xs text-mute mt-2 mb-0 min-h-4" data-lossless={t.qualityLossless} data-jpeg={t.jpegFlatten} data-vector={v.vectorLossless}></p>
               </div>
 
+              <!-- Shown once the batch holds an SVG, AI or EPS file -->
+              {vectorUi && (
+                <div id="vector-size" class="mt-6 hidden">
+                  <div class="flex items-center justify-between mb-2">
+                    <label for="vector-size-range" class="font-mono text-xs uppercase tracking-wider text-mute">{v.sizeLabel}</label>
+                    <span class="inline-flex items-baseline gap-1 font-mono text-sm font-medium text-ink">
+                      <input id="vector-size-value" type="number" inputmode="numeric" min={MIN_VECTOR_SIZE} max={MAX_VECTOR_SIZE} step="1" value={DEFAULT_VECTOR_SIZE}
+                        aria-label={v.sizeInput}
+                        class="w-[6ch] box-content px-1.5 py-0.5 text-right tabular-nums bg-transparent border border-hairline rounded-xs text-ink [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none hover:border-hairline-strong focus-visible:outline-2 focus-visible:outline-link disabled:opacity-40" />
+                      <span class="text-xs text-mute">px</span>
+                    </span>
+                  </div>
+                  <input id="vector-size-range" type="range" min="0" max={SLIDER_STEPS} step="1" value={sizeToSlider(DEFAULT_VECTOR_SIZE)}
+                    aria-valuetext={`${DEFAULT_VECTOR_SIZE} px`}
+                    class="w-full accent-ink cursor-pointer disabled:cursor-not-allowed disabled:opacity-40" />
+
+                  <fieldset class="border-0 p-0 m-0 mt-3">
+                    <legend class="sr-only">{v.iconSizes}</legend>
+                    <!-- A button group: outline buttons joined edge to edge, sharing their borders. -->
+                    <div class="flex w-full rounded-md shadow-xs">
+                      {ICON_SIZES.map((size) => (
+                        <label class:list={[
+                          'relative flex-1 min-w-0 flex items-center justify-center h-8 px-1 cursor-pointer select-none',
+                          'font-mono text-[13px] max-sm:text-[11px] max-sm:tracking-tighter tabular-nums font-medium text-body',
+                          'bg-canvas border border-hairline -ml-px first:ml-0 first:rounded-l-md last:rounded-r-md transition-colors',
+                          'hover:bg-canvas-soft-2 hover:text-ink',
+                          // Selected: filled, raised above its neighbours so its border shows on both sides.
+                          'has-checked:z-10 has-checked:bg-ink has-checked:border-ink has-checked:text-on-primary',
+                          'has-focus-visible:z-20 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-link',
+                          'has-disabled:cursor-not-allowed has-disabled:opacity-50',
+                        ]}>
+                          <input type="radio" name="vector-preset" value={size} class="sr-only" />
+                          {size}
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <p class="text-xs text-mute mt-2 mb-0">{v.sizeHint}</p>
+                </div>
+              )}
+
+              <!-- Pushes the button to the bottom of a tall column, keeping a gap above it. -->
+              <div class="md:flex-1" aria-hidden="true"></div>
               <button id="convert-btn" type="button" disabled
-                class="mt-6 md:mt-auto w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85] disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+                class="mt-6 w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-ink text-on-primary border-none rounded-pill text-sm font-medium cursor-pointer transition-opacity hover:opacity-[0.85] disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
                 <span id="convert-spinner" class="hidden w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin" aria-hidden="true"></span>
                 <span id="convert-label">{t.convert.replace('{format}', formats[0].label)}</span>
               </button>
@@ -181,13 +303,13 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
 
       <ToolArticle
         heading={t.articleHeading}
-        article={t.article}
+        article={article}
         faqHeading={t.faqHeading}
-        faq={t.faq}
+        faq={faq}
       />
     </main>
 
-    <Footer lang={lang} variant="convert" />
+    <Footer lang={lang} variant="convert" copy={v.footer} />
   </div>
 </Layout>
 
@@ -199,7 +321,16 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
       <img data-thumb alt="" class="w-full h-full object-cover" loading="lazy" />
     </div>
     <div class="flex-1 min-w-0">
-      <p data-name dir="auto" class="text-sm font-medium text-ink m-0 truncate"></p>
+      <!-- Before conversion: the file's name. After: the converted file's name and format, with the original underneath. -->
+      <p class="m-0 flex items-center gap-1.5 min-w-0">
+        <span data-name dir="auto" class="text-sm font-medium text-ink truncate"></span>
+        <span data-format class="hidden shrink-0 px-1.5 py-px rounded-xs bg-link/10 text-link font-mono text-[10px] font-semibold uppercase tracking-wider"></span>
+      </p>
+      <p data-from class="hidden m-0 mt-0.5 items-center gap-1 min-w-0 text-[11px] text-mute">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="shrink-0" aria-hidden="true"><path d="M3 5v6a4 4 0 0 0 4 4h13"/><path d="m16 11 4 4-4 4"/></svg>
+        <span data-from-label class="sr-only"></span>
+        <span data-from-name dir="auto" class="truncate line-through decoration-mute/50"></span>
+      </p>
       <p class="m-0 mt-0.5 flex items-center gap-2 flex-wrap text-xs text-mute">
         <span data-status></span>
         <span data-sizes dir="ltr" class="font-mono tabular-nums"></span>
@@ -207,7 +338,7 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
         <span data-engine class="hidden max-sm:hidden! font-mono text-[10px] uppercase tracking-wider px-1.5 py-px rounded-xs border border-hairline"></span>
       </p>
     </div>
-    <a data-download href="#" download class="hidden shrink-0 w-8 h-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-canvas-soft-2 focus-visible:outline-2 focus-visible:outline-link">
+    <a data-download href="#" download class="hidden shrink-0 w-8 h-8 items-center justify-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
     </a>
     <button data-remove type="button" class="shrink-0 w-8 h-8 inline-flex items-center justify-center rounded-full bg-transparent border-none text-mute cursor-pointer transition-colors hover:bg-canvas-soft-2 hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-link">
@@ -216,61 +347,80 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
   </li>
 </template>
 
-<script is:inline type="application/json" id="convert-i18n" set:html={JSON.stringify(strings)} />
+<script is:inline type="application/json" id="convert-i18n" set:html={JSON.stringify({ ...strings, labels })} />
 
 <script>
   import { HybridProcessor, type Engine } from '../../lib/transform/hybrid';
   import {
-    FORMATS, formatBytes, isOutputFormat, isRasterImage, outputName, percentChange, type OutputFormat,
+    FORMATS, formatBytes, isOutputFormat, isRasterImage, isVectorOutput, outputName, percentChange,
+    type OutputFormat, type VectorOutput,
   } from '../../lib/transform/formats';
+  import {
+    DEFAULT_VECTOR_SIZE, clampVectorSize, convertVector, isVectorImage, rasterizeVector, sizeToSlider,
+    sliderToSize, svgsFromText,
+  } from '../../lib/transform/vector';
   import { showToast } from '../../lib/ui/toast';
   import { takeHandoff } from '../../lib/handoff';
   import { recordProcessed } from '../../lib/counter';
 
+  type Format = OutputFormat | VectorOutput;
   type Status = 'queued' | 'working' | 'done' | 'error';
   interface Item {
     file: File;
+    /** SVG, AI or EPS: redrawn at the chosen vector size on every conversion. */
+    vector: boolean;
     thumbUrl: string;
     status: Status;
     /** Settings the current result was produced with; re-run when they change. */
     settings: string;
     blob: Blob | null;
     blobUrl: string;
-    format: OutputFormat | null;
+    format: Format | null;
     engine: Engine | null;
     row: HTMLLIElement;
   }
 
-  const I18N: Record<string, string> = (() => {
+  const I18N: Record<string, string> & { labels: Record<string, string> } = (() => {
     try { return JSON.parse(document.getElementById('convert-i18n')?.textContent || '{}'); }
-    catch { return {}; }
+    catch { return { labels: {} }; }
   })();
   // Each value is wrapped in Unicode isolates (FSI…PDI) so a figure like
   // "1.8 MB" keeps its own direction inside right-to-left sentences.
   const fill = (s: string, vars: Record<string, string | number>) =>
-    s.replace(/\{(\w+)\}/g, (_, k) => `\u2068${vars[k] ?? ''}\u2069`);
+    s.replace(/\{(\w+)\}/g, (_, k) => `⁨${vars[k] ?? ''}⁩`);
 
-  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
-  const sourcePanel = $('source-panel');
-  const dropZone = $('drop-zone');
-  const fileInput = $<HTMLInputElement>('file-input');
-  const addBtn = $<HTMLButtonElement>('add-btn');
-  const fileCount = $('file-count');
-  const fileList = $('file-list');
-  const quality = $<HTMLInputElement>('quality');
-  const qualityValue = $<HTMLOutputElement>('quality-value');
-  const qualityNote = $('quality-note');
-  const convertBtn = $<HTMLButtonElement>('convert-btn');
-  const convertLabel = $('convert-label');
-  const convertSpinner = $('convert-spinner');
-  const batchBar = $('batch-bar');
-  const summary = $('summary');
-  const totalSaved = $('total-saved');
-  const zipBtn = $<HTMLButtonElement>('zip-btn');
-  const clearBtn = $<HTMLButtonElement>('clear-btn');
-  const toastContainer = $('toast-container');
-  const rowTemplate = $<HTMLTemplateElement>('row-template');
+  const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T | null;
+  const $$ = <T extends HTMLElement = HTMLElement>(id: string) => $<T>(id)!;
+  const sourcePanel = $$('source-panel');
+  const dropZone = $$('drop-zone');
+  const fileInput = $$<HTMLInputElement>('file-input');
+  const addBtn = $$<HTMLButtonElement>('add-btn');
+  const fileCount = $$('file-count');
+  const fileList = $$('file-list');
+  const quality = $$<HTMLInputElement>('quality');
+  const qualityValue = $$<HTMLOutputElement>('quality-value');
+  const qualityNote = $$('quality-note');
+  const convertBtn = $$<HTMLButtonElement>('convert-btn');
+  const convertLabel = $$('convert-label');
+  const convertSpinner = $$('convert-spinner');
+  const batchBar = $$('batch-bar');
+  const converter = $$('converter');
+  const summary = $$('summary');
+  const totalSaved = $$('total-saved');
+  const zipBtn = $$<HTMLButtonElement>('zip-btn');
+  const clearBtn = $$<HTMLButtonElement>('clear-btn');
+  const toastContainer = $$('toast-container');
+  const rowTemplate = $$<HTMLTemplateElement>('row-template');
   const formatInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="format"]'));
+  // Absent in a language without the vector copy (see the frontmatter).
+  const vectorSize = $('vector-size');
+  const sizeRange = $<HTMLInputElement>('vector-size-range');
+  const sizeValue = $<HTMLInputElement>('vector-size-value');
+  const presetInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="vector-preset"]'));
+  const vectorFormatsHint = $('vector-formats-hint');
+  const pasteForm = $<HTMLFormElement>('svg-paste');
+  const pasteCode = $<HTMLTextAreaElement>('svg-code');
+  const pasteAdd = $<HTMLButtonElement>('svg-add');
 
   // Edge requests are network-bound, so a few run side by side. On-device
   // encoding is CPU- and memory-bound, so it runs one at a time.
@@ -279,18 +429,26 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
   const processor = new HybridProcessor();
   const items: Item[] = [];
   let running = false;
+  let vectorPx = DEFAULT_VECTOR_SIZE;
 
-  const selectedFormat = (): OutputFormat => {
+  const selectedFormat = (): Format => {
     const v = formatInputs.find((i) => i.checked)?.value;
-    return isOutputFormat(v) ? v : 'webp';
+    return isOutputFormat(v) || isVectorOutput(v) ? v : 'webp';
   };
-  const settingsKey = () => {
+  const labelOf = (f: Format) => I18N.labels?.[f] ?? f.toUpperCase();
+  const isLossy = (f: Format) => !isVectorOutput(f) && FORMATS[f].lossy;
+  /** Vector output needs a vector source: a photo cannot become shapes. */
+  const applies = (item: Item) => item.vector || !isVectorOutput(selectedFormat());
+  /** The settings an item's result depends on; the vector size only matters to vectors. */
+  const settingsKey = (item: Item) => {
     const f = selectedFormat();
-    return FORMATS[f].lossy ? `${f}:${quality.value}` : f;
+    const key = isLossy(f) ? `${f}:${quality.value}` : f;
+    return item.vector ? `${key}@${vectorPx}` : key;
   };
-  const needsRun = (item: Item) =>
-    item.status === 'queued' || item.status === 'error' || item.settings !== settingsKey();
-  const isCurrent = (item: Item) => item.status === 'done' && item.settings === settingsKey();
+  const needsRun = (item: Item) => applies(item)
+    && (item.status === 'queued' || item.status === 'error' || item.settings !== settingsKey(item));
+  const isCurrent = (item: Item) => item.status === 'done' && item.settings === settingsKey(item);
+  const isConvertible = (file: File) => isRasterImage(file) || isVectorImage(file);
 
   /** Download names, unique across the batch and stable for one render. */
   function downloadNames(): Map<Item, string> {
@@ -307,13 +465,14 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
     const r = item.row;
     const q = <T extends HTMLElement = HTMLElement>(sel: string) => r.querySelector(sel) as T;
     const done = item.status === 'done' && !!item.blob;
+    const skipped = !applies(item) && item.status !== 'working';
 
     const statusText: Record<Status, string> = {
       queued: I18N.statusQueued, working: I18N.statusWorking, done: I18N.statusDone, error: I18N.statusError,
     };
     const status = q('[data-status]');
-    status.textContent = statusText[item.status];
-    status.className = item.status === 'error' ? 'text-error' : item.status === 'working' ? 'text-ink' : '';
+    status.textContent = skipped ? I18N.vectorOnly : statusText[item.status];
+    status.className = item.status === 'error' && !skipped ? 'text-error' : item.status === 'working' ? 'text-ink' : '';
 
     q('[data-sizes]').textContent = done
       ? `${formatBytes(item.file.size)} → ${formatBytes(item.blob!.size)}`
@@ -332,11 +491,33 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
     engine.classList.toggle('hidden', !done || !item.engine);
     engine.textContent = item.engine === 'edge' ? I18N.engineEdge : I18N.engineLocal;
 
-    r.classList.toggle('opacity-60', done && item.settings !== settingsKey());
+    r.classList.toggle('opacity-60', skipped || (done && item.settings !== settingsKey(item)));
+
+    // The converted file's name and format replace the original's, which
+    // moves to a struck-through line underneath.
+    const named = done && !!name;
+    q('[data-name]').textContent = named ? name! : item.file.name;
+    q('[data-name]').title = named ? name! : item.file.name;
+    const fmt = q('[data-format]');
+    fmt.classList.toggle('hidden', !named);
+    fmt.textContent = named && item.format ? labelOf(item.format) : '';
+    const from = q('[data-from]');
+    from.classList.toggle('hidden', !named);
+    from.classList.toggle('flex', named);
+    q('[data-from-name]').textContent = item.file.name;
+    q('[data-from-label]').textContent = I18N.convertedFrom ? fill(I18N.convertedFrom, { name: '' }).replace(/[\u2068\u2069]/g, '').trim() : '';
+    from.title = I18N.convertedFrom ? fill(I18N.convertedFrom, { name: item.file.name }).replace(/[\u2068\u2069]/g, '') : item.file.name;
 
     const dl = q<HTMLAnchorElement>('[data-download]');
     dl.classList.toggle('hidden', !done);
     dl.classList.toggle('inline-flex', done);
+    // Filled while the result matches the settings, outlined once it is stale.
+    const fresh = done && item.settings === settingsKey(item);
+    dl.classList.toggle('bg-ink', fresh);
+    dl.classList.toggle('text-on-primary', fresh);
+    dl.classList.toggle('hover:opacity-85', fresh);
+    dl.classList.toggle('text-ink', !fresh);
+    dl.classList.toggle('hover:bg-canvas-soft-2', !fresh);
     if (done && name) {
       dl.href = item.blobUrl;
       dl.download = name;
@@ -346,7 +527,23 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
     q<HTMLButtonElement>('[data-remove]').disabled = item.status === 'working';
   }
 
+  function renderSize() {
+    if (!sizeRange || !sizeValue) return;
+    sizeRange.value = String(sizeToSlider(vectorPx));
+    sizeRange.setAttribute('aria-valuetext', `${vectorPx} px`);
+    // Leave the box alone while someone is typing in it.
+    if (document.activeElement !== sizeValue) sizeValue.value = String(vectorPx);
+    presetInputs.forEach((i) => { i.checked = Number(i.value) === vectorPx; });
+  }
+
   function renderAll() {
+    const hasVector = items.some((i) => i.vector);
+    // Vector formats need a vector file; fall back once the last one is removed.
+    if (isVectorOutput(selectedFormat()) && !hasVector && !running) {
+      const first = formatInputs.find((i) => isOutputFormat(i.value));
+      if (first) first.checked = true;
+    }
+
     const names = downloadNames();
     items.forEach((item) => renderRow(item, names.get(item)));
 
@@ -361,14 +558,26 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
     fileCount.textContent = has ? `(${items.length})` : '';
 
     const format = selectedFormat();
-    const lossy = FORMATS[format].lossy;
+    const lossy = isLossy(format);
     quality.disabled = !lossy || running;
-    qualityNote.textContent = !lossy ? qualityNote.dataset.lossless || ''
+    qualityNote.textContent = isVectorOutput(format) ? qualityNote.dataset.vector || ''
+      : !lossy ? qualityNote.dataset.lossless || ''
       : format === 'jpeg' ? qualityNote.dataset.jpeg || '' : '';
-    formatInputs.forEach((i) => { i.disabled = running; });
+    formatInputs.forEach((i) => { i.disabled = running || (isVectorOutput(i.value) && !hasVector); });
+    vectorFormatsHint?.classList.toggle('hidden', hasVector);
+
+    vectorSize?.classList.toggle('hidden', !hasVector);
+    if (sizeRange) sizeRange.disabled = running;
+    if (sizeValue) sizeValue.disabled = running;
+    presetInputs.forEach((i) => { i.disabled = running; });
+    renderSize();
+    if (pasteCode && pasteAdd) {
+      pasteCode.disabled = running;
+      pasteAdd.disabled = running || !pasteCode.value.trim();
+    }
 
     convertSpinner.classList.toggle('hidden', !running);
-    convertLabel.textContent = running ? I18N.converting : fill(I18N.convert, { format: FORMATS[format].label });
+    convertLabel.textContent = running ? I18N.converting : fill(I18N.convert, { format: labelOf(format) });
     convertBtn.disabled = running || !items.some(needsRun);
     clearBtn.disabled = running;
 
@@ -387,20 +596,18 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
 
   function addFiles(files: File[]) {
     if (!files.length) return;
-    const images = files.filter(isRasterImage);
+    const images = files.filter(isConvertible);
     if (images.length < files.length) showToast(toastContainer, I18N.notImage, 6000);
     for (const file of images) {
       const row = rowTemplate.content.firstElementChild!.cloneNode(true) as HTMLLIElement;
       const item: Item = {
-        file, thumbUrl: URL.createObjectURL(file), status: 'queued', settings: '',
+        file, vector: isVectorImage(file), thumbUrl: URL.createObjectURL(file), status: 'queued', settings: '',
         blob: null, blobUrl: '', format: null, engine: null, row,
       };
       const thumb = row.querySelector<HTMLImageElement>('[data-thumb]')!;
+      // An SVG previews itself; AI and EPS get a thumbnail once drawn.
       thumb.src = item.thumbUrl;
       thumb.onerror = () => { thumb.classList.add('invisible'); };
-      const nameEl = row.querySelector<HTMLElement>('[data-name]')!;
-      nameEl.textContent = file.name;
-      nameEl.title = file.name;
       const removeBtn = row.querySelector<HTMLButtonElement>('[data-remove]')!;
       removeBtn.setAttribute('aria-label', fill(I18N.remove, { name: file.name }));
       removeBtn.addEventListener('click', () => removeItem(item));
@@ -426,11 +633,54 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
     renderAll();
   }
 
-  async function runItem(item: Item, format: OutputFormat, q: number, key: string) {
+  /**
+   * Replay a one-shot highlight (global.css, .convert-*). Removing the class
+   * when it ends keeps it from replaying when the element is shown again.
+   */
+  function flash(el: HTMLElement, cls: string) {
+    el.classList.remove(cls);
+    void el.offsetWidth; // restart the animation if it is already running
+    el.classList.add(cls);
+    // Children animate too and their animationend bubbles up; wait for the element's own.
+    const done = (e: AnimationEvent) => {
+      if (e.target !== el) return;
+      el.classList.remove(cls);
+      el.removeEventListener('animationend', done);
+    };
+    el.addEventListener('animationend', done);
+  }
+
+  /** Give an AI or EPS file the thumbnail its browser could not draw, once. */
+  function fixThumb(item: Item, preview: Blob) {
+    const thumb = item.row.querySelector<HTMLImageElement>('[data-thumb]')!;
+    if (!thumb.classList.contains('invisible')) return;
+    URL.revokeObjectURL(item.thumbUrl);
+    item.thumbUrl = URL.createObjectURL(preview);
+    thumb.classList.remove('invisible');
+    thumb.src = item.thumbUrl;
+  }
+
+  async function runItem(item: Item, format: Format, q: number, px: number) {
     item.status = 'working';
     renderAll();
+    const key = settingsKey(item);
     try {
-      const { blob, engine } = await processor.process(item.file, { format, quality: q });
+      let blob: Blob;
+      let engine: Engine;
+      if (isVectorOutput(format)) {
+        blob = await convertVector(item.file, format, px);
+        engine = 'local';
+        if (format === 'svg') fixThumb(item, blob);
+      } else {
+        let source = item.file;
+        // Drawn on the device, and encoded there too, so nothing from a
+        // vector file is uploaded.
+        if (item.vector) {
+          source = await rasterizeVector(item.file, px);
+          fixThumb(item, source);
+        }
+        ({ blob, engine } = await processor.process(source, { format, quality: q, localOnly: item.vector }));
+      }
       releaseResult(item);
       item.blob = blob;
       item.blobUrl = URL.createObjectURL(blob);
@@ -439,6 +689,9 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
       item.engine = engine;
       item.settings = key;
       recordProcessed('convert');
+      // Render first so the row shows its new name, then light it up.
+      renderAll();
+      flash(item.row, 'convert-row-done');
     } catch (error) {
       console.error('[convert]', item.file.name, error);
       item.status = 'error';
@@ -449,7 +702,7 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
     if (running) return;
     const format = selectedFormat();
     const q = Number(quality.value);
-    const key = settingsKey();
+    const px = vectorPx;
     const queue = items.filter(needsRun);
     if (!queue.length) return;
 
@@ -458,25 +711,36 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
 
     // Lanes beyond the first stop as soon as the edge switches off, so a
     // batch that hits the free-tier limit midway carries on one file at a
-    // time in the browser.
+    // time in the browser. Vector work is all on the device, so it takes one.
     const lane = async (index: number) => {
       while (queue.length) {
-        if (index > 0 && !processor.edgeAvailable) return;
+        if (index > 0 && (!processor.edgeAvailable || queue[0].vector)) return;
         const item = queue.shift()!;
         if (!items.includes(item)) continue; // removed while waiting
-        await runItem(item, format, q, key);
+        await runItem(item, format, q, px);
         renderAll();
       }
     };
+    const doneBefore = new Set(items.filter(isCurrent));
     try {
       await processor.ready();
-      const lanes = processor.edgeAvailable ? EDGE_CONCURRENCY : 1;
+      const lanes = processor.edgeAvailable && !isVectorOutput(format) ? EDGE_CONCURRENCY : 1;
       await Promise.all(Array.from({ length: lanes }, (_, i) => lane(i)));
     } finally {
       running = false;
       renderAll();
     }
-    if (items.some((i) => i.status === 'error')) showToast(toastContainer, I18N.failed, 8000);
+    // Something new to download: bring the downloads into view and draw the eye to them.
+    if (items.some((i) => isCurrent(i) && !doneBefore.has(i))) {
+      flash(converter, 'convert-card-done');
+      flash(batchBar, 'convert-bar-done');
+      const rect = batchBar.getBoundingClientRect();
+      if (rect.bottom > window.innerHeight || rect.top < 0) {
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        batchBar.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' });
+      }
+    }
+    if (items.some((i) => i.status === 'error' && applies(i))) showToast(toastContainer, I18N.failed, 8000);
   }
 
   async function downloadZip() {
@@ -530,14 +794,51 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
     setDrag(false);
     addFiles(Array.from(e.dataTransfer?.files || []));
   });
+  // Pasted image files, or pasted SVG code: each <svg> block becomes a file.
   document.addEventListener('paste', (e) => {
-    if (e.defaultPrevented || !e.clipboardData) return;
+    if (e.defaultPrevented || !e.clipboardData || running) return;
     if (e.composedPath().some((t) => t instanceof HTMLElement && (t.isContentEditable || t.matches('input, textarea, [role="textbox"]')))) return;
-    const files = Array.from(e.clipboardData.files).filter(isRasterImage);
+    let files = Array.from(e.clipboardData.files).filter(isConvertible);
+    if (!files.length) files = svgsFromText(e.clipboardData.getData('text/plain'));
     if (!files.length) return;
     e.preventDefault();
     addFiles(files);
   });
+
+  // The paste card: SVG code in, one file per <svg> block out.
+  if (pasteForm && pasteCode && pasteAdd) {
+    const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+    pasteForm.querySelectorAll('[data-paste-key]').forEach((k) => { k.textContent = isMac ? '⌘V' : 'Ctrl+V'; });
+    const submit = () => {
+      if (running) return;
+      const files = svgsFromText(pasteCode.value);
+      if (!files.length) {
+        showToast(toastContainer, I18N.pasteNone, 6000);
+        pasteCode.focus();
+        return;
+      }
+      addFiles(files);
+      pasteCode.value = '';
+      renderAll();
+      fileList.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    };
+    pasteForm.addEventListener('submit', (e) => { e.preventDefault(); submit(); });
+    pasteCode.addEventListener('input', renderAll);
+    // ⌘/Ctrl+Enter adds the code without leaving the keyboard.
+    pasteCode.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); submit(); }
+    });
+  }
+
+  const setSize = (px: number) => { vectorPx = clampVectorSize(px); renderAll(); };
+  sizeRange?.addEventListener('input', () => setSize(sliderToSize(Number(sizeRange.value))));
+  sizeValue?.addEventListener('input', () => {
+    const n = Number(sizeValue.value);
+    // Only act on a complete, in-range number; tidy up on change below.
+    if (Number.isInteger(n) && n >= Number(sizeValue.min) && n <= Number(sizeValue.max)) setSize(n);
+  });
+  sizeValue?.addEventListener('change', () => { setSize(Number(sizeValue.value) || vectorPx); sizeValue.value = String(vectorPx); });
+  presetInputs.forEach((i) => i.addEventListener('change', () => { if (i.checked) setSize(Number(i.value)); }));
 
   quality.addEventListener('input', () => { qualityValue.textContent = quality.value; renderAll(); });
   formatInputs.forEach((i) => i.addEventListener('change', renderAll));

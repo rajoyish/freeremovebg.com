@@ -17,7 +17,8 @@ const { lang = DEFAULT_LANG } = Astro.props;
 const dict = getDictionary(lang);
 // Converter and optimizer disclosures (revisions.privacy), where this
 // language has them. Untranslated languages keep the earlier policy and date.
-const t = revise(lang, dict.pages.privacy, 'privacy');
+// Vector conversion copy (revisions.privacyVector) on top, where translated.
+const t = revise(lang, revise(lang, dict.pages.privacy, 'privacy'), 'privacyVector');
 
 // One source of truth for the date; rendered in the reader's language.
 const UPDATED = new Date(`${t.updated ?? '2026-06-02'}T00:00:00Z`);

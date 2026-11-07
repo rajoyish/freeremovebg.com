@@ -19,6 +19,11 @@ export interface HybridOptions {
   quality: number;
   /** Passed to the local engine; PNG never runs at the edge. */
   pngPalette?: boolean;
+  /**
+   * Skip the edge for this file. The converter sets it for pictures drawn
+   * from a vector file, which it promises never to upload.
+   */
+  localOnly?: boolean;
 }
 
 export interface HybridResult {
@@ -122,8 +127,8 @@ export class HybridProcessor {
   }
 
   async process(file: File, opts: HybridOptions): Promise<HybridResult> {
-    if (!this.edgeOff) await this.ready();
-    if (!this.edgeOff) {
+    if (!opts.localOnly && !this.edgeOff) await this.ready();
+    if (!opts.localOnly && !this.edgeOff) {
       const size = await this.deps.probe(file);
       if (edgeEligible(file, opts.format, size)) {
         try {

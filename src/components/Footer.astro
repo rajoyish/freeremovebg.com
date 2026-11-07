@@ -12,17 +12,20 @@ interface Props {
    * the fourth, in place of the background-removal copy and use cases.
    */
   variant?: 'remove' | 'convert' | 'optimize';
+  /** Revised tool copy (a page's `revisions` entry), in place of the variant's base copy. */
+  copy?: { aboutBody?: string; features?: string[]; greatFor?: string[] };
 }
 
-const { lang = DEFAULT_LANG, variant = 'remove' } = Astro.props;
+const { lang = DEFAULT_LANG, variant = 'remove', copy } = Astro.props;
 const dict = getDictionary(lang);
 const t = dict.footer;
 const nav = dict.nav;
 
-const toolCopy =
+const baseCopy =
   variant === 'convert' ? dict.converter.footer
   : variant === 'optimize' ? dict.optimizer.footer
   : null;
+const toolCopy = baseCopy && copy ? { ...baseCopy, ...copy } : baseCopy;
 const aboutBody = toolCopy?.aboutBody ?? t.aboutBody;
 const features = toolCopy?.features ?? t.features;
 
