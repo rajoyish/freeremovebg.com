@@ -1044,7 +1044,7 @@
         },
         {
           "heading": "Built on Open Source",
-          "body": "The vector converter stands on open-source work: Ghostscript and MuPDF from Artifex, both under the GNU Affero General Public License, plus pdf.js, svg2pdf.js and jsPDF. They run in your browser, unmodified, and their source code is public. The source code of this site is public too, at github.com/rajoyish/freeremovebg.com."
+          "body": "The vector converter stands on open-source work: Ghostscript and MuPDF from Artifex, both under the GNU Affero General Public License, plus pdf.js, svg2pdf.js and jsPDF. They run in your browser, unmodified, and their source code is public."
         },
         {
           "heading": "Always Free",
