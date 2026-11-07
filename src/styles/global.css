@@ -94,6 +94,53 @@
   }
 }
 
+/* Converter: draw the eye to finished files and the downloads. */
+@keyframes convert-row-done {
+  0%   { background-color: color-mix(in srgb, var(--color-link) 14%, transparent); }
+  100% { background-color: transparent; }
+}
+@keyframes convert-pop {
+  0%   { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes convert-slide {
+  0%   { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes convert-card-glow {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-link) 0%, transparent); }
+  25%  { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-link) 28%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-link) 0%, transparent); }
+}
+@keyframes convert-bar-glow {
+  0%   { background-color: color-mix(in srgb, var(--color-link) 16%, var(--color-canvas-soft)); }
+  100% { background-color: var(--color-canvas-soft); }
+}
+@keyframes convert-zip-pulse {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-link) 55%, transparent); }
+  100% { box-shadow: 0 0 0 14px color-mix(in srgb, var(--color-link) 0%, transparent); }
+}
+
+.convert-row-done { animation: convert-row-done 1.6s ease-out; }
+.convert-row-done [data-download] { animation: convert-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.convert-row-done [data-format],
+.convert-row-done [data-from] { animation: convert-slide 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.convert-card-done { animation: convert-card-glow 1.8s cubic-bezier(0.16, 1, 0.3, 1); }
+.convert-bar-done { animation: convert-bar-glow 2s ease-out; }
+.convert-bar-done #zip-btn:not(:disabled) { animation: convert-zip-pulse 1.2s ease-out 0.15s 3; }
+
+@media (prefers-reduced-motion: reduce) {
+  .convert-row-done,
+  .convert-row-done [data-download],
+  .convert-row-done [data-format],
+  .convert-row-done [data-from],
+  .convert-card-done,
+  .convert-bar-done,
+  .convert-bar-done #zip-btn:not(:disabled) {
+    animation: none;
+  }
+}
+
 :root {
   color-scheme: light;
 }

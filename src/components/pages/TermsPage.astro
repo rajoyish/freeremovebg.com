@@ -17,7 +17,8 @@ const { lang = DEFAULT_LANG } = Astro.props;
 const dict = getDictionary(lang);
 // Converter and optimizer terms (revisions.terms), where this language has
 // them. Untranslated languages keep the earlier terms and date.
-const t = revise(lang, dict.pages.terms, 'terms');
+// Vector conversion copy (revisions.termsVector) on top, where translated.
+const t = revise(lang, revise(lang, dict.pages.terms, 'terms'), 'termsVector');
 
 const UPDATED = new Date(`${t.updated ?? '2026-06-02'}T00:00:00Z`);
 const updated = new Intl.DateTimeFormat(lang, {

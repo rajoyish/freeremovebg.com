@@ -356,6 +356,7 @@ quality level, ZIP download) share a hybrid engine in `src/lib/transform/`:
 | `edge.ts` | Primary engine: upload to R2, encode at `/cdn-cgi/image/`, delete |
 | `local.ts` + `encode.worker.ts` | Fallback: canvas encoders, plus `@jsquash` WASM for AVIF (and WebP in Safari) |
 | `hybrid.ts` | Edge first, local on failure. A systemic failure turns the edge off for the rest of the batch and for 15 minutes in that tab |
+| `vector.ts` + `vector.worker.ts` | `/convert` only: SVG, AI and EPS input, resized to a longest side of 16–8192 px. Raster output: SVG via the browser's `<img>`, PDF-compatible AI via pdf.js, EPS / PostScript AI via Ghostscript; the PNG then goes through `hybrid.ts` with `localOnly`, capped at 16.7 MP for iOS Safari. Vector output (SVG, EPS, AI): SVG resized in place or drawn to PDF with svg2pdf.js; AI/EPS → PDF (Ghostscript) → resized by MuPDF → SVG (MuPDF), AI (the PDF) or EPS (Ghostscript `eps2write`, bounding box reset to the artboard). 1 px = 1 pt. Ghostscript and MuPDF are AGPL; see README. Nothing from a vector file is uploaded |
 
 The upload endpoint is `POST/DELETE /api/upload-temp` in `worker/upload.js`.
 It lives in the Worker, next to `/api/count`, because the site is a static

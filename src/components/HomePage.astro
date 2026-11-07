@@ -15,7 +15,8 @@ const { lang = DEFAULT_LANG } = Astro.props;
 const dict = getDictionary(lang);
 const t = dict.tool;
 // Converter and optimizer copy (revisions.home), where this language has it.
-const extra = revise(lang, {}, 'home');
+// Vector conversion copy (revisions.homeVector) on top, where translated.
+const extra = revise(lang, revise(lang, {}, 'home'), 'homeVector');
 const faqs = [...dict.faq.items, ...(extra.faq ?? [])];
 const toolLinks = ['/convert', '/optimize'] as const;
 

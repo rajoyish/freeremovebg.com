@@ -764,6 +764,80 @@
         }
       ]
     },
+    "converterVector": {
+      "intro": "Drop in one image or a whole batch, choose the format you need and download each result or everything as a ZIP. It works with JPEG, PNG, WebP, GIF, AVIF, HEIC and BMP photos, and with SVG, AI and EPS vector files.",
+      "dropHint": "Photos, SVG, AI and EPS files",
+      "vectorFormatsLabel": "Vector formats",
+      "vectorFormatsHint": "Add an SVG, AI or EPS file to convert to these.",
+      "formatHints": {
+        "svg": "Scales to any size, for websites and apps",
+        "eps": "For print shops and older design software",
+        "ai": "Opens in Adobe Illustrator"
+      },
+      "vectorLossless": "Vector formats keep every shape exactly, so the quality setting does not apply.",
+      "vectorOnly": "Needs a vector file",
+      "sizeLabel": "Vector size",
+      "sizeInput": "Longest side in pixels",
+      "iconSizes": "Icon sizes",
+      "sizeHint": "The longest side, in pixels, from a 16 px icon up to 8192 px. EPS and AI files get the same number of points. Vector files are redrawn at this size, so they stay sharp.",
+      "vectorArticle": [
+        {
+          "heading": "Convert SVG, AI and EPS files",
+          "body": "Logos and icons often arrive as SVG, Adobe Illustrator (.ai) or EPS files, which many apps and upload forms will not open. Drop them in with your other images, set a size and pick a format. PNG, JPG, WebP and AVIF give you a picture at exactly that size. SVG, EPS and AI keep the artwork as shapes, so an icon pasted from an icon library becomes a 24 px SVG, a 64 pt Illustrator file or a print-ready EPS. Vector files are converted on your device and never uploaded."
+        }
+      ],
+      "vectorFaq": [
+        {
+          "q": "Can I convert SVG, AI or EPS files to PNG or JPG?",
+          "a": "<p>Yes. Drop the files in like any other image, set the vector size and choose the format you need. Each file is redrawn at that size, from a 16 px icon up to 8192 px, and saved as PNG, JPG, WebP or AVIF. Only the first page or artboard is converted.</p>"
+        },
+        {
+          "q": "Can I convert SVG to AI or EPS, or EPS and AI to SVG?",
+          "a": "<p>Yes. Choose SVG, EPS or AI under <strong>Vector formats</strong>. The artwork stays as shapes, so it remains sharp at any size, and it is resized to the size you set. Text in EPS and AI files becomes outlines in the SVG, so it looks the same without the original fonts.</p>"
+        },
+        {
+          "q": "Are SVG, AI and EPS files uploaded?",
+          "a": "<p>No. Vector files are converted entirely in your browser, and so is any PNG, JPG, WebP or AVIF made from them. The conversion engines download the first time you need them and then run on your device. Photos are different: the converter may upload a photo briefly to Cloudflare to convert it, then delete it.</p>"
+        },
+        {
+          "q": "Can I turn SVG code from an icon library into a file?",
+          "a": "<p>Yes. Copy the icon’s code, paste it into the <strong>Paste SVG code</strong> box or press Ctrl+V (⌘V on a Mac) anywhere on the converter page. Each <code>svg</code> block becomes its own file, named after the comment above it, ready to resize and save as SVG, PNG, JPG, WebP, AI or EPS.</p>"
+        },
+        {
+          "q": "Why does my AI file not convert?",
+          "a": "<p>An Illustrator file saved without <strong>Create PDF Compatible File</strong> holds only Illustrator’s own data, which no other app can draw. Open it in Illustrator, save it again with that option ticked, or export it as SVG or EPS, and try again.</p>"
+        }
+      ],
+      "pasteTitle": "Paste SVG code",
+      "pasteNew": "New",
+      "pasteBody": "Copied an icon from an icon library? Paste its code here. Each SVG becomes a file you can resize, from 16 px up, and save as SVG, PNG, JPG, WebP, AI or EPS.",
+      "pasteAdd": "Add SVG code",
+      "pasteShortcut": "or press {key} anywhere on this page",
+      "pasteNone": "No SVG code found. Paste the whole block, from the opening svg tag to the closing one.",
+      "pasteBadge": "Turn SVG code into PNG, AI or EPS files",
+      "convertedFrom": "Converted from {name}",
+      "title": "Free Image Converter: JPG, PNG, WebP, SVG, EPS & AI | FreeRemoveBG",
+      "description": "Convert photos to JPG, PNG, WebP or AVIF and vector files to SVG, EPS or AI. Resize icons from 16 px, paste SVG code and download a ZIP. Free, no sign-up.",
+      "keywords": "image converter, image converter free, free image converter, online image converter, image converter to jpg, image converter to png, transparent image converter, 4k image converter, 3000x3000 image converter, batch image converter free, heic to jpg, png to webp, svg to png, svg to ai, svg to eps, eps to svg, ai to svg, eps to png, ai to png, svg code to png, svg icon resizer, vector converter",
+      "h1": "Free image converter for JPG, PNG, WebP, SVG, EPS and AI",
+      "footer": {
+        "aboutBody": "A free converter for JPG, PNG, WebP and AVIF images and for SVG, EPS and AI vector files. Photos are converted on Cloudflare’s network or in your browser, and uploads are deleted as soon as you have the result. Vector files never leave your device.",
+        "features": [
+          "Convert to WebP, AVIF, JPEG or PNG",
+          "SVG, EPS and AI In and Out",
+          "Resize Icons from 16 px Up",
+          "Paste SVG Code as Files",
+          "Keeps Transparency in WebP and PNG",
+          "No Sign-Up or Watermarks"
+        ],
+        "greatFor": [
+          "Faster-loading websites",
+          "iPhone HEIC photos",
+          "Icons and logos at any size",
+          "Print-ready EPS and AI files"
+        ]
+      }
+    },
     "optimizer": {
       "title": "Optimize Images Free: Reduce Image Size Online in Bulk | FreeRemoveBG",
       "description": "Optimize images for the web for free. Reduce image size in KB or MB without visible quality loss, one image or a whole batch of JPG, PNG, WebP and AVIF files. No sign-up.",
@@ -886,6 +960,34 @@
         }
       ]
     },
+    "homeVector": {
+      "tools": [
+        {
+          "title": "Image converter",
+          "body": "Convert one image or a whole batch to JPG, PNG, WebP or AVIF at full resolution, and turn SVG, EPS and AI vector files into any of those or into each other, from a 16 px icon up. PNG, WebP and AVIF keep the transparent background of your cutouts.",
+          "cta": "Open the converter"
+        },
+        {
+          "title": "Image optimizer",
+          "body": "Reduce image size for the web in bulk. Set one quality for a whole batch, switch to WebP or AVIF if you like, and download a ZIP.",
+          "cta": "Open the optimizer"
+        }
+      ],
+      "faq": [
+        {
+          "q": "Can I convert or compress my cutouts?",
+          "a": "<p>Yes. Each finished cutout can go straight to the <strong>FreeRemoveBG</strong> image converter, to change it to WebP, AVIF, JPG or PNG, or to the optimizer, to reduce its file size. You don't have to download it first.</p>"
+        },
+        {
+          "q": "Do the converter and optimizer upload my images?",
+          "a": "<p>Photos usually are, for a moment. The converter and optimizer first try to process a photo on Cloudflare’s network, which means a temporary upload that is deleted as soon as you have the result. If that is not possible, the photo is processed in your browser instead. SVG, AI and EPS files are never uploaded, and neither is anything the background remover handles.</p>"
+        },
+        {
+          "q": "Can I convert SVG, AI or EPS files?",
+          "a": "<p>Yes. The <strong>FreeRemoveBG</strong> image converter opens SVG, Adobe Illustrator and EPS files. Pick a size, from a 16 px icon up to 8192 px, and save them as PNG, JPG, WebP or AVIF, or as SVG, EPS or AI. You can also paste SVG code copied from an icon library. Vector files are converted on your device.</p>"
+        }
+      ]
+    },
     "about": {
       "title": "About Free Remove BG: Background Remover and Free Image Tools",
       "description": "Free Remove BG is a free AI background remover, image converter and image optimizer. Learn how each tool works and what happens to your images.",
@@ -917,6 +1019,39 @@
         }
       ]
     },
+    "aboutVector": {
+      "description": "Free Remove BG is a free AI background remover, image and vector converter and image optimizer. Learn how each tool works and what happens to your images.",
+      "sections": [
+        {
+          "heading": "Our Mission",
+          "body": "Most background removers ask you to sign up, watch a watermark land on your download, or pay for the resolution you actually need. Free Remove BG was created to remove that friction. It is a free AI bg remove tool that turns any photo into a clean transparent cutout in seconds, with no account, no watermark, and no hidden limits. Whether you are preparing a single profile picture or a folder full of product shots, the tool is ready the moment you open the page."
+        },
+        {
+          "heading": "Privacy by Design",
+          "body": "The background remover runs entirely inside your browser. Your photos are never sent anywhere, never stored and never seen by anyone, and after the page loads once it even works offline. The converter and optimizer handle photos differently, because Cloudflare’s network encodes WebP, AVIF and JPEG faster than most phones can. They upload each photo to temporary storage, delete it the moment your result is ready, and fall back to your browser when the network route is unavailable. SVG, AI and EPS files are never uploaded at all. Camera data such as GPS location is removed from every converted or optimized photo."
+        },
+        {
+          "heading": "Smart AI for Every Image",
+          "body": "Different pictures need different handling. A portrait with fine, flyaway hair needs careful matting, while a hard-edged logo or product needs crisp, clean lines. Smart mode analyses each image and automatically routes it to the best engine, using a portrait-optimised model for people and a general-purpose model for objects, graphics, and animals. You can also choose the engine yourself at any time. The result is a high-quality cutout exported as a full-resolution transparent PNG."
+        },
+        {
+          "heading": "A Converter and an Optimizer",
+          "body": "Two more tools sit next to the background remover. The image converter turns JPG, PNG, WebP, GIF, AVIF, HEIC and BMP images into JPG, PNG, WebP or AVIF at full resolution, one at a time or in bulk, with a quality slider for the lossy formats. It also opens SVG, Adobe Illustrator and EPS files and redraws them at any size, from a 16 px icon to 8192 px, as a picture or as SVG, EPS or AI, and it turns SVG code pasted from an icon library into files. The image optimizer reduces the file size of a whole batch at once, keeps the original if it cannot make a file smaller, and packs the results into a ZIP. Both take a finished cutout straight from the background remover."
+        },
+        {
+          "heading": "Built for Real Work",
+          "body": "Free Remove BG handles JPG, PNG, WebP, AVIF, and even GIF images, and it can process many files at once. Drop in a batch, watch each one cut out with a live before-and-after preview, and download every result together as a single ZIP. The transparent PNGs slot straight into the tools you already use, from Canva, PowerPoint, and Google Slides to Photoshop, GIMP, and Photopea, making it a practical part of any everyday design workflow."
+        },
+        {
+          "heading": "Built on Open Source",
+          "body": "The vector converter stands on open-source work: Ghostscript and MuPDF from Artifex, both under the GNU Affero General Public License, plus pdf.js, svg2pdf.js and jsPDF. They run in your browser, unmodified, and their source code is public. The source code of this site is public too, at github.com/rajoyish/freeremovebg.com."
+        },
+        {
+          "heading": "Always Free",
+          "body": "There is no paywall hiding better output and no stamp across your downloads. Cutouts, conversions and optimized images come out at the original resolution, free to use for personal and commercial projects alike. The site is paid for by ads. Install nothing, sign up for nothing, and open the page whenever you need it."
+        }
+      ]
+    },
     "privacy": {
       "updated": "2026-11-07",
       "description": "How Free Remove BG handles your data. Background removal runs in your browser. The converter and optimizer may upload images briefly and delete them right after.",
@@ -931,6 +1066,11 @@
       "analyticsBody": "The site keeps anonymous running totals of how many images each tool has processed. These counts contain no images, file names or personal information. The site shows ads from Google AdSense. Google and its partners may use cookies to show ads and measure them, and you can manage personalized ads in your Google Ad Settings. We do not sell or share personal data.",
       "thirdPartyBody": "To run, the page loads assets such as web fonts and the AI model files from content delivery networks. The site is hosted on Cloudflare, which also performs the temporary conversions described above. Ads are served by Google. Requests for fonts and model files never include your images."
     },
+    "privacyVector": {
+      "description": "How Free Remove BG handles your data. Background removal and vector conversion run in your browser. The converter and optimizer may upload photos briefly and delete them right after.",
+      "toolsBody": "To convert or compress a photo, the converter and optimizer first try Cloudflare’s image service. Your browser uploads the photo to temporary storage on Cloudflare, the service returns the converted file, and your browser deletes the upload right away. If a deletion fails, a storage rule removes the file automatically within one day. We do not look at, copy, or keep these images. When the network route is unavailable, the photo is converted inside your browser and nothing is uploaded. SVG, AI and EPS files, and SVG code you paste, are never uploaded: they are converted inside your browser, and so is any picture made from them.",
+      "thirdPartyBody": "To run, the page loads assets such as web fonts, the AI model files and the vector conversion engines from content delivery networks or from this site. The site is hosted on Cloudflare, which also performs the temporary conversions described above. Ads are served by Google. Requests for these assets never include your images."
+    },
     "terms": {
       "updated": "2026-11-07",
       "description": "The terms and conditions for using Free Remove BG, the free background remover, image converter and image optimizer. Free for personal and commercial use.",
@@ -944,6 +1084,11 @@
       ],
       "limitsHeading": "Service Limits",
       "limitsBody": "Network conversion has a shared daily capacity and per-visitor rate limits. When those are reached, the converter and optimizer process images in your browser instead, which can be slower on older devices. We may change these limits at any time."
+    },
+    "termsVector": {
+      "description": "The terms and conditions for using Free Remove BG, the free background remover, image and vector converter and image optimizer. Free for personal and commercial use.",
+      "useBody": "Free Remove BG offers free tools to remove image backgrounds, convert images and SVG, EPS and AI vector files between formats, and reduce image file size. You may use them for both personal and commercial projects at no cost, with no sign-up and no watermarks. You are responsible for ensuring you have the right to edit any image or vector file you process, including icons copied from icon libraries, whose own licences still apply.",
+      "contentBody": "You retain all rights to the images and vector files you process and the files you create. The background remover and the vector converter work entirely on your device. The converter and optimizer may upload a photo to temporary storage for processing, and that copy is deleted as soon as your result is ready. We never claim any ownership over your content."
     }
   }
 }

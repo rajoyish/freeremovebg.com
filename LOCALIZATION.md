@@ -324,3 +324,16 @@ translate-locale workflow pick them up like any other missing copy. Once every
 language carries a revision, fold it back into the base section and delete it
 from `revisions`. A revision's `updated` date (privacy, terms) has no letters,
 so it is not translated and moves with the revision.
+
+Revisions can stack. To change copy that an earlier, already translated
+revision provides, add a second one (`homeVector` over `home`, `aboutVector`
+over `about`, and so on) and chain the calls:
+`revise(lang, revise(lang, base, 'about'), 'aboutVector')`. Editing the earlier
+revision in place would send every language back to the base copy until the
+whole revision is translated again; a stacked one leaves them on the earlier
+revision instead. A stacked revision that rewrites an array (`sections`,
+`faq`, `tools`) carries the whole array, but the unchanged items match
+strings the locales already have, so only the new text needs translating.
+`converterVector` covers the converter page's vector UI and its page copy
+together, so the size control, the vector formats and the copy that
+mentions them reach a language at the same time.

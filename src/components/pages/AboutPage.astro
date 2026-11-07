@@ -17,7 +17,8 @@ interface Props {
 const { lang = DEFAULT_LANG } = Astro.props;
 const dict = getDictionary(lang);
 // Converter and optimizer copy (revisions.about), where this language has it.
-const t = revise(lang, dict.pages.about, 'about');
+// Vector conversion copy (revisions.aboutVector) on top, where translated.
+const t = revise(lang, revise(lang, dict.pages.about, 'about'), 'aboutVector');
 ---
 
 <Layout

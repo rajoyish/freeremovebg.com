@@ -10,6 +10,7 @@ A free AI background remover, the [FreeRemoveBG](https://freeremovebg.com) that 
 - **Batch Processing** - Drop in many images and download them all as a ZIP
 - **Smart AI Selection** - Auto mode picks the best engine for each image (portraits vs objects)
 - **Broad Format Support** - JPG, PNG, WebP, AVIF, GIF, BMP and more
+- **Vector Conversion** - `/convert` resizes SVG, AI and EPS files, from a 16 px icon up to 8192 px, and saves them as PNG, JPG, WebP or AVIF, or as SVG, EPS or AI. Pasted SVG code works too. All on the device
 - **Works Offline** - After the first load, background removal works without a connection
 - **Dark Mode** - Toggle between light and dark themes
 - **Crisp Edge Detail** - A dedicated portrait engine preserves fine hair, fur and soft edges
@@ -94,4 +95,15 @@ On mobile and devices reporting 4 GB of memory or less, Smart mode uses the smal
 
 ## License
 
-MIT
+MIT, except for the third-party components below.
+
+### Third-party notices
+
+`/convert` loads these in the visitor's browser, only when a vector file needs them (`src/lib/transform/vector.worker.ts`):
+
+- **Ghostscript** ([@jspawn/ghostscript-wasm](https://github.com/jsscheller/ghostscript-wasm), built from [Artifex Ghostscript](https://www.ghostscript.com/)), licensed under the **GNU AGPL-3.0**, reads EPS and PostScript-based AI files and writes EPS. Source: [github.com/jsscheller/ghostscript-wasm](https://github.com/jsscheller/ghostscript-wasm) and [git.ghostscript.com](https://git.ghostscript.com/).
+- **MuPDF** ([mupdf](https://www.npmjs.com/package/mupdf), Artifex), licensed under the **GNU AGPL-3.0-or-later**, resizes PDF-based artwork and writes SVG. Source: [github.com/ArtifexSoftware/mupdf.js](https://github.com/ArtifexSoftware/mupdf.js) and [git.ghostscript.com](https://git.ghostscript.com/?p=mupdf.git).
+
+This site's own source is at [github.com/rajoyish/freeremovebg.com](https://github.com/rajoyish/freeremovebg.com).
+
+Also used: **pdf.js** ([pdfjs-dist](https://github.com/mozilla/pdf.js), Apache-2.0) to draw AI files, and **svg2pdf.js** ([github.com/yWorks/svg2pdf.js](https://github.com/yWorks/svg2pdf.js), MIT) with **jsPDF** (MIT) to turn SVG into AI and EPS.

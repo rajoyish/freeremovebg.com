@@ -1,6 +1,8 @@
 // Output formats shared by the converter (/convert) and optimizer (/optimize),
 // and which processing engine can produce each one.
 
+import { isVectorImage } from './vector';
+
 export type OutputFormat = 'webp' | 'avif' | 'jpeg' | 'png';
 
 interface FormatInfo {
@@ -26,6 +28,24 @@ export const FORMATS: Record<OutputFormat, FormatInfo> = {
 
 export const OUTPUT_FORMATS = Object.keys(FORMATS) as OutputFormat[];
 
+/**
+ * Vector output, converter only, and only from a vector source (vector.ts):
+ * redrawing a photo as shapes would need tracing, which this tool does not do.
+ */
+export type VectorOutput = 'svg' | 'eps' | 'ai';
+
+export const VECTOR_FORMATS: Record<VectorOutput, { ext: string; label: string }> = {
+  svg: { ext: 'svg', label: 'SVG' },
+  eps: { ext: 'eps', label: 'EPS' },
+  ai:  { ext: 'ai',  label: 'AI' },
+};
+
+export const VECTOR_OUTPUTS = Object.keys(VECTOR_FORMATS) as VectorOutput[];
+
+export function isVectorOutput(value: unknown): value is VectorOutput {
+  return typeof value === 'string' && value in VECTOR_FORMATS;
+}
+
 export function isOutputFormat(value: unknown): value is OutputFormat {
   return typeof value === 'string' && value in FORMATS;
 }
@@ -48,9 +68,12 @@ export function keepFormatFor(mime: string): OutputFormat {
 
 const IMAGE_EXT = /\.(jpe?g|png|webp|gif|bmp|avif|heic|heif|ico|tiff?)$/i;
 
-/** SVG is excluded on purpose: it is not a raster source for these tools. */
+/**
+ * Vector files (SVG, AI, EPS) are excluded on purpose: the browser cannot
+ * decode them as pixels. The converter draws them first (vector.ts).
+ */
 export function isRasterImage(file: File): boolean {
-  if (file.type === 'image/svg+xml' || /\.svg$/i.test(file.name)) return false;
+  if (isVectorImage(file)) return false;
   return file.type.startsWith('image/') || IMAGE_EXT.test(file.name);
 }
 
@@ -58,13 +81,13 @@ export function isRasterImage(file: File): boolean {
  * Download name for a converted file: the original base name with the new
  * extension, de-duplicated within one session ("photo.webp", "photo-2.webp").
  */
-export function outputName(originalName: string, format: OutputFormat, used: Set<string>): string {
+export function outputName(originalName: string, format: OutputFormat | VectorOutput, used: Set<string>): string {
   const base = originalName
     .replace(/\.[^/.]+$/, '')
     .replace(/[\\/:*?"<>|\u0000-\u001f]+/g, '-')
     .trim()
     .slice(0, 80) || 'image';
-  const ext = FORMATS[format].ext;
+  const ext = isVectorOutput(format) ? VECTOR_FORMATS[format].ext : FORMATS[format].ext;
   let candidate = `${base}.${ext}`;
   for (let n = 2; used.has(candidate.toLowerCase()); n++) candidate = `${base}-${n}.${ext}`;
   used.add(candidate.toLowerCase());
