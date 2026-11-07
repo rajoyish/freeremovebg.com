@@ -37,15 +37,6 @@ const related = USE_CASE_SLUGS.filter((s) => s !== slug);
 const basePaths = useCaseBasePaths(USE_CASE_LANGS, slug);
 const basePath = `/${localizedSlug(lang, slug)}`;
 
-const faqJsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: uc.faqs.map((faq) => ({
-    '@type': 'Question',
-    name: faq.q,
-    acceptedAnswer: { '@type': 'Answer', text: faq.a },
-  })),
-};
 ---
 
 <Layout
@@ -56,6 +47,7 @@ const faqJsonLd = {
   basePath={basePath}
   basePaths={basePaths}
   hreflangLangs={USE_CASE_LANGS}
+  faq={uc.faqs}
 >
   <div class="min-h-screen flex flex-col">
     <Header lang={lang} basePath={basePath} basePaths={basePaths} availableLangs={USE_CASE_LANGS} />
@@ -126,8 +118,6 @@ const faqJsonLd = {
           </div>
         </div>
       </section>
-
-      <script is:inline type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
 
     </main>
 

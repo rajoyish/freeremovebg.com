@@ -1,0 +1,66 @@
+---
+// Long-form copy and FAQ under the converter and optimizer. Both come from
+// en.json → revisions.<page>, so a language without that revision translated
+// passes nothing and the section is not rendered (see revise() in
+// src/i18n/dictionaries.ts). The FAQ's structured data is emitted by
+// Layout.astro from the same items (pass them as its `faq` prop).
+interface Props {
+  heading?: string;
+  article?: { heading: string; body: string }[];
+  faqHeading?: string;
+  faq?: { q: string; a: string }[];
+  /** Optional call to action after the article. */
+  link?: { href: string; label: string };
+}
+
+const { heading, article = [], faqHeading, faq = [], link } = Astro.props;
+
+---
+
+{article.length > 0 && (
+  <section class="px-6 py-16 border-t border-hairline">
+    <article class="max-w-190 mx-auto">
+      {heading && (
+        <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-10">{heading}</h2>
+      )}
+      {article.map((block, i) => (
+        <div class:list={[i > 0 && 'mt-10']}>
+          <h3 class="text-[1.2rem] font-semibold text-ink mt-0 mb-3">{block.heading}</h3>
+          <p class="text-base text-body leading-[1.8] m-0">{block.body}</p>
+        </div>
+      ))}
+      {link && (
+        <p class="mt-10 mb-0">
+          <a href={link.href}
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-ink text-on-primary rounded-pill text-sm font-medium no-underline transition-opacity hover:opacity-[0.85] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+            {link.label}
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="rtl:rotate-180" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </p>
+      )}
+    </article>
+  </section>
+)}
+
+{faq.length > 0 && (
+  <section class="px-6 py-16 bg-canvas-soft-2 border-t border-hairline">
+    <div class="max-w-190 mx-auto">
+      {faqHeading && (
+        <h2 class="text-[clamp(1.5rem,4vw,2rem)] font-semibold tracking-[-1px] leading-tight text-ink mt-0 mb-8 text-center">{faqHeading}</h2>
+      )}
+      <div class="flex flex-col gap-3">
+        {faq.map((item) => (
+          <details class="group bg-canvas border border-hairline rounded-lg overflow-hidden">
+            <summary class="flex items-center justify-between gap-4 px-5 py-4 cursor-pointer list-none text-[15px] font-medium text-ink select-none">
+              <span>{item.q}</span>
+              <svg class="shrink-0 w-4 h-4 text-mute transition-transform duration-200 group-open:rotate-45" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+              </svg>
+            </summary>
+            <div class="px-5 pb-4 pt-0 text-[14px] text-body leading-[1.7] [&_p]:m-0 [&_p+p]:mt-3" set:html={item.a}></div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

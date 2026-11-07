@@ -696,5 +696,254 @@
         "Freeing up storage space"
       ]
     }
+  },
+  "revisions": {
+    "converter": {
+      "title": "Free Image Converter: JPG, PNG, WebP & AVIF Online | FreeRemoveBG",
+      "description": "Free online image converter. Convert one image or a whole batch to JPG, PNG, WebP or AVIF at full resolution, keep transparency and download a ZIP. No sign-up.",
+      "keywords": "image converter, image converter free, free image converter, online image converter, image converter to jpg, image converter to png, transparent image converter, 4k image converter, 3000x3000 image converter, batch image converter free, heic to jpg, png to webp",
+      "h1": "Free image converter for JPG, PNG, WebP and AVIF",
+      "intro": "Drop in one image or a whole batch, choose the format you need and download each result or everything as a ZIP. It works with JPEG, PNG, WebP, GIF, AVIF, HEIC and BMP files.",
+      "dropTitle": "Drop images to convert",
+      "articleHeading": "A free online image converter",
+      "article": [
+        {
+          "heading": "Convert an image to JPG",
+          "body": "JPG opens everywhere: email clients, office software, print shops and upload forms that still refuse WebP. Choose JPEG, leave the quality at 80 and you get a file that looks like the original at a fraction of the size. iPhone HEIC photos convert the same way. JPG has no transparency, so any transparent area turns white."
+        },
+        {
+          "heading": "Convert an image to PNG",
+          "body": "PNG is lossless. Every pixel comes out exactly as it went in, which is what you want for logos, screenshots, diagrams and text. The cost is size. A photo saved as PNG is often several times larger than the same photo as JPG, and the result panel tells you by how much before you download."
+        },
+        {
+          "heading": "A transparent image converter",
+          "body": "PNG, WebP and AVIF all keep the transparent background of a cutout or logo. JPG does not. If your image does not have a transparent background yet, remove it first with the free background remover on the home page, then send the cutout straight to the converter without downloading it in between."
+        },
+        {
+          "heading": "4K and 3000x3000 images at full resolution",
+          "body": "The converter changes the format, never the dimensions. A 4K frame (3840 x 2160) stays 3840 x 2160, and a 3000x3000 product photo for a marketplace listing stays 3000 x 3000. Images up to 25 MB and 12,000 pixels on the long side convert on Cloudflare's network. Larger ones convert inside your browser instead, limited only by your device's memory."
+        },
+        {
+          "heading": "A free batch image converter",
+          "body": "Add one image or a whole folder. Every file in the batch converts to the format and quality you pick, the list shows how each one changed in size, and you can download them one by one or all together as a ZIP. Change the format afterwards and only the files that need it convert again. There is no file limit."
+        },
+        {
+          "heading": "Free, with nothing to install",
+          "body": "There is no account, no watermark and no daily cap. When your image converts on Cloudflare's network, the upload is deleted as soon as you have the result, and any copy left behind expires within a day. Camera data such as GPS location is removed from the converted file."
+        }
+      ],
+      "faqHeading": "Image converter questions",
+      "faq": [
+        {
+          "q": "What is an image converter?",
+          "a": "<p>An image converter rewrites a picture from one file format into another, such as HEIC to JPG or PNG to WebP. The picture stays the same. What changes is how the file is compressed, so the new file can be smaller, keep or lose transparency, and open in apps that could not read the original.</p>"
+        },
+        {
+          "q": "What's the best image converter?",
+          "a": "<p>It depends on the job. For everyday conversions between JPG, PNG, WebP, AVIF and HEIC, a browser converter like <strong>FreeRemoveBG</strong> is the quickest: nothing to install, a quality slider, and transparency kept where the format allows it.</p><p>For camera RAW files, layered PSDs or scripted jobs on thousands of files, desktop software such as ImageMagick, XnConvert or Photoshop does more.</p>"
+        },
+        {
+          "q": "Is the image converter free?",
+          "a": "<p>Yes. The <strong>FreeRemoveBG</strong> image converter is free with no sign-up, no watermark and no limit on how many images you convert. The site is paid for by ads.</p>"
+        },
+        {
+          "q": "What is the best free image converter?",
+          "a": "<p>For converting images online, <strong>FreeRemoveBG</strong> is free without limits, keeps full resolution, adds no watermark and reads JPG, PNG, WebP, GIF, AVIF, HEIC and BMP. If you need an offline desktop program, ImageMagick is free and open source, and XnConvert is free for personal use.</p>"
+        },
+        {
+          "q": "Can I convert several images at once?",
+          "a": "<p>Yes. Drop in as many images as you like, choose JPEG, PNG, WebP or AVIF, and click Convert. Each file shows its new size when it is done, and Download all (ZIP) saves the whole batch in one file.</p>"
+        },
+        {
+          "q": "Will converting to JPG keep a transparent background?",
+          "a": "<p>No. JPG cannot store transparency, so transparent areas become white. Convert to PNG, WebP or AVIF to keep the background transparent.</p>"
+        },
+        {
+          "q": "Does converting change the resolution of my image?",
+          "a": "<p>No. A 4K image comes out at 4K and a 3000x3000 image comes out at 3000x3000. Only the format and the compression change. Lossy formats (JPG, WebP, AVIF) use the quality setting, and PNG stays lossless.</p>"
+        }
+      ]
+    },
+    "optimizer": {
+      "title": "Optimize Images Free: Reduce Image Size Online in Bulk | FreeRemoveBG",
+      "description": "Optimize images for the web for free. Reduce image size in KB or MB without visible quality loss, one image or a whole batch of JPG, PNG, WebP and AVIF files. No sign-up.",
+      "keywords": "optimize image, optimize image free, optimize image for web, optimize image for website, optimize image online, optimize image size, optimize image for wordpress, optimize image quality, reduce image size, reduce image size online free, reduce image size in kb, reduce image size in mb, reduce image size without losing quality, reduce image size png, reduce image size to 100kb, batch reduce image size, batch image optimizer",
+      "h1": "Optimize images and reduce their file size, free",
+      "articleHeading": "Reduce image size without losing visible quality",
+      "article": [
+        {
+          "heading": "Optimize images for the web and your website",
+          "body": "Images are usually the heaviest part of a web page, and the biggest image on screen often decides how fast the page feels. A useful target is under 200 KB for a full-width hero image and under 100 KB for images inside an article. WebP at a quality of 75 to 85 hits those numbers for most photos, and nobody looking at the page will see the difference."
+        },
+        {
+          "heading": "Optimize images for WordPress",
+          "body": "WordPress accepts WebP uploads since version 5.8 and AVIF since 6.5. It builds every thumbnail size from the file you upload, so a 6 MB original leaves 6 MB in your media library plus a stack of large copies. Optimize the image before uploading it and every size WordPress makes starts from a lighter file, often without needing a compression plugin."
+        },
+        {
+          "heading": "Reduce image size in KB or MB",
+          "body": "Two settings do most of the work. Quality decides how much detail the encoder keeps, and format decides how efficiently it stores that detail. Moving a phone photo from JPG to WebP at 80 usually cuts it by a third or more. The table shows the before and after size of every file, so you can stop when the number fits."
+        },
+        {
+          "heading": "Reduce image size to 100 KB",
+          "body": "Upload forms often ask for an image under 100 KB or 1 MB. Start at quality 80 and step down. If the file is still too large at around 60, the pixel dimensions are the problem: a 4000 pixel wide photo rarely fits in 100 KB at a quality you would accept. This tool keeps the original dimensions, so resize the image to the size the form displays, then optimize it."
+        },
+        {
+          "heading": "Reduce PNG size",
+          "body": "The optimizer reduces each PNG to a color palette sized by the quality slider. Screenshots, logos and flat graphics use few colors, so they often shrink by half or more and still look the same. A photo saved as PNG will not get small this way. Convert it to WebP or JPEG instead."
+        },
+        {
+          "heading": "Batch reduce image size",
+          "body": "Drop in a whole folder. Every image gets the same quality and format settings, and you can download the files one by one or as a single ZIP. If an optimized copy comes out no smaller than the original, the optimizer hands back the original, so a batch never makes a file bigger."
+        },
+        {
+          "heading": "On Mac, iPhone and Android",
+          "body": "The optimizer runs in Safari, Chrome, Firefox and Edge, so there is nothing to install on a Mac, an iPhone or an Android phone. iPhone HEIC photos are accepted as they are. Camera data such as GPS location is removed from optimized files, which also saves a few kilobytes."
+        },
+        {
+          "heading": "Reduce image size in PowerPoint and email",
+          "body": "A slide deck full of phone photos can run to hundreds of megabytes. Optimize the photos before inserting them and the deck shrinks with them. PowerPoint's own Compress Pictures command lowers the resolution, which is a separate step you can still apply afterwards. For email, Gmail caps attachments at 25 MB and Outlook at 20 MB. Keep email images as JPEG or PNG, because some email clients do not display WebP or AVIF."
+        }
+      ],
+      "faqHeading": "Image optimization questions",
+      "faq": [
+        {
+          "q": "How to optimize an image for the web?",
+          "a": "<p>Resize it to the largest size it will be shown at, then compress it in a modern format. With <strong>FreeRemoveBG</strong>, add the image, choose WebP, keep the quality at 80 and download. Most photos come out a fraction of their original size with no difference you can see on screen.</p>"
+        },
+        {
+          "q": "How to optimize image size for a website?",
+          "a": "<p>Match the pixel width to your layout. A 6000 pixel photo in a 1200 pixel column wastes most of its bytes. Then compress it: WebP at quality 75 to 85 is a good default, with AVIF where your audience uses current browsers. Aim for under 200 KB on hero images and under 100 KB on images inside content.</p>"
+        },
+        {
+          "q": "How to optimize image-heavy emails?",
+          "a": "<p>Keep each image under about 100 KB and the whole email under 1 MB so it loads fast on mobile data. Use JPEG for photos and PNG for logos, since some email clients do not show WebP or AVIF. Size each image to the width it is displayed at, usually 600 pixels for an email body or 1200 for sharp screens, and run the batch through the optimizer.</p>"
+        },
+        {
+          "q": "How can I optimize image files for web use?",
+          "a": "<p>Work through four steps: pick the right dimensions, pick the right format (WebP or AVIF for photos, PNG for flat graphics), compress at a quality around 80, and strip camera data. The <strong>FreeRemoveBG</strong> optimizer handles the last three for a whole batch at once.</p>"
+        },
+        {
+          "q": "How can I optimize the image for better quality?",
+          "a": "<p>Optimizing usually trades a little quality for a smaller file, so start from the best original you have and raise the quality slider to 90 or more. Use PNG for text and sharp-edged graphics, and avoid re-saving the same JPEG again and again, since each save loses a little more. No optimizer can bring back detail that is already gone.</p>"
+        },
+        {
+          "q": "How to optimize images for SEO?",
+          "a": "<p>Give each file a descriptive name (red-running-shoes.webp, not IMG_4021.jpg), write alt text that describes the image, and keep files small so pages load fast. Set width and height on the image tag, lazy-load images below the fold, and list important images in your sitemap. The optimizer keeps your file names and only changes the extension.</p>"
+        },
+        {
+          "q": "What does optimize for image quality mean?",
+          "a": "<p>It means a setting that favors how the image looks over how small the file is. The encoder throws away less detail, so the file is larger. Its opposite is optimizing for size. On the <strong>FreeRemoveBG</strong> optimizer this is the quality slider: 90 and up favors quality, 60 and below favors size, and 75 to 85 is the usual balance.</p>"
+        },
+        {
+          "q": "How can I optimize the image compression process?",
+          "a": "<p>Settle your settings once on a few sample images, then apply them to everything in one batch instead of image by image. Keep your originals, so you can redo a batch at a different quality later. For a site that publishes images every day, automate the same settings in your build or your CDN.</p>"
+        },
+        {
+          "q": "What tools can I use to optimize image file sizes?",
+          "a": "<p>For batches in the browser, the <strong>FreeRemoveBG</strong> optimizer is free with no file limit. Squoosh is good for tuning a single image side by side. ImageOptim is a free Mac app, and image CDNs or build plugins can optimize images automatically for large sites.</p>"
+        },
+        {
+          "q": "How to reduce image size?",
+          "a": "<p>Open the <strong>FreeRemoveBG</strong> optimizer, add your images, set the quality (80 is a good start) and click Optimize. To shrink them further, switch the output format to WebP or AVIF. Download each file, or all of them as a ZIP.</p>"
+        },
+        {
+          "q": "How to reduce image size on iPhone?",
+          "a": "<p>Open this page in Safari, tap Choose images and pick photos from your library. HEIC photos are accepted. Choose JPEG if you need the photo to open everywhere, or WebP for the smallest file, then tap Optimize and download. Files save to the Downloads folder in the Files app.</p>"
+        },
+        {
+          "q": "How to reduce image size on Android?",
+          "a": "<p>Open this page in Chrome, tap Choose images and select photos from your gallery. Set the quality, tap Optimize and download the results, one by one or as a ZIP. Nothing to install.</p>"
+        },
+        {
+          "q": "Can I reduce image size without losing quality?",
+          "a": "<p>Without losing visible quality, yes. At quality 80 to 85, or by moving from JPG or PNG to WebP, most images get much smaller with no difference you can see. Truly lossless savings exist too but are small, often 5 to 15 percent, mostly from removing metadata.</p>"
+        }
+      ]
+    },
+    "home": {
+      "toolsHeading": "More free image tools",
+      "toolsBody": "Two more tools work alongside the background remover. Send a finished cutout to either one without downloading it first.",
+      "tools": [
+        {
+          "title": "Image converter",
+          "body": "Convert one image or a whole batch to JPG, PNG, WebP or AVIF at full resolution. PNG, WebP and AVIF keep the transparent background of your cutouts.",
+          "cta": "Open the converter"
+        },
+        {
+          "title": "Image optimizer",
+          "body": "Reduce image size for the web in bulk. Set one quality for a whole batch, switch to WebP or AVIF if you like, and download a ZIP.",
+          "cta": "Open the optimizer"
+        }
+      ],
+      "faq": [
+        {
+          "q": "Can I convert or compress my cutouts?",
+          "a": "<p>Yes. Each finished cutout can go straight to the <strong>FreeRemoveBG</strong> image converter, to change it to WebP, AVIF, JPG or PNG, or to the optimizer, to reduce its file size. You don't have to download it first.</p>"
+        },
+        {
+          "q": "Do the converter and optimizer upload my images?",
+          "a": "<p>Usually, yes, for a moment. They first try to process the image on Cloudflare's network, which means a temporary upload that is deleted as soon as you have the result. If that is not possible, the image is processed in your browser instead. The background remover is different: it never uploads anything.</p>"
+        }
+      ]
+    },
+    "about": {
+      "title": "About Free Remove BG: Background Remover and Free Image Tools",
+      "description": "Free Remove BG is a free AI background remover, image converter and image optimizer. Learn how each tool works and what happens to your images.",
+      "intro": "Free image tools built on a simple idea: removing a background, converting a format or shrinking a file should be fast, private and cost nothing.",
+      "sections": [
+        {
+          "heading": "Our Mission",
+          "body": "Most background removers ask you to sign up, watch a watermark land on your download, or pay for the resolution you actually need. Free Remove BG was created to remove that friction. It is a free AI bg remove tool that turns any photo into a clean transparent cutout in seconds, with no account, no watermark, and no hidden limits. Whether you are preparing a single profile picture or a folder full of product shots, the tool is ready the moment you open the page."
+        },
+        {
+          "heading": "Privacy by Design",
+          "body": "The background remover runs entirely inside your browser. Your photos are never sent anywhere, never stored and never seen by anyone, and after the page loads once it even works offline. The converter and optimizer work differently, because Cloudflare's network encodes WebP, AVIF and JPEG faster than most phones can. They upload each image to temporary storage, delete it the moment your result is ready, and fall back to your browser when the network route is unavailable. Camera data such as GPS location is removed from every converted or optimized file."
+        },
+        {
+          "heading": "Smart AI for Every Image",
+          "body": "Different pictures need different handling. A portrait with fine, flyaway hair needs careful matting, while a hard-edged logo or product needs crisp, clean lines. Smart mode analyses each image and automatically routes it to the best engine, using a portrait-optimised model for people and a general-purpose model for objects, graphics, and animals. You can also choose the engine yourself at any time. The result is a high-quality cutout exported as a full-resolution transparent PNG."
+        },
+        {
+          "heading": "A Converter and an Optimizer",
+          "body": "Two more tools sit next to the background remover. The image converter turns JPG, PNG, WebP, GIF, AVIF, HEIC and BMP images into JPG, PNG, WebP or AVIF at full resolution, one at a time or in bulk, with a quality slider for the lossy formats. The image optimizer reduces the file size of a whole batch at once, keeps the original if it cannot make a file smaller, and packs the results into a ZIP. Both take a finished cutout straight from the background remover."
+        },
+        {
+          "heading": "Built for Real Work",
+          "body": "Free Remove BG handles JPG, PNG, WebP, AVIF, and even GIF images, and it can process many files at once. Drop in a batch, watch each one cut out with a live before-and-after preview, and download every result together as a single ZIP. The transparent PNGs slot straight into the tools you already use, from Canva, PowerPoint, and Google Slides to Photoshop, GIMP, and Photopea, making it a practical part of any everyday design workflow."
+        },
+        {
+          "heading": "Always Free",
+          "body": "There is no paywall hiding better output and no stamp across your downloads. Cutouts, conversions and optimized images come out at the original resolution, free to use for personal and commercial projects alike. The site is paid for by ads. Install nothing, sign up for nothing, and open the page whenever you need it."
+        }
+      ]
+    },
+    "privacy": {
+      "updated": "2026-11-07",
+      "description": "How Free Remove BG handles your data. Background removal runs in your browser. The converter and optimizer may upload images briefly and delete them right after.",
+      "intro": "Free Remove BG is built around a single privacy principle: your images belong to you. This policy explains what data we do and do not collect when you use the background remover, the image converter and the image optimizer.",
+      "imagesHeading": "Background Remover: Images Stay on Your Device",
+      "imagesBody": "All background removal happens locally in your browser using on-device AI. Images you give the background remover are never uploaded to a server, never stored, and never seen by us or anyone else. When you close the tab, they are gone from memory. After the page has loaded once, you can even use it offline.",
+      "toolsHeading": "Converter and Optimizer: Temporary Uploads",
+      "toolsBody": "To convert or compress an image, the converter and optimizer first try Cloudflare's image service. Your browser uploads the image to temporary storage on Cloudflare, the service returns the converted file, and your browser deletes the upload right away. If a deletion fails, a storage rule removes the file automatically within one day. We do not look at, copy, or keep these images. When the network route is unavailable, the image is converted inside your browser and nothing is uploaded.",
+      "metadataBody": "Converted and optimized files are saved without camera metadata, so details such as GPS location, camera model and capture time are not carried over.",
+      "collectBody": "We do not require an account, and we do not ask for your name, email, or any personal details to use any of the tools. We do not keep the images you process. To prevent abuse, Cloudflare checks the IP address of each upload against a rate limit. We do not store that address.",
+      "analyticsHeading": "Counters, Ads and Cookies",
+      "analyticsBody": "The site keeps anonymous running totals of how many images each tool has processed. These counts contain no images, file names or personal information. The site shows ads from Google AdSense. Google and its partners may use cookies to show ads and measure them, and you can manage personalized ads in your Google Ad Settings. We do not sell or share personal data.",
+      "thirdPartyBody": "To run, the page loads assets such as web fonts and the AI model files from content delivery networks. The site is hosted on Cloudflare, which also performs the temporary conversions described above. Ads are served by Google. Requests for fonts and model files never include your images."
+    },
+    "terms": {
+      "updated": "2026-11-07",
+      "description": "The terms and conditions for using Free Remove BG, the free background remover, image converter and image optimizer. Free for personal and commercial use.",
+      "useBody": "Free Remove BG offers free tools to remove image backgrounds, convert images between formats and reduce image file size. You may use them for both personal and commercial projects at no cost, with no sign-up and no watermarks. You are responsible for ensuring you have the right to edit any image you process.",
+      "contentBody": "You retain all rights to the images you process and the files you create. The background remover works entirely on your device. The converter and optimizer may upload an image to temporary storage for processing, and that copy is deleted as soon as your result is ready. We never claim any ownership over your content.",
+      "acceptableItems": [
+        "Do not use the tool to process images you do not have permission to use.",
+        "Do not use the tool to create unlawful, infringing, or harmful content.",
+        "Do not attempt to disrupt, reverse-engineer, or misuse the service.",
+        "Do not send automated or bulk requests to the upload and conversion endpoints outside the normal use of the website."
+      ],
+      "limitsHeading": "Service Limits",
+      "limitsBody": "Network conversion has a shared daily capacity and per-visitor rate limits. When those are reached, the converter and optimizer process images in your browser instead, which can be slower on older devices. We may change these limits at any time."
+    }
   }
 }

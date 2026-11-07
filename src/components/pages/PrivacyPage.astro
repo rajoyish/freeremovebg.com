@@ -5,7 +5,7 @@ import Header from '../Header.astro';
 import Footer from '../Footer.astro';
 import Breadcrumb from '../Breadcrumb.astro';
 import LinkedText from '../LinkedText.astro';
-import { getDictionary, PAGE_LANGS } from '../../i18n/dictionaries';
+import { getDictionary, PAGE_LANGS, revise } from '../../i18n/dictionaries';
 import { DEFAULT_LANG } from '../../i18n/config';
 import { pageHref } from '../../i18n/routes';
 
@@ -15,10 +15,12 @@ interface Props {
 
 const { lang = DEFAULT_LANG } = Astro.props;
 const dict = getDictionary(lang);
-const t = dict.pages.privacy;
+// Converter and optimizer disclosures (revisions.privacy), where this
+// language has them. Untranslated languages keep the earlier policy and date.
+const t = revise(lang, dict.pages.privacy, 'privacy');
 
 // One source of truth for the date; rendered in the reader's language.
-const UPDATED = new Date('2026-06-02T00:00:00Z');
+const UPDATED = new Date(`${t.updated ?? '2026-06-02'}T00:00:00Z`);
 const updated = new Intl.DateTimeFormat(lang, {
   year: 'numeric',
   month: 'long',
@@ -36,6 +38,7 @@ const prose = '[&_h2]:text-[1.3rem] [&_h2]:font-semibold [&_h2]:text-ink [&_h2]:
   lang={lang}
   basePath="/privacy-policy"
   hreflangLangs={PAGE_LANGS}
+  app={null}
 >
   <div class="min-h-screen flex flex-col">
     <Header lang={lang} basePath="/privacy-policy" availableLangs={PAGE_LANGS} />
@@ -52,6 +55,14 @@ const prose = '[&_h2]:text-[1.3rem] [&_h2]:font-semibold [&_h2]:text-ink [&_h2]:
 
             <h2>{t.imagesHeading}</h2>
             <p>{t.imagesBody}</p>
+
+            {t.toolsHeading && (
+              <>
+                <h2>{t.toolsHeading}</h2>
+                <p>{t.toolsBody}</p>
+                <p>{t.metadataBody}</p>
+              </>
+            )}
 
             <h2>{t.collectHeading}</h2>
             <p>{t.collectBody}</p>
