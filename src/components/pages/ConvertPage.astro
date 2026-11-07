@@ -1,13 +1,16 @@
 ---
-// Single-image format converter (/convert). The engine is hybrid: Cloudflare's
-// edge first, the visitor's browser on any failure (src/lib/transform/).
-// Copy lives in en.json under `converter`.
+// Bulk format converter (/convert). Takes one image or a batch, converts every
+// file to the chosen format and offers each result or a ZIP. The engine is
+// hybrid: Cloudflare's edge first, the visitor's browser on any failure
+// (src/lib/transform/). Copy lives in en.json under `converter`; the batch
+// labels reuse the optimizer's, which every translated language already has.
 import Layout from '../../layouts/Layout.astro';
 import Header from '../Header.astro';
 import Footer from '../Footer.astro';
 import Breadcrumb from '../Breadcrumb.astro';
 import ToolCounter from '../ToolCounter.astro';
-import { getDictionary, TOOL_LANGS } from '../../i18n/dictionaries';
+import ToolArticle from '../ToolArticle.astro';
+import { getDictionary, revise, TOOL_LANGS } from '../../i18n/dictionaries';
 import { toolHref } from '../../i18n/routes';
 import { DEFAULT_LANG } from '../../i18n/config';
 import { FORMATS, OUTPUT_FORMATS } from '../../lib/transform/formats';
@@ -18,20 +21,28 @@ interface Props {
 
 const { lang = DEFAULT_LANG } = Astro.props;
 const dict = getDictionary(lang);
-const t = dict.converter;
+// SEO copy, meta and FAQ from revisions.converter, where this language has it.
+const t = revise(lang, dict.converter, 'converter');
 
+const o = dict.optimizer;
 const strings = {
   convert: t.convert,
   converting: t.converting,
   smaller: t.smaller,
   larger: t.larger,
   sameSize: t.sameSize,
-  engineEdge: t.engineEdge,
-  engineLocal: t.engineLocal,
-  download: t.download,
-  notImage: t.notImage,
-  oneAtATime: t.oneAtATime,
   failed: t.failed,
+  notImage: o.notImage,
+  engineEdge: o.engineEdge,
+  engineLocal: o.engineLocal,
+  statusQueued: o.statusQueued,
+  statusWorking: o.statusWorking,
+  statusDone: o.statusDone,
+  statusError: o.statusError,
+  summary: o.summary,
+  totalSaved: o.totalSaved,
+  download: o.download,
+  remove: o.remove,
 };
 
 const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.formatHints[id] }));
@@ -44,6 +55,8 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
   lang={lang}
   basePath="/convert"
   hreflangLangs={TOOL_LANGS}
+  app={{ name: `Free Remove BG ${dict.nav.convert}`, featureList: t.footer.features }}
+  faq={t.faq}
 >
   <div class="min-h-screen flex flex-col">
     <Header lang={lang} basePath="/convert" availableLangs={TOOL_LANGS} />
@@ -66,37 +79,34 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
         <div id="converter" class="max-w-240 mx-auto bg-canvas border border-hairline rounded-lg shadow-sm overflow-hidden">
           <div class="grid md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
 
-            <!-- Source -->
-            <div class="p-5 sm:p-6 border-b md:border-b-0 md:border-r border-hairline">
+            <!-- Source: drop zone, then the batch once files are added -->
+            <div id="source-panel" class="p-5 sm:p-6 border-b md:border-b-0 md:border-r border-hairline min-w-0 rounded-ss-lg transition-colors data-[drag=true]:bg-canvas-soft">
               <div class="flex items-center justify-between gap-3 mb-3">
-                <span class="font-mono text-xs uppercase tracking-wider text-mute">{t.sourceLabel}</span>
-                <button id="replace-btn" type="button"
-                  class="hidden text-[13px] font-medium text-ink bg-transparent border border-hairline rounded-pill px-3 py-1 cursor-pointer transition-colors hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
-                  {t.replace}
+                <span class="font-mono text-xs uppercase tracking-wider text-mute">
+                  {t.sourceLabel} <span id="file-count" class="tabular-nums"></span>
+                </span>
+                <button id="add-btn" type="button"
+                  class="hidden items-center gap-1.5 text-[13px] font-medium text-ink bg-transparent border border-hairline rounded-pill px-3 py-1 cursor-pointer transition-colors hover:border-ink disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  {o.addMore}
                 </button>
               </div>
 
-              <div id="drop-zone" role="button" tabindex="0" aria-label={t.browse}
-                class="group relative flex min-h-80 items-center justify-center rounded-md border-2 border-dashed border-hairline-strong bg-canvas-soft cursor-pointer transition-colors hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link data-[drag=true]:border-ink data-[drag=true]:bg-canvas-soft-2 data-[filled=true]:border-solid data-[filled=true]:border-hairline data-[filled=true]:cursor-default data-[filled=true]:bg-checkerboard">
-                <div id="drop-empty" class="px-6 py-10 text-center">
+              <div id="drop-zone" role="button" tabindex="0" aria-label={o.browse}
+                class="group flex min-h-80 items-center justify-center rounded-md border-2 border-dashed border-hairline-strong bg-canvas-soft cursor-pointer transition-colors hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link data-[drag=true]:border-ink data-[drag=true]:bg-canvas-soft-2">
+                <div class="px-6 py-10 text-center">
                   <div class="w-12 h-12 mx-auto mb-4 rounded-[10px] bg-ink flex items-center justify-center">
-                    <svg width="22" height="22" fill="none" class="stroke-on-primary" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></svg>
+                    <svg width="22" height="22" fill="none" class="stroke-on-primary" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18"/><circle cx="12" cy="8" r="2"/><rect width="16" height="16" x="6" y="2" rx="2"/></svg>
                   </div>
                   <p class="text-base font-semibold text-ink mt-0 mb-1">{t.dropTitle}</p>
-                  <p class="text-sm text-mute mt-0 mb-5">{t.dropSubtitle}</p>
-                  <span class="inline-block px-5 py-2 bg-ink text-on-primary rounded-pill text-sm font-medium transition-opacity group-hover:opacity-[0.85]">{t.browse}</span>
+                  <p class="text-sm text-mute mt-0 mb-5">{o.dropSubtitle}</p>
+                  <span class="inline-block px-5 py-2 bg-ink text-on-primary rounded-pill text-sm font-medium transition-opacity group-hover:opacity-[0.85]">{o.browse}</span>
                 </div>
-                <img id="source-preview" alt="" class="hidden max-h-80 max-w-full object-contain" />
               </div>
 
-              <div id="source-meta" class="hidden mt-3 font-mono text-xs">
-                <p id="meta-name" dir="auto" class="text-ink m-0 truncate"></p>
-                <p class="text-mute m-0 mt-1 tabular-nums">
-                  <span id="meta-size" dir="ltr"></span> · <span id="meta-type" dir="ltr"></span>
-                </p>
-              </div>
+              <ul id="file-list" class="hidden list-none m-0 p-0 max-h-96 overflow-y-auto rounded-md border border-hairline divide-y divide-hairline"></ul>
 
-              <input type="file" id="file-input" accept="image/*,.heic,.heif,.avif" class="hidden" />
+              <input type="file" id="file-input" accept="image/*,.heic,.heif,.avif" multiple class="hidden" />
             </div>
 
             <!-- Options -->
@@ -105,8 +115,8 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
                 <legend class="font-mono text-xs uppercase tracking-wider text-mute mb-3 p-0">{t.formatLabel}</legend>
                 <div class="grid grid-cols-2 gap-2.5">
                   {formats.map((f, i) => (
-                    <label class="relative block cursor-pointer rounded-md border border-hairline bg-canvas p-3 transition-colors hover:border-hairline-strong has-checked:border-ink has-checked:bg-canvas-soft-2 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-link">
-                      <input type="radio" name="format" value={f.id} checked={i === 0} class="sr-only" data-label={f.label} data-lossy={String(f.lossy)} />
+                    <label class="relative block cursor-pointer rounded-md border border-hairline bg-canvas p-3 transition-colors hover:border-hairline-strong has-checked:border-ink has-checked:bg-canvas-soft-2 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-link has-disabled:cursor-not-allowed has-disabled:opacity-60">
+                      <input type="radio" name="format" value={f.id} checked={i === 0} class="sr-only" />
                       <span class="flex items-baseline justify-between gap-2">
                         <span class="text-base font-semibold text-ink">{f.label}</span>
                         <span class="font-mono text-[11px] text-mute">.{f.ext}</span>
@@ -134,36 +144,22 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
             </div>
           </div>
 
-          <!-- Result -->
-          <div id="result" class="hidden border-t border-hairline bg-canvas-soft p-5 sm:p-6" aria-live="polite">
-            <h2 class="text-lg font-semibold text-ink mt-0 mb-4">{t.resultHeading}</h2>
-            <div class="flex flex-col sm:flex-row gap-5 sm:items-center">
-              <div class="shrink-0 w-full sm:w-36 h-36 rounded-md border border-hairline bg-checkerboard flex items-center justify-center overflow-hidden">
-                <img id="result-preview" alt="" class="max-w-full max-h-full object-contain" />
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-3 flex-wrap font-mono text-sm tabular-nums">
-                  <span><span class="text-mute">{t.original}</span> <span id="size-before" dir="ltr" class="text-ink"></span></span>
-                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="text-mute rtl:rotate-180" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></svg>
-                  <span><span class="text-mute">{t.converted}</span> <span id="size-after" dir="ltr" class="text-ink font-semibold"></span></span>
-                  <span id="size-delta" class="px-2 py-0.5 rounded-pill text-xs font-medium"></span>
-                </div>
-                <p id="engine-badge" class="inline-flex items-center gap-1.5 mt-3 mb-0 text-xs text-mute">
-                  <span id="engine-dot" class="w-1.5 h-1.5 rounded-full"></span>
-                  <span id="engine-label"></span>
-                </p>
-              </div>
-              <div class="flex flex-col gap-2 sm:items-end">
-                <a id="download-link" href="#" download
-                  class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-ink text-on-primary rounded-pill text-sm font-medium no-underline transition-opacity hover:opacity-[0.85] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
-                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                  <span id="download-label"></span>
-                </a>
-                <button id="another-btn" type="button"
-                  class="text-[13px] font-medium text-body bg-transparent border-none cursor-pointer underline-offset-4 hover:text-ink hover:underline">
-                  {t.another}
-                </button>
-              </div>
+          <!-- Batch summary and downloads -->
+          <div id="batch-bar" class="hidden flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-6 py-3.5 border-t border-hairline bg-canvas-soft">
+            <div class="flex items-center gap-3 flex-wrap">
+              <span id="summary" class="text-[13px] text-body tabular-nums" aria-live="polite"></span>
+              <span id="total-saved" class="hidden px-2 py-0.5 rounded-pill text-xs font-medium bg-link/10 text-link tabular-nums"></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="clear-btn" type="button"
+                class="px-3.5 py-2 bg-transparent text-body border border-hairline rounded-pill text-[13px] font-medium cursor-pointer transition-colors hover:border-ink hover:text-ink disabled:opacity-40 disabled:cursor-not-allowed">
+                {o.clear}
+              </button>
+              <button id="zip-btn" type="button" disabled
+                class="inline-flex items-center gap-2 px-4 py-2 bg-ink text-on-primary border-none rounded-pill text-[13px] font-medium cursor-pointer transition-opacity hover:opacity-[0.85] disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-link">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                {o.downloadAll}
+              </button>
             </div>
           </div>
         </div>
@@ -182,6 +178,13 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
           </div>
         </div>
       </section>
+
+      <ToolArticle
+        heading={t.articleHeading}
+        article={t.article}
+        faqHeading={t.faqHeading}
+        faq={t.faq}
+      />
     </main>
 
     <Footer lang={lang} variant="convert" />
@@ -190,14 +193,53 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
 
 <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none"></div>
 
+<template id="row-template">
+  <li class="flex items-center gap-3 px-3 py-2.5">
+    <div class="shrink-0 w-10 h-10 rounded-sm border border-hairline bg-checkerboard overflow-hidden flex items-center justify-center">
+      <img data-thumb alt="" class="w-full h-full object-cover" loading="lazy" />
+    </div>
+    <div class="flex-1 min-w-0">
+      <p data-name dir="auto" class="text-sm font-medium text-ink m-0 truncate"></p>
+      <p class="m-0 mt-0.5 flex items-center gap-2 flex-wrap text-xs text-mute">
+        <span data-status></span>
+        <span data-sizes dir="ltr" class="font-mono tabular-nums"></span>
+        <span data-delta class="hidden px-1.5 py-px rounded-pill text-[11px] font-medium"></span>
+        <span data-engine class="hidden max-sm:hidden! font-mono text-[10px] uppercase tracking-wider px-1.5 py-px rounded-xs border border-hairline"></span>
+      </p>
+    </div>
+    <a data-download href="#" download class="hidden shrink-0 w-8 h-8 items-center justify-center rounded-full text-ink transition-colors hover:bg-canvas-soft-2 focus-visible:outline-2 focus-visible:outline-link">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+    </a>
+    <button data-remove type="button" class="shrink-0 w-8 h-8 inline-flex items-center justify-center rounded-full bg-transparent border-none text-mute cursor-pointer transition-colors hover:bg-canvas-soft-2 hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-link">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </li>
+</template>
+
 <script is:inline type="application/json" id="convert-i18n" set:html={JSON.stringify(strings)} />
 
 <script>
-  import { HybridProcessor } from '../../lib/transform/hybrid';
-  import { FORMATS, formatBytes, formatFromMime, isOutputFormat, isRasterImage, outputName, percentChange, type OutputFormat } from '../../lib/transform/formats';
+  import { HybridProcessor, type Engine } from '../../lib/transform/hybrid';
+  import {
+    FORMATS, formatBytes, isOutputFormat, isRasterImage, outputName, percentChange, type OutputFormat,
+  } from '../../lib/transform/formats';
   import { showToast } from '../../lib/ui/toast';
   import { takeHandoff } from '../../lib/handoff';
   import { recordProcessed } from '../../lib/counter';
+
+  type Status = 'queued' | 'working' | 'done' | 'error';
+  interface Item {
+    file: File;
+    thumbUrl: string;
+    status: Status;
+    /** Settings the current result was produced with; re-run when they change. */
+    settings: string;
+    blob: Blob | null;
+    blobUrl: string;
+    format: OutputFormat | null;
+    engine: Engine | null;
+    row: HTMLLIElement;
+  }
 
   const I18N: Record<string, string> = (() => {
     try { return JSON.parse(document.getElementById('convert-i18n')?.textContent || '{}'); }
@@ -209,153 +251,284 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
     s.replace(/\{(\w+)\}/g, (_, k) => `\u2068${vars[k] ?? ''}\u2069`);
 
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
+  const sourcePanel = $('source-panel');
   const dropZone = $('drop-zone');
-  const dropEmpty = $('drop-empty');
   const fileInput = $<HTMLInputElement>('file-input');
-  const replaceBtn = $('replace-btn');
-  const sourcePreview = $<HTMLImageElement>('source-preview');
-  const sourceMeta = $('source-meta');
+  const addBtn = $<HTMLButtonElement>('add-btn');
+  const fileCount = $('file-count');
+  const fileList = $('file-list');
   const quality = $<HTMLInputElement>('quality');
   const qualityValue = $<HTMLOutputElement>('quality-value');
   const qualityNote = $('quality-note');
   const convertBtn = $<HTMLButtonElement>('convert-btn');
   const convertLabel = $('convert-label');
   const convertSpinner = $('convert-spinner');
-  const result = $('result');
-  const resultPreview = $<HTMLImageElement>('result-preview');
-  const downloadLink = $<HTMLAnchorElement>('download-link');
+  const batchBar = $('batch-bar');
+  const summary = $('summary');
+  const totalSaved = $('total-saved');
+  const zipBtn = $<HTMLButtonElement>('zip-btn');
+  const clearBtn = $<HTMLButtonElement>('clear-btn');
   const toastContainer = $('toast-container');
+  const rowTemplate = $<HTMLTemplateElement>('row-template');
   const formatInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[name="format"]'));
 
+  // Edge requests are network-bound, so a few run side by side. On-device
+  // encoding is CPU- and memory-bound, so it runs one at a time.
+  const EDGE_CONCURRENCY = 3;
+
   const processor = new HybridProcessor();
-  const state = {
-    file: null as File | null,
-    sourceUrl: '',
-    resultUrl: '',
-    busy: false,
-  };
+  const items: Item[] = [];
+  let running = false;
 
   const selectedFormat = (): OutputFormat => {
     const v = formatInputs.find((i) => i.checked)?.value;
     return isOutputFormat(v) ? v : 'webp';
   };
+  const settingsKey = () => {
+    const f = selectedFormat();
+    return FORMATS[f].lossy ? `${f}:${quality.value}` : f;
+  };
+  const needsRun = (item: Item) =>
+    item.status === 'queued' || item.status === 'error' || item.settings !== settingsKey();
+  const isCurrent = (item: Item) => item.status === 'done' && item.settings === settingsKey();
 
-  function syncControls() {
-    const format = selectedFormat();
-    const lossy = FORMATS[format].lossy;
-    quality.disabled = !lossy || state.busy;
-    qualityNote.textContent = !lossy ? qualityNote.dataset.lossless || ''
-      : format === 'jpeg' ? qualityNote.dataset.jpeg || '' : '';
-    convertLabel.textContent = state.busy ? I18N.converting : fill(I18N.convert, { format: FORMATS[format].label });
-    convertBtn.disabled = !state.file || state.busy;
-    convertSpinner.classList.toggle('hidden', !state.busy);
-    formatInputs.forEach((i) => { i.disabled = state.busy; });
-  }
-
-  function clearResult() {
-    if (state.resultUrl) URL.revokeObjectURL(state.resultUrl);
-    state.resultUrl = '';
-    resultPreview.removeAttribute('src');
-    result.classList.add('hidden');
-  }
-
-  function setFile(file: File | null) {
-    clearResult();
-    if (state.sourceUrl) URL.revokeObjectURL(state.sourceUrl);
-    state.file = file;
-    state.sourceUrl = file ? URL.createObjectURL(file) : '';
-
-    dropZone.dataset.filled = String(!!file);
-    dropZone.setAttribute('tabindex', file ? '-1' : '0');
-    dropEmpty.classList.toggle('hidden', !!file);
-    sourcePreview.classList.toggle('hidden', !file);
-    sourceMeta.classList.toggle('hidden', !file);
-    replaceBtn.classList.toggle('hidden', !file);
-
-    if (file) {
-      sourcePreview.src = state.sourceUrl;
-      sourcePreview.alt = file.name;
-      $('meta-name').textContent = file.name;
-      $('meta-name').title = file.name;
-      $('meta-size').textContent = formatBytes(file.size);
-      $('meta-type').textContent = file.type || file.name.split('.').pop()?.toLowerCase() || '–';
-      sourcePreview.onload = () => {
-        $('meta-size').textContent = `${formatBytes(file.size)} · ${sourcePreview.naturalWidth}×${sourcePreview.naturalHeight}`;
-      };
-      // Don't offer a no-op: converting WebP to WebP is what people do by accident.
-      if (formatFromMime(file.type) === selectedFormat()) {
-        const next = formatInputs.find((i) => i.value !== selectedFormat());
-        if (next) next.checked = true;
-      }
+  /** Download names, unique across the batch and stable for one render. */
+  function downloadNames(): Map<Item, string> {
+    const used = new Set<string>();
+    const names = new Map<Item, string>();
+    for (const item of items) {
+      if (item.status !== 'done' || !item.format) continue;
+      names.set(item, outputName(item.file.name, item.format, used));
     }
-    syncControls();
+    return names;
   }
 
-  function acceptFiles(files: File[]) {
-    if (state.busy || !files.length) return;
-    const images = files.filter(isRasterImage);
-    if (!images.length) { showToast(toastContainer, I18N.notImage, 6000); return; }
-    if (files.length > 1) showToast(toastContainer, I18N.oneAtATime, 8000);
-    setFile(images[0]);
-  }
+  function renderRow(item: Item, name?: string) {
+    const r = item.row;
+    const q = <T extends HTMLElement = HTMLElement>(sel: string) => r.querySelector(sel) as T;
+    const done = item.status === 'done' && !!item.blob;
 
-  async function convert() {
-    const file = state.file;
-    if (!file || state.busy) return;
-    const format = selectedFormat();
-    state.busy = true;
-    clearResult();
-    syncControls();
-    try {
-      const { blob, engine } = await processor.process(file, { format, quality: Number(quality.value) });
-      if (state.file !== file) return; // replaced while converting
-      state.resultUrl = URL.createObjectURL(blob);
-      resultPreview.src = state.resultUrl;
-      resultPreview.alt = file.name;
+    const statusText: Record<Status, string> = {
+      queued: I18N.statusQueued, working: I18N.statusWorking, done: I18N.statusDone, error: I18N.statusError,
+    };
+    const status = q('[data-status]');
+    status.textContent = statusText[item.status];
+    status.className = item.status === 'error' ? 'text-error' : item.status === 'working' ? 'text-ink' : '';
 
-      $('size-before').textContent = formatBytes(file.size);
-      $('size-after').textContent = formatBytes(blob.size);
-      const pct = percentChange(file.size, blob.size);
-      const delta = $('size-delta');
+    q('[data-sizes]').textContent = done
+      ? `${formatBytes(item.file.size)} → ${formatBytes(item.blob!.size)}`
+      : formatBytes(item.file.size);
+
+    const delta = q('[data-delta]');
+    delta.classList.toggle('hidden', !done);
+    if (done) {
+      const pct = percentChange(item.file.size, item.blob!.size);
       delta.textContent = pct < 0 ? fill(I18N.smaller, { percent: -pct })
         : pct > 0 ? fill(I18N.larger, { percent: pct }) : I18N.sameSize;
-      delta.className = `px-2 py-0.5 rounded-pill text-xs font-medium ${pct < 0 ? 'bg-link/10 text-link' : 'bg-canvas-soft-2 text-body border border-hairline'}`;
+      delta.className = `px-1.5 py-px rounded-pill text-[11px] font-medium ${pct < 0 ? 'bg-link/10 text-link' : 'bg-canvas-soft-2 text-body border border-hairline'}`;
+    }
 
-      $('engine-label').textContent = engine === 'edge' ? I18N.engineEdge : I18N.engineLocal;
-      $('engine-dot').className = `w-1.5 h-1.5 rounded-full ${engine === 'edge' ? 'bg-link' : 'bg-ink'}`;
+    const engine = q('[data-engine]');
+    engine.classList.toggle('hidden', !done || !item.engine);
+    engine.textContent = item.engine === 'edge' ? I18N.engineEdge : I18N.engineLocal;
 
-      downloadLink.href = state.resultUrl;
-      downloadLink.download = outputName(file.name, format, new Set());
-      $('download-label').textContent = fill(I18N.download, { format: FORMATS[format].label });
-      result.classList.remove('hidden');
+    r.classList.toggle('opacity-60', done && item.settings !== settingsKey());
+
+    const dl = q<HTMLAnchorElement>('[data-download]');
+    dl.classList.toggle('hidden', !done);
+    dl.classList.toggle('inline-flex', done);
+    if (done && name) {
+      dl.href = item.blobUrl;
+      dl.download = name;
+      dl.setAttribute('aria-label', `${I18N.download} ${name}`);
+      dl.title = name;
+    }
+    q<HTMLButtonElement>('[data-remove]').disabled = item.status === 'working';
+  }
+
+  function renderAll() {
+    const names = downloadNames();
+    items.forEach((item) => renderRow(item, names.get(item)));
+
+    const has = items.length > 0;
+    dropZone.classList.toggle('hidden', has);
+    fileList.classList.toggle('hidden', !has);
+    addBtn.classList.toggle('hidden', !has);
+    addBtn.classList.toggle('inline-flex', has);
+    addBtn.disabled = running;
+    batchBar.classList.toggle('hidden', !has);
+    batchBar.classList.toggle('flex', has);
+    fileCount.textContent = has ? `(${items.length})` : '';
+
+    const format = selectedFormat();
+    const lossy = FORMATS[format].lossy;
+    quality.disabled = !lossy || running;
+    qualityNote.textContent = !lossy ? qualityNote.dataset.lossless || ''
+      : format === 'jpeg' ? qualityNote.dataset.jpeg || '' : '';
+    formatInputs.forEach((i) => { i.disabled = running; });
+
+    convertSpinner.classList.toggle('hidden', !running);
+    convertLabel.textContent = running ? I18N.converting : fill(I18N.convert, { format: FORMATS[format].label });
+    convertBtn.disabled = running || !items.some(needsRun);
+    clearBtn.disabled = running;
+
+    const current = items.filter(isCurrent);
+    zipBtn.disabled = running || names.size === 0;
+    summary.textContent = fill(I18N.summary, { done: current.length, total: items.length });
+    const before = current.reduce((s, i) => s + i.file.size, 0);
+    const after = current.reduce((s, i) => s + (i.blob?.size ?? 0), 0);
+    const saved = before - after;
+    totalSaved.classList.toggle('hidden', saved <= 0);
+    totalSaved.textContent = fill(I18N.totalSaved, {
+      size: formatBytes(saved),
+      percent: before ? Math.round((saved / before) * 100) : 0,
+    });
+  }
+
+  function addFiles(files: File[]) {
+    if (!files.length) return;
+    const images = files.filter(isRasterImage);
+    if (images.length < files.length) showToast(toastContainer, I18N.notImage, 6000);
+    for (const file of images) {
+      const row = rowTemplate.content.firstElementChild!.cloneNode(true) as HTMLLIElement;
+      const item: Item = {
+        file, thumbUrl: URL.createObjectURL(file), status: 'queued', settings: '',
+        blob: null, blobUrl: '', format: null, engine: null, row,
+      };
+      const thumb = row.querySelector<HTMLImageElement>('[data-thumb]')!;
+      thumb.src = item.thumbUrl;
+      thumb.onerror = () => { thumb.classList.add('invisible'); };
+      const nameEl = row.querySelector<HTMLElement>('[data-name]')!;
+      nameEl.textContent = file.name;
+      nameEl.title = file.name;
+      const removeBtn = row.querySelector<HTMLButtonElement>('[data-remove]')!;
+      removeBtn.setAttribute('aria-label', fill(I18N.remove, { name: file.name }));
+      removeBtn.addEventListener('click', () => removeItem(item));
+      items.push(item);
+      fileList.appendChild(row);
+    }
+    renderAll();
+  }
+
+  function releaseResult(item: Item) {
+    if (item.blobUrl) URL.revokeObjectURL(item.blobUrl);
+    item.blobUrl = '';
+    item.blob = null;
+  }
+
+  function removeItem(item: Item) {
+    if (item.status === 'working') return;
+    const idx = items.indexOf(item);
+    if (idx >= 0) items.splice(idx, 1);
+    releaseResult(item);
+    URL.revokeObjectURL(item.thumbUrl);
+    item.row.remove();
+    renderAll();
+  }
+
+  async function runItem(item: Item, format: OutputFormat, q: number, key: string) {
+    item.status = 'working';
+    renderAll();
+    try {
+      const { blob, engine } = await processor.process(item.file, { format, quality: q });
+      releaseResult(item);
+      item.blob = blob;
+      item.blobUrl = URL.createObjectURL(blob);
+      item.status = 'done';
+      item.format = format;
+      item.engine = engine;
+      item.settings = key;
       recordProcessed('convert');
-      result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (error) {
-      console.error('[convert]', error);
-      showToast(toastContainer, I18N.failed, 8000);
-    } finally {
-      state.busy = false;
-      syncControls();
+      console.error('[convert]', item.file.name, error);
+      item.status = 'error';
     }
   }
 
-  const openPicker = () => { if (!state.busy) fileInput.click(); };
+  async function convertAll() {
+    if (running) return;
+    const format = selectedFormat();
+    const q = Number(quality.value);
+    const key = settingsKey();
+    const queue = items.filter(needsRun);
+    if (!queue.length) return;
 
-  dropZone.addEventListener('click', () => { if (!state.file) openPicker(); });
+    running = true;
+    renderAll();
+
+    // Lanes beyond the first stop as soon as the edge switches off, so a
+    // batch that hits the free-tier limit midway carries on one file at a
+    // time in the browser.
+    const lane = async (index: number) => {
+      while (queue.length) {
+        if (index > 0 && !processor.edgeAvailable) return;
+        const item = queue.shift()!;
+        if (!items.includes(item)) continue; // removed while waiting
+        await runItem(item, format, q, key);
+        renderAll();
+      }
+    };
+    try {
+      await processor.ready();
+      const lanes = processor.edgeAvailable ? EDGE_CONCURRENCY : 1;
+      await Promise.all(Array.from({ length: lanes }, (_, i) => lane(i)));
+    } finally {
+      running = false;
+      renderAll();
+    }
+    if (items.some((i) => i.status === 'error')) showToast(toastContainer, I18N.failed, 8000);
+  }
+
+  async function downloadZip() {
+    const names = downloadNames();
+    if (!names.size || running) return;
+    zipBtn.disabled = true;
+    try {
+      const { default: JSZip } = await import('jszip');
+      const zip = new JSZip();
+      // Images are already compressed; deflating them again only costs time.
+      names.forEach((name, item) => zip.file(name, item.blob!, { compression: 'STORE' }));
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'converted-images_freeremovebg.zip';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } finally {
+      renderAll();
+    }
+  }
+
+  function clearAll() {
+    if (running) return;
+    [...items].forEach(removeItem);
+  }
+
+  const openPicker = () => { if (!running) fileInput.click(); };
+
+  dropZone.addEventListener('click', openPicker);
   dropZone.addEventListener('keydown', (e) => {
-    if (!state.file && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openPicker(); }
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPicker(); }
   });
-  replaceBtn.addEventListener('click', openPicker);
+  addBtn.addEventListener('click', openPicker);
   fileInput.addEventListener('change', () => {
-    acceptFiles(Array.from(fileInput.files || []));
+    addFiles(Array.from(fileInput.files || []));
     fileInput.value = '';
   });
-  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.dataset.drag = 'true'; });
-  dropZone.addEventListener('dragleave', () => { dropZone.dataset.drag = 'false'; });
-  dropZone.addEventListener('drop', (e) => {
+  // The whole source panel takes drops, so more files can land on the list too.
+  const setDrag = (on: boolean) => {
+    sourcePanel.dataset.drag = String(on);
+    dropZone.dataset.drag = String(on);
+  };
+  sourcePanel.addEventListener('dragover', (e) => { e.preventDefault(); setDrag(true); });
+  sourcePanel.addEventListener('dragleave', (e) => {
+    if (!sourcePanel.contains(e.relatedTarget as Node | null)) setDrag(false);
+  });
+  sourcePanel.addEventListener('drop', (e) => {
     e.preventDefault();
-    dropZone.dataset.drag = 'false';
-    acceptFiles(Array.from(e.dataTransfer?.files || []));
+    setDrag(false);
+    addFiles(Array.from(e.dataTransfer?.files || []));
   });
   document.addEventListener('paste', (e) => {
     if (e.defaultPrevented || !e.clipboardData) return;
@@ -363,14 +536,15 @@ const formats = OUTPUT_FORMATS.map((id) => ({ id, ...FORMATS[id], hint: t.format
     const files = Array.from(e.clipboardData.files).filter(isRasterImage);
     if (!files.length) return;
     e.preventDefault();
-    acceptFiles(files);
+    addFiles(files);
   });
 
-  quality.addEventListener('input', () => { qualityValue.textContent = quality.value; });
-  formatInputs.forEach((i) => i.addEventListener('change', syncControls));
-  convertBtn.addEventListener('click', () => { void convert(); });
-  $('another-btn').addEventListener('click', () => { setFile(null); openPicker(); });
+  quality.addEventListener('input', () => { qualityValue.textContent = quality.value; renderAll(); });
+  formatInputs.forEach((i) => i.addEventListener('change', renderAll));
+  convertBtn.addEventListener('click', () => { void convertAll(); });
+  zipBtn.addEventListener('click', () => { void downloadZip(); });
+  clearBtn.addEventListener('click', clearAll);
 
-  syncControls();
-  void takeHandoff().then((files) => { if (files.length) acceptFiles(files); });
+  renderAll();
+  void takeHandoff().then((files) => { if (files.length) addFiles(files); });
 </script>

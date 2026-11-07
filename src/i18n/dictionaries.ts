@@ -135,6 +135,37 @@ export function hasToolTranslations(code: string): boolean {
   return fullyTranslated(code, TOOL_STRINGS);
 }
 
+export type Revisions = typeof en.revisions;
+
+/**
+ * Layer a page's revised copy (en.json → `revisions.<page>`) over its current
+ * copy, but only in languages that have translated every string of that
+ * revision. Other languages keep the copy they already have.
+ *
+ * `revisions` sits outside the three route gates above on purpose: rewriting a
+ * gated string in place would unpublish that page in every language until the
+ * new English is translated again. A revision ships in English at once and
+ * reaches each language when its locale catches up. Once all languages carry a
+ * revision, fold it back into the base section and delete it here.
+ *
+ * All or nothing per revision, so a page never mixes old and new versions of
+ * the same paragraph.
+ */
+export function revise<B extends object, P extends keyof Revisions>(
+  code: string,
+  base: B,
+  page: P,
+): B & Partial<Revisions[P]> {
+  const revision = en.revisions[page];
+  if (code === DEFAULT_LANG) return { ...base, ...revision };
+  const cache = LOCALE_MAPS[code];
+  if (!cache) return base;
+  const strings = new Set<string>();
+  collectStrings(revision, strings);
+  const complete = [...strings].every((s) => cache[s] !== undefined && cache[s] !== "");
+  return complete ? { ...base, ...rebuild(revision, code, cache) } : base;
+}
+
 /** Language codes with localized use-case pages, in languages.json order. */
 export const USE_CASE_LANGS: string[] = LANGUAGES.map((l) => l.code).filter(
   hasUseCaseTranslations,

@@ -305,3 +305,22 @@ passes every language.
 
 Slugs stay English in every language (`/es/transparent-png-maker/`): they're the
 key tying copy to a route, and localizing them would fork the URL space.
+
+## 8. Revising gated copy (`revisions`)
+
+Rewriting a string under `converter`, `optimizer` or `pages` in place would
+fail the gates in §7 for every language at once and unpublish those routes
+until the new English is translated. Put new or rewritten copy under
+`en.json → revisions.<page>` instead. `revise()` in `src/i18n/dictionaries.ts`
+layers a revision over the page's base copy:
+
+- English always gets the revision.
+- A language gets it only when its locale has every string in that revision,
+  all or nothing, so a page never mixes old and new paragraphs.
+- Otherwise the language keeps its current, fully translated page.
+
+`revisions` strings count as core strings, so `pnpm i18n:status` and the
+translate-locale workflow pick them up like any other missing copy. Once every
+language carries a revision, fold it back into the base section and delete it
+from `revisions`. A revision's `updated` date (privacy, terms) has no letters,
+so it is not translated and moves with the revision.

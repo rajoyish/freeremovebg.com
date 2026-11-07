@@ -56,6 +56,7 @@ export const PAGE_STRINGS = [...collectStrings(EN.pages ?? {})];
 export const KEYWORD_STRINGS = [
   EN.meta?.keywords,
   ...Object.values(EN.useCases?.items ?? {}).map((i) => i.keywords),
+  ...Object.values(EN.revisions ?? {}).map((r) => r.keywords),
 ].filter(Boolean);
 const KEYWORD_SET = new Set(KEYWORD_STRINGS);
 export const isKeywordString = (s) => KEYWORD_SET.has(s);

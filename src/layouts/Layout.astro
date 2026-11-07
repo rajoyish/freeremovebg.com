@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { SITE, LANGUAGES, DEFAULT_LANG, LANG_BY_CODE, hreflangOf, ogLocaleOf } from '../i18n/config';
 import { getDictionary } from '../i18n/dictionaries';
 import AdSense from '../components/AdSense.astro';
+import { buildGraph, type AppSchema, type FaqItem, type PageType } from '../lib/jsonld';
 
 interface Props {
 	title?: string;
@@ -27,6 +28,15 @@ interface Props {
 	 * never generated — instead of /es/quitar-fondo-de-logotipo/.
 	 */
 	basePaths?: Record<string, string>;
+	/** schema.org type of the page node in the JSON-LD graph. */
+	pageType?: PageType;
+	/**
+	 * The tool this page offers, for the WebApplication node. Defaults to the
+	 * background remover; pass null on pages that offer no tool.
+	 */
+	app?: AppSchema | null;
+	/** Questions answered on the page, added to the graph as FAQPage. */
+	faq?: FaqItem[];
 }
 
 const {
@@ -41,6 +51,9 @@ const {
 	canonical: providedCanonical,
 	ogImage = `${SITE}/images/og-frbg.png`,
 	noindex = false,
+	pageType = 'WebPage',
+	app,
+	faq = [],
 } = Astro.props;
 
 // Localized, trailing-slash-normalized path for a language code, e.g.
@@ -88,25 +101,20 @@ const ogLocaleAlternates = localized
 	: [];
 
 // Structured data speaks the page's language: the description is already the
-// localized meta description, and the feature list reuses the translated footer
-// copy rather than a second, English-only list.
-const jsonLd = {
-	'@context': 'https://schema.org',
-	'@type': 'WebApplication',
-	name: 'Free Remove BG',
-	url: new URL(pagePath(lang), Astro.site).href,
+// localized meta description, and the feature lists reuse translated copy
+// rather than a second, English-only list. See src/lib/jsonld.ts.
+const jsonLd = buildGraph({
+	url: canonicalHref,
+	title,
 	description,
-	inLanguage: lang,
-	applicationCategory: 'MultimediaApplication',
-	operatingSystem: 'Any (web browser)',
-	browserRequirements: 'Requires a modern web browser with JavaScript.',
-	offers: {
-		'@type': 'Offer',
-		price: '0',
-		priceCurrency: 'USD',
-	},
-	featureList: getDictionary(lang).footer.features,
-};
+	lang,
+	image: ogImage,
+	pageType,
+	app: app === undefined
+		? { name: 'Free Remove BG', featureList: getDictionary(lang).footer.features }
+		: app,
+	faq,
+});
 ---
 
 <!doctype html>

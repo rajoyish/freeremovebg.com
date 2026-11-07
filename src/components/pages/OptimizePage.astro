@@ -8,7 +8,8 @@ import Header from '../Header.astro';
 import Footer from '../Footer.astro';
 import Breadcrumb from '../Breadcrumb.astro';
 import ToolCounter from '../ToolCounter.astro';
-import { getDictionary, TOOL_LANGS } from '../../i18n/dictionaries';
+import ToolArticle from '../ToolArticle.astro';
+import { getDictionary, revise, TOOL_LANGS } from '../../i18n/dictionaries';
 import { toolHref } from '../../i18n/routes';
 import { DEFAULT_LANG } from '../../i18n/config';
 import { FORMATS, OUTPUT_FORMATS } from '../../lib/transform/formats';
@@ -19,7 +20,8 @@ interface Props {
 
 const { lang = DEFAULT_LANG } = Astro.props;
 const dict = getDictionary(lang);
-const t = dict.optimizer;
+// SEO copy, meta and FAQ from revisions.optimizer, where this language has it.
+const t = revise(lang, dict.optimizer, 'optimizer');
 
 const strings = {
   optimize: t.optimize,
@@ -54,6 +56,8 @@ const formatChoices = [
   lang={lang}
   basePath="/optimize"
   hreflangLangs={TOOL_LANGS}
+  app={{ name: `Free Remove BG ${dict.nav.optimize}`, featureList: t.footer.features }}
+  faq={t.faq}
 >
   <div class="min-h-screen flex flex-col">
     <Header lang={lang} basePath="/optimize" availableLangs={TOOL_LANGS} />
@@ -167,6 +171,13 @@ const formatChoices = [
           </ol>
         </div>
       </section>
+
+      <ToolArticle
+        heading={t.articleHeading}
+        article={t.article}
+        faqHeading={t.faqHeading}
+        faq={t.faq}
+      />
     </main>
 
     <Footer lang={lang} variant="optimize" />

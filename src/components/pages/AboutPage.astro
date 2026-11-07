@@ -6,7 +6,7 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../Header.astro';
 import Footer from '../Footer.astro';
 import Breadcrumb from '../Breadcrumb.astro';
-import { getDictionary, PAGE_LANGS } from '../../i18n/dictionaries';
+import { getDictionary, PAGE_LANGS, revise } from '../../i18n/dictionaries';
 import { DEFAULT_LANG } from '../../i18n/config';
 import { homeHref, pageHref } from '../../i18n/routes';
 
@@ -16,7 +16,8 @@ interface Props {
 
 const { lang = DEFAULT_LANG } = Astro.props;
 const dict = getDictionary(lang);
-const t = dict.pages.about;
+// Converter and optimizer copy (revisions.about), where this language has it.
+const t = revise(lang, dict.pages.about, 'about');
 ---
 
 <Layout
@@ -26,6 +27,8 @@ const t = dict.pages.about;
   lang={lang}
   basePath="/about"
   hreflangLangs={PAGE_LANGS}
+  pageType="AboutPage"
+  app={null}
 >
   <div class="min-h-screen flex flex-col">
     <Header lang={lang} basePath="/about" availableLangs={PAGE_LANGS} />
