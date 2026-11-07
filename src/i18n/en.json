@@ -840,7 +840,7 @@
         },
         {
           "q": "What tools can I use to optimize image file sizes?",
-          "a": "<p>For batches in the browser, the <strong>FreeRemoveBG</strong> optimizer is free with no file limit. Squoosh is good for tuning a single image side by side. ImageOptim is a free Mac app, and image CDNs or build plugins can optimize images automatically for large sites.</p>"
+          "a": "<p>For batches in the browser, the <strong>FreeRemoveBG</strong> optimizer is free with no file limit. For large sites, image CDNs or build plugins can optimize images automatically.</p>"
         },
         {
           "q": "How to reduce image size?",
